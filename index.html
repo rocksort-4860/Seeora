@@ -706,6 +706,7 @@ en:{
   payFailGeneric:"Please try again.",
   payRetry:"Retry",
   restoring:"Restoring…",
+  restored:"Pro restored · Thank you", noPurchase:"No previous purchase found", restoreFailed:"Restore failed, try again",
   notifLab:"Notification permission",
   notifGranted:"Enabled · reminders will fire",
   notifDenied:"Denied · enable in system settings",
@@ -782,6 +783,7 @@ zh:{
   payFailGeneric:"请稍后重试",
   payRetry:"重试",
   restoring:"正在恢复…",
+  restored:"已恢复 Pro · 感谢支持", noPurchase:"没有可恢复的购买记录", restoreFailed:"恢复失败，请稍后重试",
   notifLab:"通知权限",
   notifGranted:"已开启 · 提醒可正常送达",
   notifDenied:"已被拒绝 · 请到系统设置里打开",
@@ -856,6 +858,9 @@ var PRO_TRIAL_UNTIL = 0;
 try{ var _pt = parseInt(localStorage.getItem("seeora_pro_trial_until")||"0",10); PRO_TRIAL_UNTIL = _pt || 0; }catch(e){}
 // 清理已过期但未清除的试用标记，保持状态整洁
 try{ if (PRO_TRIAL_UNTIL && Date.now() >= PRO_TRIAL_UNTIL){ localStorage.removeItem("seeora_pro_trial_until"); PRO_TRIAL_UNTIL = 0; } }catch(e){}
+// 购买凭证：模拟 App Store 服务端记录（买断后持久化，与本地解锁标记分离，供「恢复购买」找回）
+var PRO_RECEIPT = null;
+try { var _rc = localStorage.getItem("seeora_receipt"); PRO_RECEIPT = _rc ? JSON.parse(_rc) : null; }catch(e){ PRO_RECEIPT = null; }
 function isPro(){
   if (PRO) return true;
   if (PRO_TRIAL_UNTIL && Date.now() < PRO_TRIAL_UNTIL) return true;
@@ -872,10 +877,12 @@ function trialDaysLeft(){
 }
 function setPro(v){
   PRO = !!v;
-  if (PRO){ // 正式买断：清空试用标记
+  if (PRO){ // 正式买断：清空试用标记 + 写入购买凭证
     PRO_TRIAL_UNTIL = 0;
     try{ localStorage.removeItem("seeora_pro_trial_until"); }catch(e){}
+    saveReceipt({ type:"lifetime", at: Date.now() });
   }
+  // 注意：setPro(false) 不清空凭证，保留供「恢复购买」找回（与真机重装后本地标记丢失、服务端凭证仍在一致）
   try{ localStorage.setItem("seeora_pro", PRO?"1":"0"); }catch(e){}
   renderAll();
 }
@@ -888,6 +895,20 @@ function startTrial(days){
     localStorage.setItem("seeora_pro_trial_until", String(PRO_TRIAL_UNTIL));
   }catch(e){}
   renderAll();
+}
+function saveReceipt(rec){
+  PRO_RECEIPT = rec;
+  try { if (rec) localStorage.setItem("seeora_receipt", JSON.stringify(rec)); else localStorage.removeItem("seeora_receipt"); }catch(e){}
+}
+// 模拟从商店恢复已购：读取服务端购买凭证，返回 lifetime 凭证或 null
+function restorePurchases(){
+  return new Promise(function(resolve, reject){
+    setTimeout(function(){
+      if (getIapSimMode() === "fail"){ reject(new Error("restore_failed")); return; }
+      try { var raw = localStorage.getItem("seeora_receipt"); PRO_RECEIPT = raw ? JSON.parse(raw) : null; }catch(e){ PRO_RECEIPT = null; }
+      resolve(PRO_RECEIPT && PRO_RECEIPT.type === "lifetime" ? PRO_RECEIPT : null);
+    }, 1500);
+  });
 }
 
 /* ===== 7天迷你点 ===== */
@@ -1307,22 +1328,23 @@ document.getElementById("maskPay").addEventListener("click", function(){ hideShe
 document.getElementById("btnTrial").addEventListener("click", function(){ startTrial(7); hideSheet("sheetPay","maskPay"); toast(t().trialStarted); });
 document.getElementById("btnBuy").addEventListener("click", function(){ setPro(true); hideSheet("sheetPay","maskPay"); toast(t().bought); });
 
-/* 恢复购买：模拟真实加载，不再直接 toast 成功 */
+/* 恢复购买：模拟从商店读取已购记录并重新解锁 Pro */
 document.getElementById("btnRestore").addEventListener("click", async function(){
   var btn = this;
   var orig = btn.textContent;
   btn.textContent = t().restoring;
   btn.style.pointerEvents = "none";
   try {
-    await new Promise(function(res, rej){
-      setTimeout(function(){
-        if (getIapSimMode() === "fail") rej(new Error("restore_failed"));
-        else res();
-      }, 1500);
-    });
-    toast(isZh() ? "没有可恢复的购买" : "No purchase to restore");
+    var rec = await restorePurchases();
+    if (rec){
+      setPro(true);                  // 重新写入本地解锁标记 + 刷新凭证时间戳
+      hideSheet("sheetPay","maskPay");
+      toast(t().restored);
+    } else {
+      toast(t().noPurchase);
+    }
   } catch(err){
-    toast(isZh() ? "恢复失败，请稍后重试" : "Restore failed, try later");
+    toast(t().restoreFailed);
   } finally {
     btn.textContent = orig;
     btn.style.pointerEvents = "";
