@@ -676,7 +676,7 @@ en:{
   guide:"7 dots per ring, starting from your first day", guideOk:"Got it",
   newBest:"New longest streak: ", gotBadge:"unlocked",
   habitSub:function(s,f){ var x = f===1?"Daily":("Every "+f+" days"); return s+" "+(s===1?"day":"days")+" · "+x; },
-  pro:"Seeora Pro", proSubFree:"Free · up to 5 habits", proSubPro:"Purchased · Thank you",
+  pro:"Seeora Pro", proSubFree:"Free · up to 5 habits", proSubPro:"Purchased · Thank you", proSubTrial:"Pro trial · {n} days left",
   grpGeneral:"GENERAL", grpNotif:"NOTIFICATIONS", grpData:"DATA", grpAbout:"ABOUT",
   langLab:"Language", themeLab:"Appearance", themeTitle:"Appearance",
   themeSystem:"System", themeLight:"Light", themeDark:"Dark",
@@ -752,7 +752,7 @@ zh:{
   guide:"每圈 7 个点，从你开始的那天算", guideOk:"知道了",
   newBest:"新的最长连续：", gotBadge:"已解锁",
   habitSub:function(s,f){ var x = f===1?"每天":("每 "+f+" 天"); return s+" 天 · "+x; },
-  pro:"Seeora Pro", proSubFree:"未升级 · 5 条习惯上限", proSubPro:"已购买 · 感谢支持",
+  pro:"Seeora Pro", proSubFree:"未升级 · 5 条习惯上限", proSubPro:"已购买 · 感谢支持", proSubTrial:"Pro 试用 · 剩 {n} 天",
   grpGeneral:"通用", grpNotif:"通知", grpData:"数据", grpAbout:"关于",
   langLab:"语言", themeLab:"外观", themeTitle:"外观",
   themeSystem:"跟随系统", themeLight:"浅色", themeDark:"深色",
@@ -852,8 +852,43 @@ function isZh(){ return LANG==="zh"; }
 
 var PRO = false;
 try{ PRO = localStorage.getItem("seeora_pro")==="1"; }catch(e){}
-function isPro(){ return PRO; }
-function setPro(v){ PRO=!!v; try{ localStorage.setItem("seeora_pro", PRO?"1":"0"); }catch(e){} renderAll(); }
+var PRO_TRIAL_UNTIL = 0;
+try{ var _pt = parseInt(localStorage.getItem("seeora_pro_trial_until")||"0",10); PRO_TRIAL_UNTIL = _pt || 0; }catch(e){}
+// 清理已过期但未清除的试用标记，保持状态整洁
+try{ if (PRO_TRIAL_UNTIL && Date.now() >= PRO_TRIAL_UNTIL){ localStorage.removeItem("seeora_pro_trial_until"); PRO_TRIAL_UNTIL = 0; } }catch(e){}
+function isPro(){
+  if (PRO) return true;
+  if (PRO_TRIAL_UNTIL && Date.now() < PRO_TRIAL_UNTIL) return true;
+  return false;
+}
+function proMode(){ // "permanent" | "trial" | "free"
+  if (PRO) return "permanent";
+  if (PRO_TRIAL_UNTIL && Date.now() < PRO_TRIAL_UNTIL) return "trial";
+  return "free";
+}
+function trialDaysLeft(){
+  if (!PRO_TRIAL_UNTIL) return 0;
+  return Math.max(0, Math.ceil((PRO_TRIAL_UNTIL - Date.now())/86400000));
+}
+function setPro(v){
+  PRO = !!v;
+  if (PRO){ // 正式买断：清空试用标记
+    PRO_TRIAL_UNTIL = 0;
+    try{ localStorage.removeItem("seeora_pro_trial_until"); }catch(e){}
+  }
+  try{ localStorage.setItem("seeora_pro", PRO?"1":"0"); }catch(e){}
+  renderAll();
+}
+function startTrial(days){
+  if (PRO) return; // 已买断不降级
+  PRO = false;
+  PRO_TRIAL_UNTIL = Date.now() + (days||7)*86400000;
+  try{
+    localStorage.setItem("seeora_pro","0");
+    localStorage.setItem("seeora_pro_trial_until", String(PRO_TRIAL_UNTIL));
+  }catch(e){}
+  renderAll();
+}
 
 /* ===== 7天迷你点 ===== */
 function miniDots(states){
@@ -1269,7 +1304,7 @@ document.getElementById("payRetry").addEventListener("click", function(){
 
 document.getElementById("btnPayClose").addEventListener("click", function(){ hideSheet("sheetPay","maskPay"); });
 document.getElementById("maskPay").addEventListener("click", function(){ hideSheet("sheetPay","maskPay"); });
-document.getElementById("btnTrial").addEventListener("click", function(){ setPro(true); hideSheet("sheetPay","maskPay"); toast(t().trialStarted); });
+document.getElementById("btnTrial").addEventListener("click", function(){ startTrial(7); hideSheet("sheetPay","maskPay"); toast(t().trialStarted); });
 document.getElementById("btnBuy").addEventListener("click", function(){ setPro(true); hideSheet("sheetPay","maskPay"); toast(t().bought); });
 
 /* 恢复购买：模拟真实加载，不再直接 toast 成功 */
@@ -1619,7 +1654,11 @@ function renderAll(){
   document.getElementById("setTitle").textContent = T.settings;
   document.getElementById("btnSetClose").textContent = T.close;
   document.getElementById("proEntryT").textContent = T.pro;
-  document.getElementById("proEntrySub").textContent = isPro()?T.proSubPro:T.proSubFree;
+  (function(){
+    var m = proMode();
+    var s = m==="permanent" ? T.proSubPro : m==="trial" ? T.proSubTrial.replace("{n}", trialDaysLeft()) : T.proSubFree;
+    document.getElementById("proEntrySub").textContent = s;
+  })();
   document.getElementById("grpGeneral").textContent = T.grpGeneral;
   document.getElementById("grpNotif").textContent = T.grpNotif;
   document.getElementById("grpData").textContent = T.grpData;
@@ -1672,9 +1711,14 @@ function renderAll(){
   [1,2,3,8].forEach(function(v,i){ segG[i].textContent = String(v); });
   document.getElementById("guideText").textContent = T.guide;
   document.getElementById("guideOk").textContent = T.guideOk;
-  document.getElementById("proCardT").textContent = isPro() ? T.pro : (isZh()?"升级 Seeora Pro":"Upgrade to Seeora Pro");
-  document.getElementById("proCardS").textContent = isPro() ? T.proSubPro : (isZh()?"无限习惯 · 无水印分享 · 数据导出":"Unlimited habits · Watermark-free · Data export");
-  document.getElementById("proCardA").textContent = isPro() ? "✓" : (isZh()?"了解更多 →":"Learn more →");
+  (function(){
+    var m = proMode();
+    document.getElementById("proCardT").textContent = m==="free" ? (isZh()?"升级 Seeora Pro":"Upgrade to Seeora Pro") : T.pro;
+    document.getElementById("proCardS").textContent = m==="permanent" ? T.proSubPro
+      : m==="trial" ? T.proSubTrial.replace("{n}", trialDaysLeft())
+      : (isZh()?"无限习惯 · 无水印分享 · 数据导出":"Unlimited habits · Watermark-free · Data export");
+    document.getElementById("proCardA").textContent = m==="free" ? (isZh()?"了解更多 →":"Learn more →") : "✓";
+  })();
 
   renderList(); renderDetail(); renderUsage(); renderHonors();
 
