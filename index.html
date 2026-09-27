@@ -1464,9 +1464,23 @@ function roundRectPath(g,x,y,w,h,r){
   g.quadraticCurveTo(x,y+h,x,y+h-r); g.lineTo(x,y+r); g.quadraticCurveTo(x,y,x+r,y); g.closePath();
 }
 function drawBrandIcon(g,cx,cy,r){
-  g.save(); g.beginPath(); g.arc(cx,cy,r,0,Math.PI*2); g.fillStyle = C.brand; g.fill();
-  g.strokeStyle = "#fff"; g.lineWidth = 3.2; g.lineCap = "round"; g.lineJoin = "round";
-  g.beginPath(); g.moveTo(cx-r*0.42,cy+r*0.02); g.lineTo(cx-r*0.10,cy+r*0.32); g.lineTo(cx+r*0.48,cy-r*0.36); g.stroke();
+  g.save();
+  var s = r*2, x0 = cx-r, y0 = cy-r;
+  // 圆角方块品牌底（与 brand-mark-fill.svg 一致）
+  roundRectPath(g, x0, y0, s, s, s*(220/1024));
+  g.fillStyle = "#2d7a6b"; g.fill();
+  // 浅色内环
+  g.beginPath(); g.arc(cx, cy, s*(280/1024), 0, Math.PI*2);
+  g.strokeStyle = "rgba(255,255,255,0.18)"; g.lineWidth = s*(6/1024); g.stroke();
+  // 环形点阵（6 个白色实心点）
+  var dotR = s*(54/1024), map = function(p){ return [ x0 + p[0]/1024*s, y0 + p[1]/1024*s ]; };
+  var pts = [[512,232],[731,337],[785,574],[634,764],[390,764],[239,574]];
+  g.fillStyle = "#ffffff";
+  pts.forEach(function(p){ var q = map(p); g.beginPath(); g.arc(q[0],q[1],dotR,0,Math.PI*2); g.fill(); });
+  // 镂空点（品牌色填充 + 白色描边）
+  var h = map([293,337]);
+  g.beginPath(); g.arc(h[0],h[1],dotR,0,Math.PI*2); g.fillStyle = "#2d7a6b"; g.fill();
+  g.strokeStyle = "#ffffff"; g.lineWidth = s*(14/1024); g.stroke();
   g.restore();
 }
 function drawPoster(h){
