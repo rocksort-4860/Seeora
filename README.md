@@ -50,6 +50,17 @@ localStorage.setItem("seeora_lang", "zh");
 - **专业版（Pro）**：一次性买断 **$4.99**，永久解锁（无限习惯、去水印、数据导出等）。
 - **7 天免费试用**：点"开始 7 天免费试用"后进入限时 Pro 状态，倒计时 **7 天**；到期自动回退免费版，需买断才能继续使用 Pro 功能。试用状态只记录 `seeora_pro_trial_until` 截止时间戳，不会污染 `seeora_pro`（买断后试用标记自动清空）。
 
+### 恢复购买（Restore Purchases）
+
+付费墙底部"恢复购买"按钮，对应 App Store / RevenueCat 的 Restore 流程：
+
+- 买断时写入**购买凭证** `seeora_receipt`（模拟 App Store 服务端记录：`{type:"lifetime", at:<时间戳>}`），与本地解锁标记 `seeora_pro` **分离存储**。
+- 点"恢复购买" → 模拟向商店拉取已购记录（1500ms 加载）→ 若凭证存在且为 lifetime，则重新写入 `seeora_pro="1"` 解锁 Pro 并提示"已恢复 Pro"；若无凭证则提示"没有可恢复的购买记录"。
+- 本地解锁标记丢失（如手动 `seeora_pro="0"`、版本升级、重装但保留数据）后，可用"恢复购买"找回 Pro，无需重复付费。
+- 与"试用"无关：Restore 只恢复**买断**，不恢复限时试用（与真机一致）。
+- 受 `seeora_iap_sim="fail"` 影响：开启后恢复会提示"恢复失败，请稍后重试"（按钮本身即重试入口）。
+- ⚠️ 局限性：本原型无后端，凭证同样存于 localStorage，因此 `localStorage.clear()` 会一并清除凭证（真机中凭证在苹果服务器、重装不丢）。同浏览器内的"本地标记丢失→恢复"场景可完整演示。
+
 ## 关键约束
 
 - 绝不使用 file://，必须走 localhost
