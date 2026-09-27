@@ -44,6 +44,12 @@ localStorage.setItem("seeora_theme", "dark");
 localStorage.setItem("seeora_lang", "zh");
 ```
 
+## 付费模式
+
+- **免费版**：正常使用，习惯上限 5 条，打卡 / 补签 / 休息日 / 连续统计 / 热力图等核心功能全部可用，分享成就卡带 Seeora 水印。
+- **专业版（Pro）**：一次性买断 **$4.99**，永久解锁（无限习惯、去水印、数据导出等）。
+- **7 天免费试用**：点"开始 7 天免费试用"后进入限时 Pro 状态，倒计时 **7 天**；到期自动回退免费版，需买断才能继续使用 Pro 功能。试用状态只记录 `seeora_pro_trial_until` 截止时间戳，不会污染 `seeora_pro`（买断后试用标记自动清空）。
+
 ## 关键约束
 
 - 绝不使用 file://，必须走 localhost
