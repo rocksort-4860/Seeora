@@ -61,6 +61,12 @@ localStorage.setItem("seeora_lang", "zh");
 - 受 `seeora_iap_sim="fail"` 影响：开启后恢复会提示"恢复失败，请稍后重试"（按钮本身即重试入口）。
 - ⚠️ 局限性：本原型无后端，凭证同样存于 localStorage，因此 `localStorage.clear()` 会一并清除凭证（真机中凭证在苹果服务器、重装不丢）。同浏览器内的"本地标记丢失→恢复"场景可完整演示。
 
+## 品牌图标与启动画面
+
+- `assets/brand-mark-fill.svg`：实心徽标，用作网站 favicon（`index.html` 内 `<link rel="icon" type="image/svg+xml">` 指向它），同时作为 `apple-touch-icon` 兜底。
+- `assets/brand-mark-line.svg`：描边徽标，显示在应用**启动画面（splash）**中央。
+- 启动画面 `#splash`：打开页面时全屏淡入，居中显示描边徽标 + 应用名 "Seeora" + 本地化标语（见 `t().slogan`）+ 加载圈；`window.load` 后约 600ms 淡出并移除 DOM（另有 3 秒兜底，防止卡死）。无论深浅色主题，启动画面均为浅色品牌底，保证描边徽标清晰可读。
+
 ## 关键约束
 
 - 绝不使用 file://，必须走 localhost

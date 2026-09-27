@@ -3,6 +3,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Seeora · v8</title>
+<link rel="icon" type="image/svg+xml" href="assets/brand-mark-fill.svg">
+<link rel="apple-touch-icon" href="assets/brand-mark-fill.svg">
 <style>
 :root{
   --brand:#2d7a6b;--brandRgb:45,122,107;--brand-deep:#245f54;
@@ -34,6 +36,16 @@
   --card-shadow:0 1px 2px rgba(0,0,0,.25),0 4px 12px rgba(0,0,0,.3);
   --card-shadow-press:0 1px 2px rgba(0,0,0,.3);
 }
+/* ===== 启动画面 splash ===== */
+#splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#ffffff 0%,#e8f2ef 100%);transition:opacity .45s ease,visibility .45s ease}
+#splash.splash-hidden{opacity:0;visibility:hidden;pointer-events:none}
+#splash .sp-logo{width:96px;height:96px;display:block;animation:sp-pop .5s ease}
+#splash .sp-name{margin-top:18px;font-size:26px;font-weight:700;letter-spacing:.5px;color:var(--brand)}
+#splash .sp-slogan{margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:.2px}
+#splash .sp-spin{margin-top:26px;width:26px;height:26px;border-radius:50%;border:3px solid rgba(45,122,107,.18);border-top-color:var(--brand);animation:sp-spin .8s linear infinite}
+@keyframes sp-spin{to{transform:rotate(360deg)}}
+@keyframes sp-pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center;min-height:100vh;transition:background-color .25s ease}
@@ -255,6 +267,25 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true">
+  <img class="sp-logo" src="assets/brand-mark-line.svg" alt="Seeora">
+  <div class="sp-name">Seeora</div>
+  <div class="sp-slogan"></div>
+  <div class="sp-spin"></div>
+</div>
+<script>
+  (function(){
+    function hideSplash(){
+      var s = document.getElementById('splash');
+      if (!s) return;
+      s.classList.add('splash-hidden');
+      setTimeout(function(){ if (s && s.parentNode) s.parentNode.removeChild(s); }, 500);
+    }
+    if (document.readyState === 'complete') setTimeout(hideSplash, 600);
+    else window.addEventListener('load', function(){ setTimeout(hideSplash, 600); });
+    setTimeout(hideSplash, 3000); // 兜底：最多 3 秒强制隐藏，避免卡死
+  })();
+</script>
 <div id="app">
 
 <section id="view-home" class="view on">
@@ -1743,6 +1774,10 @@ function renderAll(){
   })();
 
   renderList(); renderDetail(); renderUsage(); renderHonors();
+
+  // 启动画面本地化标语（若启动画面仍在）
+  var _ss = document.querySelector("#splash .sp-slogan");
+  if (_ss) _ss.textContent = T.slogan;
 
   var seenIntro = false;
   try{ seenIntro = !!localStorage.getItem("seeora_intro"); }catch(e){}
