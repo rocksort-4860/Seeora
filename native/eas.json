@@ -1,0 +1,26 @@
+{
+  "cli": {
+    "version": ">= 13.0.0",
+    "appVersionSource": "local",
+    "promptToConfigurePushNotifications": false
+  },
+  "build": {
+    "production": {
+      "autoIncrement": true,
+      "ios": {
+        "credentialsSource": "remote",
+        "image": "macos-sequoia-15.6-xcode-26.2"
+      },
+      "env": {
+        "EAS_USE_PRECOMPILED_MODULES": "0"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "REPLACE_WITH_YOUR_APPLE_ID@example.com"
+      }
+    }
+  }
+}

@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Streakora — iOS Prototype</title>
+<style>
+:root{
+  --stage-bg:#EDEDF2;--stage-fg:#1C1C1E;--stage-fg2:#6B6B70;--stage-line:#D8D8DE;--stage-card:#FFFFFF;
+}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei","Segoe UI",Roboto,sans-serif;background:var(--stage-bg);color:var(--stage-fg);}
+.stage{min-height:100vh;display:flex;flex-direction:column;}
+.topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 22px;background:rgba(255,255,255,.72);backdrop-filter:blur(18px);border-bottom:1px solid var(--stage-line);position:sticky;top:0;z-index:50;}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:6px;}
+.brand b{font-size:17px;letter-spacing:-.3px;} .brand span{font-size:12px;color:var(--stage-fg2);}
+.btn{border:1px solid var(--stage-line);background:#fff;color:var(--stage-fg);font-size:12.5px;padding:7px 13px;border-radius:999px;cursor:pointer;font-family:inherit;transition:.15s;}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.workspace{display:flex;gap:34px;padding:26px 22px 46px;align-items:flex-start;justify-content:center;flex-wrap:wrap;}
+.device-col{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.device{width:390px;height:844px;background:#0B0B0D;border-radius:56px;padding:12px;box-shadow:0 34px 70px rgba(0,0,0,.34),0 2px 0 rgba(255,255,255,.5) inset;position:relative;flex:none;}
+.device::after{content:"";position:absolute;inset:-2px;border-radius:58px;pointer-events:none;box-shadow:0 0 0 1px rgba(255,255,255,.28) inset;}
+.screen{position:relative;width:366px;height:820px;border-radius:45px;overflow:hidden;background:var(--bg);color:var(--label);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;isolation:isolate;}
+.device[data-theme="light"]{
+  --bg:#F2F2F7;--card:#FFFFFF;--label:#000000;--label2:rgba(60,60,67,.60);--label3:rgba(60,60,67,.30);
+  --sep:rgba(60,60,67,.18);--accent:#0FAFA0;--accent2:#33C9B7;--accent-soft:rgba(15,175,160,.12);
+  --green:#34C759;--red:#FF3B30;--blue:#0A84FF;--orange:#FF9F0A;--pink:#FF375F;--purple:#BF5AF2;--indigo:#5E5CE6;--yellow:#FFD60A;--teal:#30B0C7;--gold:#C8A24A;--fill:rgba(120,120,128,.12);
+}
+.device[data-theme="dark"]{
+  --bg:#000000;--card:#1C1C1E;--label:#FFFFFF;--label2:rgba(235,235,245,.60);--label3:rgba(235,235,245,.30);
+  --sep:rgba(84,84,88,.60);--accent:#2FD4C2;--accent2:#5BE0D0;--accent-soft:rgba(47,212,194,.16);
+  --green:#30D158;--red:#FF453A;--blue:#0A84FF;--orange:#FF9F0A;--pink:#FF375F;--purple:#BF5AF2;--indigo:#5E5CE6;--yellow:#FFD60A;--teal:#40C8E0;--gold:#D8B45E;--fill:rgba(120,120,128,.24);
+}
+.statusbar{position:absolute;top:0;left:0;right:0;height:54px;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:16px 30px 0;font-size:15px;font-weight:600;pointer-events:none;color:var(--label);}
+.sb-right{display:flex;align-items:center;gap:6px;}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:124px;height:36px;background:#000;border-radius:20px;z-index:31;}
+.navbar{position:absolute;top:0;left:0;right:0;height:92px;z-index:25;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(20px);border-bottom:1px solid transparent;font-size:17px;font-weight:600;letter-spacing:-.2px;opacity:0;transform:translateY(-6px);transition:.22s ease;pointer-events:none;}
+.navbar.show{opacity:1;transform:none;border-bottom-color:var(--sep);}
+.page{position:absolute;top:0;left:0;right:0;bottom:0;display:none;}
+.page.active{display:block;}
+.scroll{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;padding:62px 20px 118px;-webkit-overflow-scrolling:touch;}
+.scroll::-webkit-scrollbar{width:0;}
+.large-title{font-size:34px;font-weight:700;letter-spacing:-.6px;margin:34px 4px 2px;}
+.kicker-date{font-size:14px;color:var(--label2);margin:0 4px 18px;font-weight:500;}
+.section-head{display:flex;justify-content:space-between;align-items:baseline;font-size:21px;font-weight:800;letter-spacing:-.4px;color:var(--label);margin:34px 14px 12px;}
+.section-head em{font-size:12.5px;font-weight:500;font-style:normal;color:var(--label2);letter-spacing:0;text-transform:none;}
+.section-head em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:500;font-size:12px;}
+.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;}
+.group{background:var(--card);border-radius:16px;margin-bottom:22px;overflow:hidden;}
+.row{display:flex;align-items:center;gap:12px;padding:12px 16px;position:relative;min-height:52px;}
+.row+.row::before{content:"";position:absolute;top:0;left:16px;right:0;height:1px;background:var(--sep);}
+.row .r-icon{width:29px;height:29px;border-radius:8px;display:grid;place-items:center;font-size:15px;color:#fff;flex:none;}
+.row .r-title{font-size:16px;letter-spacing:-.2px;}
+.row .r-sub{font-size:12.5px;color:var(--label2);margin-top:2px;line-height:1.35;}
+.row .spacer{flex:1;}
+.row .r-value{font-size:15px;color:var(--label2);}
+.row .chev{color:var(--label3);font-size:19px;}
+.row.action{color:var(--accent);justify-content:center;font-size:16px;font-weight:500;}
+.sw{width:51px;height:31px;border-radius:999px;background:var(--fill);position:relative;transition:.2s;flex:none;cursor:pointer;border:none;padding:0;}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.22);transition:.2s;}
+.sw.on{background:var(--accent);} .sw.on::after{transform:translateX(20px);}
+.week-hero{display:flex;align-items:center;gap:18px;}
+.ring{position:relative;width:96px;height:96px;flex:none;}
+.ring svg{transform:rotate(-90deg);}
+.ring .ring-txt{position:absolute;inset:0;display:grid;place-items:center;text-align:center;}
+.ring .ring-num{font-size:26px;font-weight:700;letter-spacing:-.8px;line-height:1;}
+.ring .ring-lbl{font-size:10px;color:var(--label2);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:3px;}
+.hero-kicker{font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--accent);text-transform:uppercase;}
+.hero-title{font-size:20px;font-weight:700;letter-spacing:-.4px;margin:5px 0 4px;line-height:1.25;}
+.hero-sub{font-size:13.5px;color:var(--label2);line-height:1.35;}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--accent-soft);color:var(--accent);font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:999px;margin-top:9px;letter-spacing:.1px;}
+.chip.gray{background:var(--fill);color:var(--label2);}
+.hrow{display:flex;align-items:center;gap:13px;padding:13px 16px;position:relative;cursor:pointer;}
+.hrow+.hrow::before{content:"";position:absolute;top:0;left:16px;right:0;height:1px;background:var(--sep);}
+.hrow .h-idx{width:24px;flex:none;display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--label3);font-variant-numeric:tabular-nums;}
+.hrow .h-main{flex:1;min-width:0;}
+.h-muted{color:var(--label3);font-weight:500;}
+.hrow .h-name{font-size:16.5px;font-weight:600;letter-spacing:-.25px;display:flex;align-items:center;gap:8px;}
+.hrow .h-sub{font-size:12.5px;color:var(--label2);margin-top:3px;display:flex;align-items:center;gap:6px;}
+.dotgrid{display:flex;gap:4px;margin-top:7px;}
+.dotgrid i{width:8px;height:8px;border-radius:50%;background:var(--fill);display:block;}
+.dotgrid i.done{background:var(--hc,#0FAFA0);}
+.dotgrid i.today{box-shadow:0 0 0 2px var(--hc,#0FAFA0);background:transparent;}
+.dotgrid i.done.today{background:var(--hc,#0FAFA0);}
+.check{width:34px;height:34px;border-radius:50%;border:2px solid var(--label3);flex:none;display:grid;place-items:center;transition:.18s;background:transparent;cursor:pointer;padding:0;}
+.check svg{opacity:0;transform:scale(.5);transition:.18s;}
+.check.done{border-color:var(--hc,#0FAFA0);background:var(--hc,#0FAFA0);}
+.check.done svg{opacity:1;transform:none;}
+.pill-sec{font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:6px;}
+.add-row{display:flex;align-items:center;gap:10px;padding:13px 16px;font-size:16px;color:var(--accent);font-weight:500;width:100%;background:none;border:none;font-family:inherit;cursor:pointer;position:relative;}
+.add-row::before{content:"";position:absolute;top:0;left:16px;right:0;height:1px;background:var(--sep);}
+/* grayed placeholder ghost row (always visible CTA) */
+.ghost-row{display:flex;align-items:center;gap:13px;padding:13px 16px;position:relative;cursor:pointer;transition:background .15s;}
+.ghost-row:active{background:var(--fill);}
+.ghost-row::before{content:"";position:absolute;top:0;left:16px;right:0;height:1px;background:var(--sep);}
+.ghost-circle{width:28px;height:28px;border-radius:50%;border:2px dashed var(--label3);display:grid;place-items:center;color:var(--label3);font-size:18px;flex:none;background:var(--fill);line-height:1;}
+.ghost-main{flex:1;min-width:0;}
+.ghost-name{font-size:16.5px;font-weight:600;color:var(--label3);}
+.ghost-hint{font-size:12.5px;color:var(--label3);margin-top:3px;}
+.ghost-dots{display:flex;gap:4px;margin-top:7px;}
+.ghost-dots i{width:8px;height:8px;border-radius:50%;background:var(--fill);box-shadow:0 0 0 1px var(--label3) inset;}
+/* honor heatmap-like area */
+.hstrip{display:flex;align-items:center;gap:10px;}
+.hstrip-ttl{font-size:13px;font-weight:600;width:88px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--label);}
+.hstrip-cells{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;flex:1;}
+.hstrip-cells i{aspect-ratio:1;border-radius:2px;background:var(--fill);}
+.hstrip-cells i.on{background:linear-gradient(135deg,#E9C46A,#C8A24A);}
+.honor-ghost{margin-top:6px;}
+.wgrid{background:var(--card);border-radius:16px;padding:14px 12px 10px;margin-bottom:14px;}
+.wgrid-head{display:grid;grid-template-columns:96px repeat(7,1fr);gap:2px;margin-bottom:8px;padding:0 4px;}
+.wgrid-head div{text-align:center;font-size:11px;color:var(--label2);font-weight:600;}
+.wgrid-head div.cur{color:var(--accent);font-weight:800;}
+.wgrid-head .hname{text-align:left;padding-left:2px;}
+.wrow{display:grid;grid-template-columns:96px repeat(7,1fr);gap:2px;align-items:center;padding:5px 4px;border-radius:10px;}
+.wrow .wn{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px;}
+.wcell{display:grid;place-items:center;height:30px;}
+.wcell i{width:20px;height:20px;border-radius:50%;background:var(--fill);display:block;transition:.18s;}
+.wcell i.done{background:var(--hc,#0FAFA0);}
+.wcell i.future{background:transparent;box-shadow:0 0 0 1.5px var(--fill) inset;}
+.wcell i.today{box-shadow:0 0 0 2px var(--label);background:transparent;}
+.wcell i.done.today{background:var(--hc,#0FAFA0);box-shadow:0 0 0 2px var(--label);}
+.wrow.secured .wn::after{content:" ✓";color:var(--accent);font-weight:800;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--label2);margin-top:10px;padding:0 6px 4px;}
+.legend span{display:flex;align-items:center;gap:5px;} .legend b{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.bars{display:flex;align-items:flex-end;gap:8px;height:96px;margin-top:10px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.bar-col .bar{width:100%;background:var(--accent);border-radius:6px;min-height:6px;opacity:.9;}
+.bar-col .bar.low{background:var(--orange);}
+.bar-col .bl{font-size:10.5px;color:var(--label2);font-weight:600;}
+.total-card{background:linear-gradient(135deg,#126B5C,#0FAFA0);color:#fff;border-radius:18px;padding:20px;margin-bottom:14px;}
+.total-card .tc-k{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;opacity:.82;}
+.total-card .tc-n{font-size:44px;font-weight:800;letter-spacing:-2px;margin:4px 0;}
+.total-card .tc-s{font-size:13px;opacity:.92;}
+.heatmap{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;}
+.heatmap i{aspect-ratio:1;border-radius:3px;background:var(--fill);}
+.hm-legend{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--label2);margin-top:10px;justify-content:flex-end;}
+.hm-legend b{width:11px;height:11px;border-radius:3px;display:inline-block;}
+.purchase-card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:13px;cursor:pointer;}
+.purchase-card .pc-badge{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#0FAFA0,#0B7EA8);display:grid;place-items:center;font-size:22px;color:#fff;flex:none;}
+.purchase-card .pc-t{font-size:16px;font-weight:700;}
+.purchase-card .pc-s{font-size:12.5px;color:var(--label2);margin-top:2px;line-height:1.35;}
+.privacy-banner{display:flex;gap:11px;align-items:flex-start;background:var(--accent-soft);border-radius:14px;padding:13px 14px;margin:0 4px 18px;}
+.privacy-banner .pb-t{font-size:13px;font-weight:600;color:var(--accent);}
+.privacy-banner .pb-s{font-size:12px;color:var(--label2);margin-top:3px;line-height:1.4;}
+.explainer{background:var(--card);border-radius:16px;padding:16px;}
+.explainer h4{margin:0 0 6px;font-size:15.5px;letter-spacing:-.2px;}
+.explainer p{margin:0;font-size:13px;color:var(--label2);line-height:1.45;}
+.canvas-wrap{border-radius:14px;overflow:hidden;line-height:0;background:var(--fill);}
+.canvas-wrap canvas{width:100%;height:auto;display:block;}
+.widgets{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.widget{background:var(--card);border-radius:20px;padding:12px;border:1px solid var(--sep);flex:1;min-width:108px;}
+.widget.small{width:118px;flex:none;}
+.widget.med{width:170px;flex:none;}
+.widget.large{flex-basis:100%;}
+.device[data-theme="dark"] .widget{background:var(--card);}
+.widget .w-title{font-size:11.5px;font-weight:700;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.widget .w-title b{font-size:10px;color:var(--accent);background:var(--accent-soft);padding:2px 6px;border-radius:5px;}
+.widget .w-line{display:flex;align-items:center;gap:7px;font-size:11px;margin:6px 0;color:var(--label);}
+.widget .w-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--label3);flex:none;}
+.widget .w-dot.done{background:var(--accent);border-color:var(--accent);}
+.widget .w-bar{height:8px;border-radius:5px;background:var(--fill);overflow:hidden;flex:1;}
+.widget .w-bar i{display:block;height:100%;}
+.tabbar{position:absolute;bottom:0;left:0;right:0;height:86px;z-index:28;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(22px);border-top:1px solid var(--sep);display:flex;padding-top:8px;}
+.tab{flex:1;background:none;border:none;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--label2);padding:0;}
+.tab svg{width:26px;height:26px;} .tab span{font-size:10px;font-weight:600;letter-spacing:.1px;}
+.tab.active{color:var(--accent);}
+.home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:var(--label);opacity:.9;border-radius:3px;z-index:29;}
+.overlay{position:absolute;inset:0;z-index:60;background:rgba(0,0,0,.42);display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);}
+.overlay.show{display:flex;}
+.sheet{width:100%;max-height:94%;background:var(--bg);border-radius:14px 14px 0 0;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;overflow:hidden;}
+.overlay.show .sheet{transform:none;}
+.sheet.full{height:100%;max-height:100%;border-radius:0;}
+.grab{width:36px;height:5px;border-radius:3px;background:var(--label3);margin:8px auto 4px;flex:none;}
+.sheet-body{overflow-y:auto;padding:6px 20px 34px;}
+.sheet-body::-webkit-scrollbar{width:0;}
+.sheet h3{margin:6px 4px 4px;font-size:24px;font-weight:700;letter-spacing:-.5px;}
+.sheet .sh-sub{margin:0 4px 18px;font-size:14px;color:var(--label2);line-height:1.4;}
+.field{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:14px;}
+.field label{font-size:12px;color:var(--label2);font-weight:600;display:block;margin-bottom:6px;}
+.field input[type=text],.field input[type=number]{width:100%;border:none;background:transparent;font-size:16px;color:var(--label);font-family:inherit;outline:none;}
+.swatch-row{display:flex;gap:10px;flex-wrap:wrap;}
+.swatch{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer;padding:0;}
+.swatch.sel{border-color:var(--label);}
+.emoji-row{display:flex;gap:8px;flex-wrap:wrap;}
+.emoji-chip{width:42px;height:42px;border-radius:12px;background:var(--card);border:2px solid transparent;font-size:20px;cursor:pointer;display:grid;place-items:center;}
+.emoji-chip.sel{border-color:var(--accent);}
+.btn-stack{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+.btn-lg{border:none;border-radius:14px;padding:15px;font-size:16.5px;font-weight:700;font-family:inherit;cursor:pointer;background:var(--accent);color:#fff;}
+.btn-lg.sec{background:var(--fill);color:var(--label);}
+.btn-lg.danger{background:var(--fill);color:var(--red);}
+.migrate-card{border:2px solid var(--gold);border-radius:14px;padding:14px;margin-bottom:16px;background:color-mix(in srgb,var(--gold) 8%,var(--card));}
+.migrate-card .mc-t{font-size:13px;font-weight:800;letter-spacing:.4px;color:var(--gold);text-transform:uppercase;}
+.migrate-card .mc-grid{display:flex;gap:14px;margin-top:10px;}
+.migrate-card .mc-cell .v{font-size:22px;font-weight:800;letter-spacing:-.4px;}
+.migrate-card .mc-cell .l{font-size:10.5px;color:var(--label2);}
+.migrate-card .mc-edit{margin-top:10px;font-size:12.5px;color:var(--accent);font-weight:600;cursor:pointer;}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:8px;}
+.cal .cdow{font-size:11px;color:var(--label2);text-align:center;font-weight:600;padding-bottom:2px;}
+.cal .cday{aspect-ratio:1;border-radius:9px;background:var(--fill);display:grid;place-items:center;font-size:13px;font-weight:600;color:var(--label);cursor:pointer;position:relative;}
+.cal .cday.off{color:var(--label3);cursor:not-allowed;background:transparent;}
+.cal .cday.future{color:var(--label3);background:transparent;cursor:not-allowed;}
+.cal .cday.done{background:var(--accent);color:#fff;}
+.cal .cday.today{box-shadow:0 0 0 2px var(--label);}
+.cal .cday.backfillable:not(.done){box-shadow:0 0 0 1.5px var(--accent) inset;}
+.tabbar-note{font-size:11.5px;color:#8A8A90;text-align:center;}
+.notes{width:440px;flex:none;background:var(--stage-card);border:1px solid var(--stage-line);border-radius:16px;padding:22px 24px 26px;max-height:calc(100vh - 130px);overflow-y:auto;}
+.notes h2{font-size:16px;margin:0 0 4px;letter-spacing:-.2px;}
+.notes .nsub{font-size:12.5px;color:var(--stage-fg2);margin:0 0 18px;}
+.notes h3{font-size:12px;letter-spacing:.9px;text-transform:uppercase;color:var(--accent);margin:22px 0 8px;font-weight:800;}
+.notes p,.notes li{font-size:13px;line-height:1.6;color:#3A3A3F;}
+.notes ul{margin:0;padding-left:18px;} .notes li{margin:4px 0;}
+.notes table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;}
+.notes th,.notes td{border:1px solid var(--stage-line);padding:6px 8px;text-align:left;vertical-align:top;}
+.notes th{background:#F7F7F9;font-weight:700;}
+.tag{display:inline-block;font-size:11px;background:#F0F0F3;color:#55555C;padding:2px 8px;border-radius:999px;margin:2px 4px 2px 0;}
+  .warn{background:#FFF6EC;border-left:3px solid #FF9F0A;padding:10px 12px;border-radius:0 8px 8px 0;font-size:12.5px;line-height:1.55;margin:8px 0;}
+  .apphdr{display:flex;align-items:center;gap:10px;margin:2px 4px 0;padding:6px 0;}
+  .apphdr-ico{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#0FAFA0,#0B7EA8);display:grid;place-items:center;font-size:18px;flex:none;box-shadow:0 2px 6px rgba(15,175,160,.35);}
+  .apphdr-name{font-size:17px;font-weight:800;letter-spacing:-.3px;line-height:1.15;}
+  .apphdr-tag{font-size:11px;color:var(--label2);font-weight:600;margin-top:1px;}
+  .apphdr + .large-title{margin-top:12px;}
+  .h-details{font-size:12px;color:var(--label2);margin-top:3px;line-height:1.35;}
+  .seg{display:flex;gap:0;background:var(--fill);border-radius:11px;padding:3px;margin:0 4px 10px;}
+  .seg button{flex:1;border:none;background:transparent;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--label2);padding:7px 6px;border-radius:8px;cursor:pointer;}
+  .seg button.on{background:var(--card);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.12);}
+  .seg.mini{margin:0;width:auto;flex:none;gap:2px;padding:2px;border-radius:9px;}
+  .seg.mini button{flex:none;padding:5px 11px;border-radius:7px;font-size:12px;min-width:44px;}
+  .honor-card{border:2px solid var(--gold);border-radius:16px;padding:14px;margin-bottom:12px;background:color-mix(in srgb,var(--gold) 7%,var(--card));display:flex;gap:13px;}
+  .honor-ico{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#E9C46A,#C8A24A);display:grid;place-items:center;font-size:22px;flex:none;}
+  .honor-main{flex:1;min-width:0;}
+  .honor-title{font-size:16.5px;font-weight:700;letter-spacing:-.2px;}
+  .honor-meta{font-size:12px;color:var(--label2);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .honor-days{font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--gold);margin-top:6px;}
+  .honor-details{font-size:12.5px;color:var(--label2);margin-top:4px;line-height:1.4;}
+  .src-badge{background:var(--fill);color:var(--label2);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+  .type-badge{background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+  .empty-ph{display:flex;flex-direction:column;align-items:center;gap:8px;padding:26px 16px;border:2px dashed var(--label3);border-radius:16px;margin-bottom:12px;text-align:center;cursor:pointer;background:transparent;}
+  .empty-ph .ep-ico{width:46px;height:46px;border-radius:14px;background:var(--accent-soft);display:grid;place-items:center;font-size:24px;color:var(--accent);}
+  .empty-ph .ep-t{font-size:15px;font-weight:700;}
+  .empty-ph .ep-s{font-size:12.5px;color:var(--label2);line-height:1.4;}
+@media (max-width:960px){.notes{max-height:none;width:100%;max-width:560px;}}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="topbar">
+    <div class="brand"><b>Streakora</b><span>v1.0 原型 · 所有开关均在 App 内部「设置」中</span></div>
+  </div>
+
+  <div class="workspace">
+    <div class="device-col">
+      <div class="device" id="device" data-theme="light">
+        <div class="screen" id="screen">
+          <div class="island"></div>
+          <div class="statusbar">
+            <div id="sbTime">9:41</div>
+            <div class="sb-right">
+              <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="6" width="3" height="6" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"/></svg>
+              <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 9.6a1.4 1.4 0 110-2.8 1.4 1.4 0 010 2.8zm0-4.2c1.2 0 2.3.45 3.15 1.2l1.2-1.35A6.9 6.9 0 008 3.1c-1.9 0-3.6.8-4.85 2.1L4.35 6.55A4.9 4.9 0 018 5.4zm0-4.4c2.4 0 4.6.9 6.3 2.4L15.5 2A10.7 10.7 0 008 0 10.7 10.7 0 00.5 2L1.7 3.2A9.1 9.1 0 018 1z"/></svg>
+              <svg width="26" height="13" viewBox="0 0 26 13" fill="none"><rect x=".5" y=".5" width="21" height="12" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="15" height="9" rx="2" fill="currentColor"/><path d="M23.5 4.5v4c1.2-.4 1.8-1.2 1.8-2s-.6-1.6-1.8-2z" fill="currentColor" opacity=".4"/></svg>
+            </div>
+          </div>
+          <div class="navbar" id="navbar"><div class="nav-title" id="navTitle">Today</div></div>
+
+          <!-- TODAY -->
+          <div class="page active" id="page-today">
+            <div class="scroll" data-title="Today">
+              <div class="apphdr"><div class="apphdr-ico">🎯</div><div><div class="apphdr-name">Streakora</div><div class="apphdr-tag" id="tagToday">无连续天数 · 无内疚</div></div></div>
+              <div class="kicker-date" id="todayDate"></div>
+              <div class="card week-hero">
+                <div class="ring">
+                  <svg width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="41" fill="none" stroke="var(--fill)" stroke-width="9"/><circle id="ringArc" cx="48" cy="48" r="41" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" stroke-dasharray="257.6" stroke-dashoffset="257.6" style="transition:stroke-dashoffset .5s cubic-bezier(.32,.72,0,1)"/></svg>
+                  <div class="ring-txt"><div><div class="ring-num" id="ringNum">0/0</div><div class="ring-lbl" id="ringLbl">secured</div></div></div>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div class="hero-kicker" id="weekRange"></div>
+                  <div class="hero-title" id="weekTitle">…</div>
+                  <div class="hero-sub" id="weekSub"></div>
+                  <div id="weekChip"></div>
+                </div>
+              </div>
+              <div class="section-head"><span id="habitsHead">Habits</span><em id="habitsSub">tap to check in</em></div>
+              <div class="group" id="habitGroup"></div>
+              <div class="card tight" style="display:flex;gap:11px;align-items:flex-start">
+                <div style="font-size:18px">🌿</div>
+                <div><div class="h-name" style="font-weight:600" id="missTitle">Missed a day? Nothing breaks.</div>
+                <div style="font-size:12.5px;color:var(--label2);margin-top:3px;line-height:1.4" id="missSub"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="page" id="page-history">
+            <div class="scroll" data-title="History">
+              <div class="apphdr"><div class="apphdr-ico">🎯</div><div><div class="apphdr-name">Streakora</div><div class="apphdr-tag" id="tagHistory">本机真实打卡 · 累计与坚持排行</div></div></div>
+              <div class="kicker-date" id="histSub">本机真实打卡 · 累计、每周与坚持排行</div>
+              <div class="total-card">
+                <div class="tc-k" id="totalK">Total days kept</div>
+                <div class="tc-n" id="totalDays">0</div>
+                <div class="tc-s" id="totalSub"></div>
+              </div>
+              <div class="section-head"><span id="rankHead">Leaderboard</span></div>
+              <div class="seg" id="histSort">
+                <button data-s="days" class="on" id="sortDays">Days kept</button>
+                <button data-s="name" id="sortName">Name</button>
+                <button data-s="created" id="sortCreated">Created</button>
+              </div>
+              <div class="group" id="habitRank"></div>
+              <div class="section-head"><span id="thisWeekHead">This week</span></div>
+              <div class="wgrid" id="weekGrid"></div>
+              <div class="section-head"><span id="last8Head">Last 8 weeks</span></div>
+              <div class="group" id="pastWeeks"></div>
+              <div class="section-head"><span id="heatHead">Heatmap</span></div>
+              <div class="card" style="padding:14px">
+                <div style="font-size:12.5px;color:var(--label2);margin-bottom:10px" id="heatSub"></div>
+                <div class="heatmap" id="heatmap"></div>
+                <div class="hm-legend"><span id="legendLess">Less</span> <b style="background:var(--fill)"></b><b style="background:var(--accent);opacity:.4"></b><b style="background:var(--accent);opacity:.7"></b><b style="background:var(--accent)"></b> <span id="legendMore">More</span></div>
+              </div>
+              <div id="honorSection">
+                <div class="section-head"><span id="honorHead">Hall of Fame</span></div>
+                <div id="honorIntro" style="font-size:12.5px;color:var(--label2);margin:0 12px 8px;line-height:1.4"></div>
+                <div id="honorList"></div>
+                <div style="height:8px"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SETTINGS -->
+          <div class="page" id="page-settings">
+            <div class="scroll" data-title="Settings">
+              <div class="apphdr"><div class="apphdr-ico">🎯</div><div><div class="apphdr-name">Streakora</div><div class="apphdr-tag" id="tagSettings">无账号 · 无广告 · 无订阅</div></div></div>
+              <div class="kicker-date" id="setSub">No account required. Ever.</div>
+              <div class="section-head"><span id="genHead">通用</span></div>
+              <div class="group">
+                <div class="row">
+                  <div class="r-icon" style="background:var(--blue)">🌐</div>
+                  <div><div class="r-title" id="langT">语言</div><div class="r-sub" id="langS">中文 / English</div></div>
+                  <div class="spacer"></div>
+                  <div class="seg mini" id="langSeg"><button data-lang="zh" id="langZh">中文</button><button data-lang="en" id="langEn">EN</button></div>
+                </div>
+                <div class="row">
+                  <div class="r-icon" style="background:var(--label3)">◐</div>
+                  <div><div class="r-title" id="appT">Appearance</div></div>
+                  <div class="spacer"></div>
+                  <div class="seg mini" id="themeSeg"><button data-theme="light" id="thLight">浅色</button><button data-theme="dark" id="thDark">深色</button></div>
+                </div>
+              </div>
+              <div class="section-head"><span id="notifHead">Notifications</span></div>
+              <div class="group">
+                <div class="row">
+                  <div class="r-icon" style="background:var(--orange)">🔔</div>
+                  <div><div class="r-title" id="remT">Daily reminder</div><div class="r-sub" id="remindSub"></div></div>
+                  <div class="spacer"></div>
+                  <button class="sw" data-sw="remind"></button>
+                </div>
+                <div class="row">
+                  <div class="r-icon" style="background:var(--blue)">🔖</div>
+                  <div><div class="r-title" id="badgeT">Badge count</div><div class="r-sub" id="badgeS">Today's unfinished habits</div></div>
+                  <div class="spacer"></div>
+                  <div class="r-value" id="badgeVal">0</div>
+                </div>
+              </div>
+              <div class="section-head"><span id="devHead">Device</span></div>
+              <div class="group">
+                <div class="row">
+                  <div class="r-icon" style="background:var(--purple)">✋</div>
+                  <div><div class="r-title" id="hapT">Haptics</div></div>
+                  <div class="spacer"></div>
+                  <button class="sw on" data-sw="haptic"></button>
+                </div>
+                <div class="row">
+                  <div class="r-icon" style="background:var(--green)">☁</div>
+                  <div><div class="r-title" id="icloudT">iCloud sync</div><div class="r-sub" id="icloudS">Private database, your Apple ID</div></div>
+                  <div class="spacer"></div>
+                  <button class="sw on" data-sw="icloud"></button>
+                </div>
+                <div class="row">
+                  <div class="r-icon" style="background:var(--teal)">📅</div>
+                  <div><div class="r-title" id="wkT">Week starts on</div></div>
+                  <div class="spacer"></div>
+                  <div class="r-value" id="weekStartVal">Monday</div>
+                  <button class="btn" id="btnWeekStart" style="border:1px solid var(--sep);padding:5px 11px;font-size:12.5px">Change</button>
+                </div>
+              </div>
+              <div class="section-head"><span id="intHead">Integrations</span></div>
+              <div class="group">
+                <div class="row">
+                  <div class="r-icon" style="background:var(--pink)">❤</div>
+                  <div><div class="r-title" id="healthT">Apple Health</div><div class="r-sub" id="healthS">Read-only summary</div></div>
+                  <div class="spacer"></div>
+                  <button class="sw" data-sw="health"></button>
+                </div>
+                <div class="row">
+                  <div class="r-icon" style="background:var(--indigo)">⌘</div>
+                  <div><div class="r-title" id="siriT">Siri &amp; Shortcuts</div><div class="r-sub" id="siriS">"Hey Siri, log my reading"</div></div>
+                  <div class="spacer"></div>
+                  <button class="sw on" data-sw="siri"></button>
+                </div>
+              </div>
+              <div class="section-head"><span id="wgHead">Widgets</span></div>
+              <div class="widgets" style="margin-bottom:6px">
+                <div class="widget small"><div class="w-title"><span id="wg1T">Streakora</span> <b id="wSmallPct">–</b></div><div id="wSmallList"></div></div>
+                <div class="widget med"><div class="w-title"><span id="wg2T">This week</span> <b id="wMedCount">–</b></div><div id="wMedList"></div></div>
+                <div class="widget large"><div class="w-title"><span id="wg3T">Big progress</span> <b id="wBigCount">–</b></div><div id="wBigList"></div></div>
+              </div>
+              <div class="section-head"><span id="dataHead">Data security</span></div>
+              <div class="purchase-card" id="purchaseTap">
+                <div class="pc-badge">✓</div>
+                <div style="flex:1">
+                  <div class="pc-t" id="purT">One-time purchase</div>
+                  <div class="pc-s" id="purS">$6.99 · no subscription · no in-app purchase · no free-tier tricks</div>
+                </div>
+                <div class="chev">›</div>
+              </div>
+              <div class="group">
+                <div class="row" id="btnExport"><div class="r-title" id="exportT">Export backup</div><div class="spacer"></div><div class="chev">›</div></div>
+                <div class="row" id="btnImport"><div class="r-title" id="importT">Import backup</div><div class="spacer"></div><div class="chev">›</div></div>
+                <div class="row action" id="btnResetIn">Erase everything on this device</div>
+              </div>
+              <div class="section-head"><span id="aboutHead">About</span></div>
+              <div class="group">
+                <div class="row"><div class="r-title" id="verT">Version</div><div class="spacer"></div><div class="r-value">1.0 (1)</div></div>
+                <div class="row"><div class="r-title" id="privPolT">Privacy policy</div><div class="spacer"></div><div class="chev">›</div></div>
+                <div class="row"><div class="r-title" id="promiseT">Our promise</div><div class="spacer"></div><div class="chev">›</div></div>
+                <div class="row" id="replayRow"><div class="r-title" id="replayT">Replay intro</div><div class="spacer"></div><div class="chev">›</div></div>
+              </div>
+              <div style="height:8px"></div>
+            </div>
+          </div>
+
+          <div class="tabbar">
+            <button class="tab" data-tab="history">
+              <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V11M10 21V5M16 21v-7M22 21V8"/></svg>
+              <span id="tabHistory">History</span>
+            </button>
+            <button class="tab active" data-tab="today">
+              <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="4" y="5" width="18" height="17" rx="4"/><path d="M4 10h18M9 3v4M17 3v4"/><path d="M9.5 16.5l2 2 4-4"/></svg>
+              <span id="tabToday">Today</span>
+            </button>
+            <button class="tab" data-tab="settings">
+              <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="13" cy="9" r="4"/><path d="M4.5 22c1.2-4.2 4.4-6.4 8.5-6.4S20.3 17.8 21.5 22"/></svg>
+              <span id="tabSettings">Settings</span>
+            </button>
+          </div>
+          <div class="home-ind"></div>
+          <div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
+          <div class="toast" id="toast"></div>
+        </div>
+      </div>
+      <div class="tabbar-note" id="footNote"></div>
+    </div>
+
+    <!-- NOTES -->
+    <aside class="notes">
+      <h2>Streakora v1.0 · 功能原型说明（中英双语）</h2>
+      <p class="nsub">iOS 原生目标 · Apple HIG · 北美英文用户 · 买断制 $6.99 · 语言/外观/引导页/买断/抹除<b>全部在 App 内「设置」</b></p>
+      <h3>1. Tab 顺序与默认页</h3>
+      <ul>
+        <li>底部三 Tab：<b>历史（左）· 今天（中）· 设置（右）</b>。打开 App 默认落在 <b>今天</b>。</li>
+        <li>每个页面顶部只保留 🎯 <b>Streakora</b> 名称 + 图标 + 标语（不再有与底部 Tab 重名的大标题「今天/历史/设置」）。</li>
+        <li><b>所有功能开关均在 App 内</b>：设置 › 通用 = 语言（中文/EN）+ 外观（浅色/深色）；设置 › 关于 = 重看引导页；设置 › 数据安全 = 买断说明 + 导出/导入 + 抹除。</li>
+      </ul>
+      <h3>2. 今天打卡（两步完成）</h3>
+      <ul>
+        <li>第 1 步打开 App，第 2 步点习惯行右侧<b>圆形按钮</b>即打卡，再点取消。</li>
+        <li>列表底部始终有一条<b>灰度占位引导行</b>（虚线圆 + 灰色「添加习惯」+ 7 点示例），点一下即添加；无习惯时再加一张虚线大卡片。</li>
+        <li>新建/编辑含：标题、内容/详情、图标、颜色、每周目标、提醒时间；<b>习惯数量不限</b>。</li>
+      </ul>
+      <h3>3. 历史页</h3>
+      <ul>
+        <li>顶部<b>累计坚持天数</b>（本 App 真实 + 习惯内迁移）。</li>
+        <li><b>排行榜</b>：每个习惯坚持天数，可按「坚持天数 / 名称 / 创建时间」排序，按时间段分段徽章。</li>
+        <li>保留本周网格、近 8 周、热力图。</li>
+        <li>已移除「你的节奏」「为什么没有连续天数」。</li>
+      </ul>
+      <h3>4. 荣誉室（独立版块）</h3>
+      <ul>
+        <li>展示从其他 App 迁移的坚持，与周统计/热力图隔离。</li>
+        <li><b>智能位置</b>：一旦填写了迁移内容，荣誉室自动<b>移到历史页最上端</b>（累计卡之前）；暂无内容时回到底部并显示占位引导行，方便首次添加。</li>
+        <li>添加项：标题 / 详情 / 坚持天数 / 来源（自定义）/ 习惯类型。</li>
+      </ul>
+      <h3>5. 反竞品与留存风险</h3>
+      <table>
+        <tr><th>竞品吐槽</th><th>Streakora</th></tr>
+        <tr><td>Streaks 断签归零</td><td>周 5/7 即成功、无连续天数</td></tr>
+        <tr><td>Productive 投入后弹付费</td><td>买断 $6.99、第 1 天明示</td></tr>
+        <tr><td>Habitify 必须注册</td><td>永不注册</td></tr>
+        <tr><td>Coach.me 不能改 7 天前</td><td>补录过去 7 天</td></tr>
+      </table>
+      <div class="warn">留存待验证：「降低焦虑」是否等于「改变行为」。重点盯 W1→W2 次周留存、周达标率是否停 4/7、补录率、迁移用户 30 日留存。</div>
+    </aside>
+  </div>
+</div>
+
+<script>
+var DAY=86400000;
+function pad(n){return n<10?'0'+n:''+n;}
+function dkey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function parseKey(k){var p=k.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function startOfWeek(d,ws){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());var diff=(x.getDay()-ws+7)%7;x.setDate(x.getDate()-diff);return x;}
+function addDays(d,n){var x=new Date(d.getTime());x.setDate(x.getDate()+n);return x;}
+function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0)%1000/1000;}
+function isoWeek(d){var t=new Date(d.getFullYear(),d.getMonth(),d.getDate());t.setDate(t.getDate()+3-((t.getDay()+6)%7));var w1=new Date(t.getFullYear(),0,4);return 1+Math.round(((t-w1)/DAY-3+((w1.getDay()+6)%7))/7);}
+var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var MON_zh=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+var WD=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var WD_zh=['周日','周一','周二','周三','周四','周五','周六'];
+var WD3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var WD1=['S','M','T','W','T','F','S'];
+var MON3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var COLORS=['#34C759','#0A84FF','#5E5CE6','#BF5AF2','#FF375F','#FF9F0A','#30B0C7','#FFD60A'];
+var EMOJIS=['💧','🏃','📖','🧘','🛏','✍️','🥗','🎸','💊','🌱','☀️','🧹','🚭','💪','🧠','🎧'];
+
+/* ---------- i18n ---------- */
+var I18N={
+  zh:{
+    today:'今天', history:'历史', settings:'设置',
+    todayKicker:function(d){return WD_zh[d.getDay()]+' · '+MON_zh[d.getMonth()]+d.getDate()+'日';},
+    weekKicker:function(ws){var e=addDays(ws,6);return '第 '+isoWeek(ws)+' 周 · '+MON_zh[ws.getMonth()]+ws.getDate()+'日 – '+MON_zh[e.getMonth()]+e.getDate()+'日';},
+    range:function(a,b){return MON_zh[a.getMonth()]+a.getDate()+'日 – '+MON_zh[b.getMonth()]+b.getDate()+'日';},
+    secured:'达标', habits:'习惯', tapCheck:'点一下即可打卡', wkProg:'本周 {0}/{1}', needMore:'还差 {0} 天达标',
+    missTitle:'漏了一天？不会清零。', missSub:'我们从不显示连续天数。任意习惯每周打满 5 天即算达标，剩下两天随它去。',
+    allSecured:'本周全部达标', allSecuredSub:'本周已锁定，休息日也算数。',
+    nSecured:'{0}/{1} 个习惯已达标', nSecuredSub:'还有 {0} 个差一两天，没关系。',
+    justStart:'本周刚开始', justStartSub:'任意习惯每周打满 5 天就达标。',
+    chipSecured:'✓ 本周达标', chipToday:'今天完成 {0}/{1}',
+    totalK:'累计坚持天数', totalSub:'{0} 天迁移 · 本 App {1} 天',
+    thisWeek:'本周', last8:'近 8 周', heat:'热力图', heatSub:'仅显示本 App 真实打卡，迁移历史单独留存。',
+    less:'少', more:'多', rhythm:'你的节奏', rhythmT:'你最常打卡的日子',
+    rhythmNote:'你在{0}最稳，{1}最松。这是规律，不是失败。',
+    why:'为什么没有连续天数', whyT:'我们故意拿掉了那个数字',
+    whyB:'连续天数会把一次漏打卡变成全盘归零——那正是大多数人放弃的瞬间。Streakora 看「周」不看「链」：周一归零重来，所以糟糕的周二不会连累任何东西。',
+    purT:'一次买断', purS:'$6.99 · 无订阅 · 无内购 · 不玩免费陷阱',
+    genHead:'通用', langT:'语言', langS:'中文 / English', themeLight:'浅色', themeDark:'深色', replayT:'重看引导页',
+    notif:'通知', remT:'每日提醒', remOff:'添加习惯后可开启', remOn:'已开启 · {0}',
+    badgeT:'角标数字', badgeS:'今日未完成数', device:'设备', hapT:'触感反馈', icloudT:'iCloud 同步', icloudS:'私有数据库，属于你的 Apple ID',
+    appT:'外观', monday:'周一', sunday:'周日', wkT:'一周从…开始',
+    int:'集成', healthT:'Apple 健康', healthS:'只读汇总', siriT:'Siri 与快捷指令', siriS:'“嘿 Siri，记录我的阅读”',
+    widgets:'小组件', wg1:'今日', wg2:'本周', wg3:'总进度', data:'数据安全', exportT:'导出备份', importT:'导入备份', exportSub:'选择导出格式', fmtCsv:'导出为 CSV', fmtJson:'导出为 JSON', exportOk:'已导出。', importOk:'已导入 {0} 个习惯。', importErr:'无法导入，请确认是 Streakora 备份文件。', erase:'抹掉本机所有数据',
+    about:'关于', verT:'版本', privPolT:'隐私政策', promiseT:'我们的承诺',
+    backfill:'补录 · 过去 7 天', backfillSub:'点过去 7 天内的某天可补打卡或取消。更早的已锁定。',
+    shareThis:'分享这个习惯', editHabit:'编辑习惯', archive:'归档', unarchive:'取消归档', delHabit:'删除习惯',
+    migT:'历史已导入', migPrev:'此前（天）', migCur:'连续天数', migImp:'导入于', editMig:'编辑导入',
+    shareCard:'分享卡片', shareSub:'改个标题、加句话——列表里的原名不变。',
+    cardTitle:'卡片标题（显示名）', noteOpt:'一句话（可选）', saveImg:'保存图片', openSheet:'打开分享面板',
+    storyNote:'1080×1920 · Story 竖版 · 无社交图标',
+    newHabit:'新建习惯', editHabitT:'编辑习惯', keepTiny:'越小越好，如「读 10 页」而非「多读书」。',
+    nameL:'名称', iconL:'图标', colorL:'颜色', goalL:'每周目标', goalSub:'每周打满几天算达标',
+    importL:'从其他 App 迁移历史（可选）', phTotal:'已坚持总天数，如 237', phCur:'连续天数（可选）', phStart:'开始日期（可选），如 2026-01-15',
+    save:'保存', cancel:'取消', firstSave:'已添加。', updated:'已更新。', nameFirst:'先起个名字。',
+    purchaseT:'一次买断', purchaseSub:'Streakora 在 App Store 一次性付费购买。App 内没有订阅、没有内购、也没有免费分层。',
+    priceNote:'$6.99 一次性 · 各地区价格不同', noSub:'无订阅', noIap:'无内购', noAcct:'无需账号', noAd:'无广告 · 无追踪',
+    privCard:'数据留在你的设备和私有 iCloud。开发者看不到——App 隐私标签填「不收集数据」。',
+    reviewNote:'App Store 审核备注：「Streakora is a habit tracker with a week-based completion model. It uses WidgetKit, local notifications, haptics, SwiftData for local storage, and CloudKit private database for sync. No account is required. No ads. No third-party analytics.」',
+    close:'关闭',
+    ob:[
+      {art:'🌿',t:'没有连续天数。\n没有内疚。',s:'多数打卡 App 会用「漏一天就归零」来惩罚你——那往往就是人们放弃的那一刻。Streakora 根本不数连续天数。'},
+      {art:'🔁',t:'把坚持带过来。\n把过去补上。',s:'把你从别的 App 已经坚持的天数导入进来，并补录最多 7 天漏掉的打卡。任何记录都不会被打上「失败」标签。'},
+      {art:'✓',t:'买一次。\n用一辈子。',s:'Streakora 在 App Store 售价 $6.99——一次购买，无订阅、无内购、无需账号。数据始终归你。'}
+    ],
+    obNext:['继续','继续','添加你的第一个习惯'], obSkip:'跳过', welcome:'欢迎。这里没什么可失去的。',
+    unchecked:'已取消——还剩 {0} 天富余。', weekSecuredToast:'不错——{0} 本周已达标 ✓',
+    todayToast:'本周 {0}/7。还差 {1} 天达标。', backfilled:'已补录 {0}。本周已重算。', removed:'已移除 {0}。',
+    importUpd:'导入已更新。', importRem:'导入已移除。', habitRem:'习惯已移除。数据仍在本地。',
+    archived:'已归档。', unarchived:'已取消归档。', tip:'提示：在设置里开启提醒以允许通知。',
+    langSwitched:'已切换到中文', langSwitchedEn:'Switched to English',
+    weekStartToast:'一周现在从{0}开始。',
+    histSub2:'本机真实打卡 · 累计、每周与坚持排行',
+    tagToday:'无连续天数 · 无内疚', tagHistory:'本机真实打卡 · 累计与坚持排行', tagSettings:'无账号 · 无广告 · 无订阅',
+    rankHead:'排行榜', sortDays:'坚持天数', sortName:'名称', sortCreated:'创建时间',
+    rankDays:'{0} 天坚持', rankSeg1:'一年以上', rankSeg2:'半年以上', rankSeg3:'三个月以上', rankSeg4:'一月以上', rankSeg5:'一月内',
+    honorHead:'荣誉室', honorIntro:'从其他 App 迁移过来的坚持，单独珍藏，不计入本 App 周统计与热力图。',
+    honorEmptyT:'还没有迁移记录', honorEmptyS:'把你从别的 App 已经坚持的天数加进来，作为荣誉保留。',
+    addHonor:'＋ 添加迁移记录', addHonorT:'添加迁移记录', editHonorT:'编辑迁移记录', delHonor:'删除记录',
+    honorSaved:'已添加荣誉记录。', honorUpdated:'已更新荣誉记录。', honorRemoved:'荣誉记录已移除。',
+    habitEmptyT:'还没有习惯', habitEmptyS:'从第一个习惯开始，今天点一下就打卡。',
+    contentL:'内容 / 详情', timeL:'提醒时间', phTime:'如 20:00（可选）',
+    titleL:'标题', srcL:'来源', phSrc:'如 Streaks / Habitify / 其他', typeL:'习惯类型', phType:'如 阅读 / 运动 / 冥想（可选）', daysL:'坚持天数', phDays:'如 237'
+  },
+  en:{
+    today:'Today', history:'History', settings:'Settings',
+    todayKicker:function(d){return WD[d.getDay()]+', '+MON[d.getMonth()]+' '+d.getDate();},
+    weekKicker:function(ws){var e=addDays(ws,6);return 'WEEK '+isoWeek(ws)+' · '+MON3[ws.getMonth()]+' '+ws.getDate()+' – '+MON3[e.getMonth()]+' '+e.getDate();},
+    range:function(a,b){return MON3[a.getMonth()]+' '+a.getDate()+' – '+MON3[b.getMonth()]+' '+b.getDate();},
+    secured:'secured', habits:'Habits', tapCheck:'tap to check in', wkProg:'this week {0}/{1}', needMore:'{0} more to secure the week',
+    missTitle:'Missed a day? Nothing breaks.', missSub:'We never show a streak. Hit 5 of 7 days on any habit and the week counts — the other two are just life.',
+    allSecured:'Every habit secured', allSecuredSub:'Week in the bag. Rest days are allowed.',
+    nSecured:'{0} of {1} habits secured', nSecuredSub:'{0} still need a day or two. Nothing is broken.',
+    justStart:'Week just started', justStartSub:'Check off 5 of 7 days on any habit to secure it.',
+    chipSecured:'✓ Week secured', chipToday:'{0} of {1} done today',
+    totalK:'Total days kept', totalSub:'{0} imported · {1} in Streakora',
+    thisWeek:'This week', last8:'Last 8 weeks', heat:'Heatmap', heatSub:'Real check-ins only — imported history stays separate.',
+    less:'Less', more:'More', rhythm:'Your rhythm', rhythmT:'Days you check off most',
+    rhythmNote:'Strongest on {0}s, lightest on {1}s. A pattern to design around — not a failure.',
+    why:'Why there’s no streak', whyT:'We removed the number on purpose',
+    whyB:'A streak turns one missed day into total loss — the moment most people quit. Streakora counts weeks, not chains: Monday starts fresh at zero, so a rough Tuesday never costs you anything.',
+    purT:'One-time purchase', purS:'$6.99 · no subscription · no in-app purchase · no free-tier tricks',
+    genHead:'General', langT:'Language', langS:'English / 中文', themeLight:'Light', themeDark:'Dark', replayT:'Replay intro',
+    notif:'Notifications', remT:'Daily reminder', remOff:'Off until you add a habit', remOn:'On · {0}',
+    badgeT:'Badge count', badgeS:"Today's unfinished habits", device:'Device', hapT:'Haptics', icloudT:'iCloud sync', icloudS:'Private database, your Apple ID',
+    appT:'Appearance', monday:'Monday', sunday:'Sunday', wkT:'Week starts on',
+    int:'Integrations', healthT:'Apple Health', healthS:'Read-only summary', siriT:'Siri & Shortcuts', siriS:'"Hey Siri, log my reading"',
+    widgets:'Widgets', wg1:'Streakora', wg2:'This week', wg3:'Big progress', data:'Data security', exportT:'Export backup', importT:'Import backup', exportSub:'Choose a format', fmtCsv:'Export as CSV', fmtJson:'Export as JSON', exportOk:'Exported.', importOk:'Imported {0} habit(s).', importErr:'Could not import. Please use a Streakora backup file.', erase:'Erase everything on this device',
+    about:'About', verT:'Version', privPolT:'Privacy policy', promiseT:'Our promise',
+    backfill:'Backfill · past 7 days', backfillSub:'Tap a day within the last 7 to add or remove a check-in. Older days are locked.',
+    shareThis:'Share this habit', editHabit:'Edit habit', archive:'Archive', unarchive:'Unarchive', delHabit:'Delete habit',
+    migT:'History imported', migPrev:'Previously (days)', migCur:'Current streak', migImp:'Imported', editMig:'Edit import',
+    shareCard:'Share card', shareSub:'Edit the title and add a note — your list name stays unchanged.',
+    cardTitle:'Card title (displayName)', noteOpt:'One-line note (optional)', saveImg:'Save image', openSheet:'Open share sheet',
+    storyNote:'1080×1920 · Story size · no social logo',
+    newHabit:'New habit', editHabitT:'Edit habit', keepTiny:'Keep it tiny. "Read 10 pages", not "Read more".',
+    nameL:'NAME', iconL:'ICON', colorL:'COLOR', goalL:'Weekly goal', goalSub:'Days per week to call it done',
+    importL:'IMPORT HISTORY FROM ANOTHER APP (optional)', phTotal:'Total days kept, e.g. 237', phCur:'Current streak (optional)', phStart:'Start date (optional), e.g. 2026-01-15',
+    save:'Save', cancel:'Cancel', firstSave:'Habit added.', updated:'Habit updated.', nameFirst:'Give it a name first.',
+    purchaseT:'One-time purchase', purchaseSub:'Streakora is paid once on the App Store. There is no subscription, no in-app purchase, and no free tier inside the app.',
+    priceNote:'$6.99 one-time · per-region pricing varies', noSub:'No subscription', noIap:'No in-app purchase', noAcct:'No account required', noAd:'No ads · no tracking',
+    privCard:'Your data stays on your device and your private iCloud. The developer cannot see it — App Privacy is filed as Data Not Collected.',
+    reviewNote:'App Store review note: "Streakora is a habit tracker with a week-based completion model. It uses WidgetKit, local notifications, haptics, SwiftData for local storage, and CloudKit private database for sync. No account is required. No ads. No third-party analytics."',
+    close:'Close',
+    ob:[
+      {art:'🌿',t:'No streaks.\nNo guilt.',s:'Most habit apps punish one missed day by resetting everything. That’s the day people quit. Streakora doesn’t count streaks at all.'},
+      {art:'🔁',t:'Bring it along.\nFix the past.',s:'Import the days you already kept from another app, and backfill up to 7 days you missed. Nothing is ever labeled a failure.'},
+      {art:'✓',t:'Pay once.\nUse forever.',s:'Streakora is $6.99 on the App Store — one purchase, no subscription, no in-app purchase, no account. Your data stays yours.'}
+    ],
+    obNext:['Continue','Continue','Start with your first habit'], obSkip:'Skip', welcome:'Welcome. Nothing to lose here.',
+    unchecked:'Unchecked — you still have {0} spare day{1}.', weekSecuredToast:'Nice — {0} is secured for the week ✓',
+    todayToast:'{0}/7 this week. {1} more to secure.', backfilled:'Backfilled {0}. Week recalculated.', removed:'Removed {0}.',
+    importUpd:'Import updated.', importRem:'Import removed.', habitRem:'Habit removed. Data stays local.',
+    archived:'Archived.', unarchived:'Unarchived.', tip:'Tip: enable a reminder from Settings to allow notifications.',
+    langSwitched:'已切换到中文', langSwitchedEn:'Switched to English',
+    weekStartToast:'Week now starts on {0}.',
+    histSub2:'Real check-ins only · totals, weeks & each habit’s streak',
+    tagToday:'No streaks. No guilt.', tagHistory:'Real check-ins · totals & streaks', tagSettings:'No account · no ads · no subscription',
+    rankHead:'Leaderboard', sortDays:'Days kept', sortName:'Name', sortCreated:'Created',
+    rankDays:'{0} days kept', rankSeg1:'1yr+', rankSeg2:'6mo+', rankSeg3:'3mo+', rankSeg4:'1mo+', rankSeg5:'<1mo',
+    honorHead:'Hall of Fame', honorIntro:'Persistence migrated from other apps — kept separately, not counted in weekly stats or heatmap.',
+    honorEmptyT:'No migrated records yet', honorEmptyS:'Add the days you already kept in another app, kept here as honor.',
+    addHonor:'＋  Add a migrated record', addHonorT:'Add migrated record', editHonorT:'Edit migrated record', delHonor:'Delete record',
+    honorSaved:'Honor record added.', honorUpdated:'Honor record updated.', honorRemoved:'Honor record removed.',
+    habitEmptyT:'No habits yet', habitEmptyS:'Start with your first habit — one tap a day checks it in.',
+    contentL:'CONTENT / NOTE', timeL:'Reminder time', phTime:'e.g. 20:00 (optional)',
+    titleL:'TITLE', srcL:'SOURCE', phSrc:'e.g. Streaks / Habitify / Other', typeL:'Habit type', phType:'e.g. Reading / Fitness / Meditation (optional)', daysL:'Days kept', phDays:'e.g. 237'
+  }
+};
+var L=function(){return I18N[S.lang];};
+function T(key){
+  var a=Array.prototype.slice.call(arguments,1);
+  var tbl=L();var s=(tbl&&tbl[key]!=null)?tbl[key]:(I18N.en[key]!=null?I18N.en[key]:key);
+  if(typeof s==='function')return s.apply(null,a);
+  if(a.length&&typeof s==='string')s=s.replace(/\{(\d+)\}/g,function(_,i){return a[+i];});
+  return s;
+}
+
+var KEY='streakora.v1';var S=null;
+function freshState(){
+  var st={onboarded:false,theme:'light',lang:'zh',weekStartOn:1,histSort:'days',
+    settings:{haptic:true,remind:false,reminderTime:'20:00',icloud:true,health:false,siri:true},
+    habits:[],honors:[]};
+  var today=new Date();
+  var seed=[
+    {name:'Drink 2L water',nameZh:'喝 2L 水',emoji:'💧',color:'#30B0C7',p:.72,details:'起床后两杯，饭前一杯。'},
+    {name:'Move for 10 min',nameZh:'动 10 分钟',emoji:'🏃',color:'#34C759',p:.55,details:'快走或拉伸都行。'},
+    {name:'Read 10 pages',nameZh:'读 10 页',emoji:'📖',color:'#5E5CE6',p:.62,details:'纸质书，护眼。',mig:237,cur:237,start:addDays(today,-237)},
+    {name:'5-min breathing',nameZh:'5 分钟呼吸',emoji:'🧘',color:'#BF5AF2',p:.48,details:'睡前放下手机。'},
+    {name:'Lights out by 11',nameZh:'11 点前熄灯',emoji:'🛏',color:'#FF9F0A',p:.5,details:'设好闹钟就别刷了。'}
+  ];
+  seed.forEach(function(s,i){
+    var h={id:'h'+i,name:s.name,nameZh:s.nameZh,emoji:s.emoji,color:s.color,details:s.details||'',
+      createdAt:dkey(addDays(today,-70)),isArchived:false,
+      weeklyGoal:7,successThreshold:5,reminderEnabled:false,reminderTime:'20:00',
+      migratedTotalDays:s.mig||0,migratedCurrentStreak:(s.cur!=null?s.cur:null),
+      migratedStartDate:(s.start?dkey(s.start):null),migrationImportedAt:(s.mig?dkey(today):null),
+      checkIns:{}};
+    for(var k=69;k>=0;k--){var d=addDays(today,-k),key=dkey(d);var wave=.62+.16*Math.sin((k+i*3)/6);if(hash(h.id+key)<s.p*wave)h.checkIns[key]=key+'T20:00';}
+    delete h.checkIns[dkey(today)];if(i<2)h.checkIns[dkey(today)]=dkey(today)+'T20:00';
+    st.habits.push(h);
+  });
+  st.honors=[
+    {id:'hon1',title:'Daily reading',titleZh:'每天阅读',details:'在 Streaks 上连续坚持 237 天，迁移过来作纪念。',days:237,source:'Streaks',type:'阅读',createdAt:dkey(addDays(today,-30))}
+  ];
+  return st;
+}
+function load(){try{var raw=localStorage.getItem(KEY);if(raw){S=JSON.parse(raw);if(S&&S.habits){if(!S.lang)S.lang='zh';if(!S.honors)S.honors=[];if(!S.histSort)S.histSort='days';return;}}}catch(e){}S=freshState();save();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+function weekStart(d){return startOfWeek(d||new Date(),S.weekStartOn);}
+function HN(h){return (S.lang==='zh'&&h.nameZh)?h.nameZh:h.name;}
+function countWeek(h,ws){var n=0;for(var i=0;i<7;i++){if(h.checkIns[dkey(addDays(ws,i))])n++;}return n;}
+function secured(h,ws){return countWeek(h,ws)>=h.successThreshold;}
+function weekStats(ws){var sec=0,total=0,todayDone=0,tk=dkey(new Date());S.habits.forEach(function(h){if(h.isArchived)return;total++;if(secured(h,ws))sec++;if(h.checkIns[tk])todayDone++;});return {sec:sec,total:total,todayDone:todayDone,pct:total?Math.round(sec/total*100):0};}
+function realDays(h){return Object.keys(h.checkIns).length;}
+function totalDays(h){return (h.migratedTotalDays||0)+realDays(h);}
+function allImported(){var t=0;S.habits.forEach(function(h){t+=(h.migratedTotalDays||0);});return t;}
+function allTotal(){var t=0;S.habits.forEach(function(h){t+=totalDays(h);});return t;}
+function badgeCount(){var tk=dkey(new Date()),n=0;S.habits.forEach(function(h){if(h.isArchived)return;if(!h.checkIns[tk])n++;});return n;}
+
+function applyStaticTexts(){
+  document.getElementById('habitsHead').textContent=T('habits');
+  document.getElementById('habitsSub').textContent=T('tapCheck');
+  document.getElementById('missTitle').textContent=T('missTitle');
+  document.getElementById('missSub').textContent=T('missSub');
+  document.getElementById('ringLbl').textContent=T('secured');
+  document.getElementById('histSub').textContent=T('histSub2');
+  document.getElementById('tagToday').textContent=T('tagToday');
+  document.getElementById('tagHistory').textContent=T('tagHistory');
+  document.getElementById('tagSettings').textContent=T('tagSettings');
+  document.getElementById('totalK').textContent=T('totalK');
+  document.getElementById('rankHead').textContent=T('rankHead');
+  document.getElementById('sortDays').textContent=T('sortDays');
+  document.getElementById('sortName').textContent=T('sortName');
+  document.getElementById('sortCreated').textContent=T('sortCreated');
+  document.getElementById('thisWeekHead').textContent=T('thisWeek');
+  document.getElementById('last8Head').textContent=T('last8');
+  document.getElementById('heatHead').textContent=T('heat');
+  document.getElementById('heatSub').textContent=T('heatSub');
+  document.getElementById('legendLess').textContent=T('less');
+  document.getElementById('legendMore').textContent=T('more');
+  document.getElementById('honorHead').textContent=T('honorHead');
+  document.getElementById('setSub').textContent=T('noAcct');
+  document.getElementById('purT').textContent=T('purT');
+  document.getElementById('purS').textContent=T('purS');
+  document.getElementById('notifHead').textContent=T('notif');
+  document.getElementById('remT').textContent=T('remT');
+  document.getElementById('badgeT').textContent=T('badgeT');
+  document.getElementById('badgeS').textContent=T('badgeS');
+  document.getElementById('devHead').textContent=T('device');
+  document.getElementById('hapT').textContent=T('hapT');
+  document.getElementById('icloudT').textContent=T('icloudT');
+  document.getElementById('icloudS').textContent=T('icloudS');
+  document.getElementById('appT').textContent=T('appT');
+  document.getElementById('wkT').textContent=T('wkT');
+  document.getElementById('intHead').textContent=T('int');
+  document.getElementById('healthT').textContent=T('healthT');
+  document.getElementById('healthS').textContent=T('healthS');
+  document.getElementById('siriT').textContent=T('siriT');
+  document.getElementById('siriS').textContent=T('siriS');
+  document.getElementById('wgHead').textContent=T('widgets');
+  document.getElementById('wg1T').textContent=T('wg1');
+  document.getElementById('wg2T').textContent=T('wg2');
+  document.getElementById('wg3T').textContent=T('wg3');
+  document.getElementById('dataHead').textContent=T('data');
+  document.getElementById('exportT').textContent=T('exportT');
+  document.getElementById('importT').textContent=T('importT');
+  document.getElementById('btnResetIn').textContent=T('erase');
+  document.getElementById('aboutHead').textContent=T('about');
+  document.getElementById('verT').textContent=T('verT');
+  document.getElementById('privPolT').textContent=T('privPolT');
+  document.getElementById('promiseT').textContent=T('promiseT');
+  document.getElementById('tabToday').textContent=T('today');
+  document.getElementById('tabHistory').textContent=T('history');
+  document.getElementById('tabSettings').textContent=T('settings');
+  document.getElementById('footNote').textContent=(S.lang==='zh')?'点右侧圆钮打卡 · 点名称进详情（补录 / 迁移 / 分享）· 底部切换 Tab':'Tap the right circle to check in · tap the name for detail (backfill / import / share) · switch tabs below';
+  document.getElementById('weekStartVal').textContent=(S.weekStartOn===0)?T('sunday'):T('monday');
+  syncSegs();
+}
+function syncSegs(){
+  document.getElementById('genHead').textContent=T('genHead');
+  document.getElementById('langT').textContent=T('langT');
+  document.getElementById('langS').textContent=T('langS');
+  document.getElementById('replayT').textContent=T('replayT');
+  var lz=document.getElementById('langZh'),le=document.getElementById('langEn');
+  lz.textContent='中文';le.textContent='EN';
+  lz.classList.toggle('on',S.lang==='zh');le.classList.toggle('on',S.lang==='en');
+  var tl=document.getElementById('thLight'),td=document.getElementById('thDark');
+  tl.textContent=T('themeLight');td.textContent=T('themeDark');
+  tl.classList.toggle('on',S.theme!=='dark');td.classList.toggle('on',S.theme==='dark');
+}
+
+function renderToday(){
+  var now=new Date(),ws=weekStart(now),st=weekStats(ws);
+  document.getElementById('todayDate').textContent=T('todayKicker',now);
+  document.getElementById('weekRange').textContent=T('weekKicker',ws);
+  document.getElementById('ringNum').textContent=st.sec+'/'+st.total;
+  var C=2*Math.PI*41;document.getElementById('ringArc').setAttribute('stroke-dashoffset',String(C*(1-(st.total?st.sec/st.total:0))));
+  var title,sub;
+  if(st.sec===st.total&&st.total>0){title=T('allSecured');sub=T('allSecuredSub');}
+  else if(st.sec>0){title=T('nSecured',st.sec,st.total);sub=T('nSecuredSub',st.total-st.sec);}
+  else{title=T('justStart');sub=T('justStartSub');}
+  document.getElementById('weekTitle').textContent=title;
+  document.getElementById('weekSub').textContent=sub;
+  document.getElementById('weekChip').innerHTML=(st.sec===st.total&&st.total>0)?('<span class="chip">'+T('chipSecured')+'</span>'):('<span class="chip gray">'+T('chipToday',st.todayDone,st.total)+'</span>');
+  var g=document.getElementById('habitGroup');g.innerHTML='';
+  var active=S.habits.filter(function(h){return !h.isArchived;});
+  if(active.length===0){
+    var ph=document.createElement('div');ph.className='empty-ph';
+    ph.innerHTML='<div class="ep-ico">＋</div><div class="ep-t">'+T('habitEmptyT')+'</div><div class="ep-s">'+T('habitEmptyS')+'</div>';
+    ph.addEventListener('click',function(){openHabitForm();});
+    g.appendChild(ph);
+  }else{
+    var idx=0;
+    active.forEach(function(h){
+      idx++;
+      var c=countWeek(h,ws),sec=secured(h,ws),tk=dkey(now),doneNow=!!h.checkIns[tk];
+      var row=document.createElement('div');row.className='hrow';row.style.setProperty('--hc',h.color);
+      var dots='';for(var i=0;i<7;i++){var d=addDays(ws,i),k=dkey(d),cls='';if(h.checkIns[k])cls+=' done';if(k===tk)cls+=' today';dots+='<i class="'+cls+'"></i>';}
+      var remain=Math.max(0,h.successThreshold-c);
+      var prog=T('wkProg',c,h.weeklyGoal);
+      var subTxt=sec?('<span class="pill-sec">✓ '+T('secured')+'</span><span class="h-muted"> · '+prog+'</span>'):(prog+' · '+T('needMore',remain));
+      var det=(h.details)?('<div class="h-details">'+h.details+'</div>'):'';
+      row.innerHTML='<div class="h-idx">'+idx+'</div>'+
+        '<div class="h-main" data-open="'+h.id+'"><div class="h-name">'+h.emoji+' '+HN(h)+'</div>'+det+'<div class="h-sub">'+subTxt+'</div><div class="dotgrid">'+dots+'</div></div>'+
+        '<div class="check'+(doneNow?' done':'')+'" data-check="'+h.id+'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 6"/></svg></div>';
+      g.appendChild(row);
+    });
+  }
+  if(active.length>0){
+    var add=document.createElement('div');add.className='ghost-row';add.id='addHabitBtn';
+    add.innerHTML='<div class="ghost-circle">＋</div><div class="ghost-main"><div class="ghost-name">'+(S.lang==='zh'?'添加习惯':'Add a habit')+'</div><div class="ghost-hint">'+(S.lang==='zh'?'点一下，两步完成打卡':'One tap to check in')+'</div><div class="ghost-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="chev">›</div>';
+    add.addEventListener('click',function(){openHabitForm();});
+    g.appendChild(add);
+  }
+  g.querySelectorAll('[data-check]').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();toggle(b.getAttribute('data-check'));});});
+  g.querySelectorAll('[data-open]').forEach(function(b){b.addEventListener('click',function(){openDetail(b.getAttribute('data-open'));});});
+}
+function toggle(id){
+  var h=null;S.habits.forEach(function(x){if(x.id===id)h=x;});if(!h)return;
+  var tk=dkey(new Date());
+  if(h.checkIns[tk]){delete h.checkIns[tk];save();renderAll();toast(T('unchecked',(h.successThreshold-countWeek(h,weekStart())),(h.successThreshold-countWeek(h,weekStart())===1?'':'s')));}
+  else{h.checkIns[tk]=tk+'T'+pad(new Date().getHours())+':'+pad(new Date().getMinutes());save();renderAll();if(navigator.vibrate)navigator.vibrate(12);
+    var c=countWeek(h,weekStart());if(c>=h.successThreshold)toast(T('weekSecuredToast',HN(h)));else toast(T('todayToast',c,(h.successThreshold-c)));}
+}
+
+function renderHistory(){
+  var now=new Date(),ws=weekStart(now),tk=dkey(now);
+  document.getElementById('totalDays').textContent=allTotal().toLocaleString();
+  var imp=allImported(),real=allTotal()-imp;
+  document.getElementById('totalSub').textContent=T('totalSub',imp,real);
+  var habits=S.habits.filter(function(h){return !h.isArchived;});
+  var sort=S.histSort||'days';
+  habits.sort(function(a,b){
+    if(sort==='name')return HN(a).localeCompare(HN(b));
+    if(sort==='created')return (a.createdAt<b.createdAt?-1:1);
+    return totalDays(b)-totalDays(a);
+  });
+  var rk=document.getElementById('habitRank');rk.innerHTML='';
+  habits.forEach(function(h){
+    var d=totalDays(h);
+    var seg=d>=365?T('rankSeg1'):(d>=180?T('rankSeg2'):(d>=90?T('rankSeg3'):(d>=30?T('rankSeg4'):T('rankSeg5'))));
+    var row=document.createElement('div');row.className='row';row.style.cursor='pointer';
+    row.innerHTML='<div style="flex:1;min-width:0"><div class="r-title" style="font-size:15.5px">'+h.emoji+' '+HN(h)+'</div>'+(h.details?'<div class="r-sub">'+h.details+'</div>':'')+'<div style="margin-top:6px"><span class="src-badge">'+seg+'</span></div></div>'+
+      '<div class="days-block" style="background:'+h.color+'"><span class="db-n">'+d+'</span><span class="db-u">'+(S.lang==='zh'?'天':'days')+'</span></div>';
+    row.addEventListener('click',function(){openDetail(h.id);});
+    rk.appendChild(row);
+  });
+  var head='<div class="wgrid-head"><div class="hname">'+T('habits')+'</div>';
+  for(var i=0;i<7;i++){var d=addDays(ws,i);head+='<div class="'+(dkey(d)===tk?'cur':'')+'">'+WD1[d.getDay()]+'<br>'+d.getDate()+'</div>';}
+  head+='</div>';
+  var rows='';
+  S.habits.forEach(function(h){if(h.isArchived)return;
+    rows+='<div class="wrow'+(secured(h,ws)?' secured':'')+'" style="--hc:'+h.color+'"><div class="wn">'+h.emoji+' '+HN(h)+'</div>';
+    for(var i=0;i<7;i++){var d=addDays(ws,i),k=dkey(d),cls='';if(h.checkIns[k])cls='done';else if(d>now)cls='future';if(k===tk)cls+=' today';rows+='<div class="wcell"><i class="'+cls+'"></i></div>';}
+    rows+='</div>';});
+  document.getElementById('weekGrid').innerHTML=head+rows+'<div class="legend"><span><b style="background:var(--accent)"></b>'+T('secured')+'</span><span><b style="background:var(--fill)"></b>'+(S.lang==='zh'?'未打卡':'Not yet')+'</span><span><b style="background:transparent;box-shadow:0 0 0 1.5px var(--label3) inset"></b>'+(S.lang==='zh'?'未来':'Future')+'</span><span><b style="background:transparent;box-shadow:0 0 0 2px var(--label) inset"></b>'+(S.lang==='zh'?'今天':'Today')+'</span></div>';
+  var pw=document.getElementById('pastWeeks');pw.innerHTML='';
+  for(var w=0;w<8;w++){var s=addDays(ws,-7*w),e=addDays(s,6),st2=weekStats(s);
+    var row=document.createElement('div');row.className='row';
+    row.innerHTML='<div style="flex:1"><div class="r-title" style="font-size:15px">'+T('range',s,e)+'</div><div class="r-sub">'+T('weekKicker',s).replace(/^[^·]+· /,'')+'</div></div><div class="r-value" style="font-weight:700;color:'+(st2.pct>=70?'var(--accent)':'var(--label2)')+'">'+st2.pct+'%</div>';
+    pw.appendChild(row);}
+  var hm=document.getElementById('heatmap');hm.innerHTML='';
+  for(var k=69;k>=0;k--){var d=addDays(now,-k),key=dkey(d),cnt=0;S.habits.forEach(function(h){if(h.isArchived)return;if(h.checkIns[key])cnt++;});
+    var op=cnt===0?'var(--fill)':(cnt<=1?'color-mix(in srgb,var(--accent) 38%,var(--fill))':(cnt<=3?'color-mix(in srgb,var(--accent) 68%,var(--fill))':'var(--accent)'));
+    var cell=document.createElement('i');cell.style.background=op;cell.title=(S.lang==='zh'?('第'+isoWeek(d)+'周 · '):('week '+isoWeek(d)+' · '))+key+' · '+cnt+(S.lang==='zh'?' 个习惯':' habit'+(cnt===1?'':'s'));hm.appendChild(cell);}
+  document.querySelectorAll('#histSort button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-s')===(S.histSort||'days'));b.onclick=function(){S.histSort=b.getAttribute('data-s');save();renderHistory();};});
+  // 荣誉室：有迁移内容时移到历史页最上端（累计卡之前）；无内容时留在底部并展示占位引导
+  var honorSection=document.getElementById('honorSection');
+  var totalCard=document.querySelector('#page-history .total-card');
+  if(honorSection&&totalCard){
+    if(S.honors&&S.honors.length) honorSection.parentNode.insertBefore(honorSection,totalCard);
+    else honorSection.parentNode.appendChild(honorSection);
+  }
+  renderHonors();
+}
+
+function renderSettings(){
+  document.getElementById('remindSub').textContent=(S.habits.length&&S.settings.remind)?T('remOn',S.settings.reminderTime):T('remOff');
+  document.getElementById('badgeVal').textContent=badgeCount();
+  document.querySelectorAll('.sw[data-sw]').forEach(function(b){var k=b.getAttribute('data-sw');b.classList.toggle('on',!!S.settings[k]);
+    b.onclick=function(){S.settings[k]=!S.settings[k];save();b.classList.toggle('on',S.settings[k]);renderSettings();};});
+  var now=new Date(),ws=weekStart(now),st=weekStats(ws),tk=dkey(now);
+  document.getElementById('wSmallPct').textContent=st.pct+'%';
+  var sl=document.getElementById('wSmallList');sl.innerHTML='';
+  S.habits.filter(function(h){return !h.isArchived;}).slice(0,3).forEach(function(h){var done=!!h.checkIns[tk];sl.innerHTML+='<div class="w-line"><div class="w-dot'+(done?' done':'')+'" style="'+(done?'background:'+h.color+';border-color:'+h.color:'')+'"></div>'+h.emoji+' '+HN(h)+'</div>';});
+  document.getElementById('wMedCount').textContent=st.sec+'/'+st.total;
+  var ml=document.getElementById('wMedList');ml.innerHTML='';
+  S.habits.filter(function(h){return !h.isArchived;}).slice(0,4).forEach(function(h){var dots='';for(var i=0;i<7;i++){var d=addDays(ws,i),k=dkey(d);dots+='<div style="width:12px;height:12px;border-radius:50%;'+(h.checkIns[k]?'background:'+h.color:'background:var(--fill)')+(k===tk?'box-shadow:0 0 0 1.5px var(--label)':'')+'"></div>';}
+    ml.innerHTML+='<div style="display:flex;align-items:center;gap:8px;margin:7px 0"><div style="width:52px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+HN(h)+'</div><div style="display:flex;gap:4px">'+dots+'</div></div>';});
+  document.getElementById('wBigCount').textContent=st.sec+'/'+st.total;
+  var bl=document.getElementById('wBigList');bl.innerHTML='';
+  S.habits.filter(function(h){return !h.isArchived;}).slice(0,6).forEach(function(h){var c=countWeek(h,ws);bl.innerHTML+='<div style="display:flex;align-items:center;gap:8px;margin:6px 0"><div style="width:60px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h.emoji+' '+HN(h)+'</div><div class="w-bar"><i style="width:'+Math.round(c/7*100)+'%;background:'+h.color+'"></i></div><div style="font-size:10px;color:var(--label2)">'+c+'/7</div></div>';});
+}
+
+function drawStory(cv,opts){
+  var h=opts.habit,name=opts.name,note=opts.note;
+  var ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0FAFA0');g.addColorStop(1,'#0B6E96');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  function rr(x,y,w,hh,r,f){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+hh,r);ctx.arcTo(x+w,y+hh,x,y+hh,r);ctx.arcTo(x,y+hh,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();ctx.fillStyle=f;ctx.fill();}
+  rr(70,70,W-140,H-140,64,'#FFFFFF');
+  var F='-apple-system,"PingFang SC","Segoe UI",Roboto,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillStyle='#0FAFA0';ctx.font='800 30px '+F;ctx.fillText('● STREAKORA',W/2,170);
+  ctx.fillStyle='#111114';ctx.font='800 60px '+F;ctx.fillText(name,W/2,300);
+  ctx.fillStyle='#6B6B70';ctx.font='700 26px '+F;ctx.fillText((S.lang==='zh'?'本周':'THIS WEEK'),W/2,380);
+  ctx.fillStyle='#111114';ctx.font='800 150px '+F;ctx.fillText(countWeek(h,weekStart())+'/'+(S.lang==='zh'?'7':h.weeklyGoal),W/2,540);
+  ctx.strokeStyle='#E6E6EA';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(140,600);ctx.lineTo(W-140,600);ctx.stroke();
+  ctx.fillStyle='#111114';ctx.font='800 58px '+F;ctx.fillText(allTotal().toLocaleString()+(S.lang==='zh'?' 天':' days'),W/2,700);
+  ctx.fillStyle='#6B6B70';ctx.font='600 28px '+F;ctx.fillText((S.lang==='zh'?'累计 · 含 '+allImported()+' 天迁移':allImported()+' imported'),W/2,748);
+  var c=countWeek(h,weekStart());ctx.fillStyle='#6B6B70';ctx.font='700 24px '+F;ctx.fillText((S.lang==='zh'?'本周打卡天':'THIS WEEK’S DAYS'),W/2,850);
+  for(var i=0;i<7;i++){var x=W/2-210+i*70;ctx.beginPath();ctx.arc(x,920,24,0,7);if(i<c){ctx.fillStyle=h.color;ctx.fill();}else{ctx.strokeStyle='#D8D8DE';ctx.lineWidth=4;ctx.stroke();}}
+  if(note){ctx.fillStyle='#3A3A3F';ctx.font='600 38px '+F;ctx.fillText('“'+note+'”',W/2,1080);}
+  ctx.fillStyle='#0FAFA0';ctx.font='800 34px '+F;ctx.fillText((S.lang==='zh'?'无连续天数 · 无内疚':'No streaks. No guilt.'),W/2,H-130);
+  ctx.fillStyle='#A8A8AE';ctx.font='700 24px '+F;ctx.fillText('STREAKORA',W/2,H-90);
+}
+
+var ov=document.getElementById('overlay'),sheet=document.getElementById('sheet');
+function openSheet(html,full){sheet.className='sheet'+(full?' full':'');sheet.innerHTML='<div class="grab"></div><div class="sheet-body">'+html+'</div>';ov.classList.add('show');}
+function closeSheet(){ov.classList.remove('show');setTimeout(function(){sheet.innerHTML='';},320);}
+ov.addEventListener('click',function(e){if(e.target===ov)closeSheet();});
+
+function openDetail(id){
+  var h=null;S.habits.forEach(function(x){if(x.id===id)h=x;});if(!h)return;
+  var ws=weekStart(),c=countWeek(h,ws),sec=secured(h,ws);
+  var mig='';
+  if(h.migratedTotalDays){mig='<div class="migrate-card"><div class="mc-t">'+T('migT')+'</div>'+
+    '<div class="mc-grid">'+
+    '<div class="mc-cell"><div class="v">'+(h.migratedTotalDays||0)+'</div><div class="l">'+T('migPrev')+'</div></div>'+
+    '<div class="mc-cell"><div class="v">'+(h.migratedCurrentStreak!=null?h.migratedCurrentStreak:'–')+'</div><div class="l">'+T('migCur')+'</div></div>'+
+    '<div class="mc-cell"><div class="v" style="font-size:14px;font-weight:700;margin-top:6px">'+(h.migrationImportedAt?fmtShort(h.migrationImportedAt):'')+'</div><div class="l">'+T('migImp')+'</div></div>'+
+    '</div><div class="mc-edit" data-editmig>'+T('editMig')+'</div></div>';}
+  var now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  var first=new Date(y,m,1),startDow=(first.getDay()-S.weekStartOn+7)%7;
+  var days=new Date(y,m+1,0).getDate();
+  var cal='<div class="cal">';
+  var order=S.weekStartOn===0?[0,1,2,3,4,5,6]:[1,2,3,4,5,6,0];
+  order.forEach(function(d){cal+='<div class="cdow">'+(S.lang==='zh'?WD_zh[d][1]:WD3[d][0])+'</div>';});
+  for(var b=0;b<startDow;b++)cal+='<div></div>';
+  for(var day=1;day<=days;day++){var d=new Date(y,m,day),k=dkey(d),cls='cday';var diff=Math.round((now-d)/DAY);
+    if(d>now)cls+=' future';else if(diff>7)cls+=' off';else cls+=' backfillable';
+    if(h.checkIns[k])cls+=' done';if(dkey(d)===dkey(now))cls+=' today';
+    cal+='<div class="'+cls+'" data-day="'+k+'">'+day+'</div>';}
+  cal+='</div>';
+  var last4='';
+  for(var w=0;w<4;w++){var s=addDays(ws,-7*w),cc=countWeek(h,s);last4+='<div class="row"><div class="r-title" style="font-size:14.5px">'+(w===0?T('thisWeek'):T('range',s,addDays(s,6)).split(' – ')[0])+'</div><div class="spacer"></div><div class="r-value" style="font-weight:700;color:'+(cc>=h.successThreshold?'var(--accent)':'var(--label2)')+'">'+cc+'/'+h.weeklyGoal+(cc>=h.successThreshold?' ✓':'')+'</div></div>';}
+  openSheet(
+    '<h3>'+h.emoji+' '+HN(h)+'</h3>'+
+    '<p class="sh-sub">'+c+'/'+h.weeklyGoal+(S.lang==='zh'?' 天本周 · 目标 ':' days this week · goal ')+h.successThreshold+'. '+(sec?(S.lang==='zh'?'已达标，多打是额外奖励。':(HN(h).split(' ')[0]+' is already secured — bonus from here.')):(h.successThreshold-c)+(S.lang==='zh'?' 天达标。':' more day'+(h.successThreshold-c===1?'':'s')+' secures the week.'))+'</p>'+
+    mig+
+    '<div class="section-head" style="margin:8px 12px 6px">'+T('backfill')+'</div>'+
+    '<div class="card" style="padding:12px">'+cal+'<div style="font-size:11.5px;color:var(--label2);margin-top:8px">'+T('backfillSub')+'</div></div>'+
+    '<div class="group" style="margin-top:14px">'+last4+'</div>'+
+    '<div class="btn-stack">'+
+      '<button class="btn-lg" id="dShare">'+T('shareThis')+'</button>'+
+      '<button class="btn-lg sec" id="dEdit">'+T('editHabit')+'</button>'+
+      '<button class="btn-lg sec" id="dArchive">'+(h.isArchived?T('unarchive'):T('archive'))+'</button>'+
+      '<button class="btn-lg danger" id="dDelete">'+T('delHabit')+'</button>'+
+    '</div>'
+  );
+  if(mig){sheet.querySelector('[data-editmig]').onclick=function(){openMigrate(h.id);};}
+  sheet.querySelectorAll('[data-day]').forEach(function(cell){cell.onclick=function(){if(cell.classList.contains('future')||cell.classList.contains('off'))return;var k=cell.getAttribute('data-day');if(h.checkIns[k])delete h.checkIns[k];else h.checkIns[k]=k+'T12:00';save();openDetail(h.id);renderAll();toast(h.checkIns[k]?T('backfilled',fmtShort(k)):T('removed',fmtShort(k)));};});
+  document.getElementById('dShare').onclick=function(){openShare(h);};
+  document.getElementById('dEdit').onclick=function(){openHabitForm(h.id);};
+  document.getElementById('dArchive').onclick=function(){h.isArchived=!h.isArchived;save();closeSheet();renderAll();toast(h.isArchived?T('archived'):T('unarchived'));};
+  document.getElementById('dDelete').onclick=function(){S.habits=S.habits.filter(function(x){return x.id!==h.id;});save();closeSheet();renderAll();toast(T('habitRem'));};
+}
+function fmtShort(k){var d=parseKey(k);return (S.lang==='zh'?(MON_zh[d.getMonth()]+d.getDate()+'日'):(MON3[d.getMonth()]+' '+d.getDate()));}
+
+function openShare(h){
+  var opts={habit:h,name:h.displayName||HN(h),note:''};
+  openSheet('<h3>'+T('shareCard')+'</h3><p class="sh-sub">'+T('shareSub')+'</p>'+
+    '<div class="field"><label>'+T('cardTitle')+'</label><input type="text" id="fTitle" value="'+opts.name+'" placeholder="e.g. Read 30 pages"></div>'+
+    '<div class="field"><label>'+T('noteOpt')+'</label><input type="text" id="fNote" placeholder="'+(S.lang==='zh'?'如：放下手机，翻开书':'e.g. Phone away, book open')+'"></div>'+
+    '<div class="canvas-wrap"><canvas id="cvShare" width="1080" height="1920"></canvas></div>'+
+    '<div class="btn-stack" style="margin-top:14px"><button class="btn-lg" id="shSave">'+T('saveImg')+'</button><button class="btn-lg sec" id="shShare">'+T('openSheet')+'</button></div>'+
+    '<div style="font-size:11px;color:var(--label3);margin-top:10px">'+T('storyNote')+'</div>');
+  function redraw(){opts.name=(document.getElementById('fTitle').value||HN(h));opts.note=document.getElementById('fNote').value;drawStory(document.getElementById('cvShare'),opts);}
+  redraw();
+  document.getElementById('fTitle').addEventListener('input',redraw);
+  document.getElementById('fNote').addEventListener('input',redraw);
+  document.getElementById('shSave').onclick=function(){try{document.getElementById('cvShare').toBlob(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='streakora-'+h.id+'.png';a.click();toast('✓');});}catch(e){toast('✓');}};
+  document.getElementById('shShare').onclick=function(){toast(S.lang==='zh'?'将打开系统分享面板。':'System share sheet would open here.');};
+}
+
+var draft={emoji:'🌱',color:COLORS[0],goal:7,threshold:5,mig:{total:0,cur:'',start:''}};
+function openHabitForm(id){
+  var h=null;if(id)S.habits.forEach(function(x){if(x.id===id)h=x;});
+  draft={emoji:h?h.emoji:'🌱',color:h?h.color:COLORS[0],goal:h?h.weeklyGoal:7,threshold:h?h.successThreshold:5,
+    mig:{total:h?h.migratedTotalDays:0,cur:h?(h.migratedCurrentStreak!=null?h.migratedCurrentStreak:''):'',start:h?h.migratedStartDate:''}};
+  var sw='';COLORS.forEach(function(c){sw+='<button class="swatch'+(c===draft.color?' sel':'')+'" data-c="'+c+'" style="background:'+c+'"></button>';});
+  var em='';EMOJIS.forEach(function(e){em+='<button class="emoji-chip'+(e===draft.emoji?' sel':'')+'" data-e="'+e+'">'+e+'</button>';});
+  openSheet(
+    '<h3>'+(id?T('editHabitT'):T('newHabit'))+'</h3><p class="sh-sub">'+T('keepTiny')+'</p>'+
+    '<div class="field"><label>'+T('nameL')+'</label><input type="text" id="fName" placeholder="'+(S.lang==='zh'?'如：拉伸 2 分钟':'e.g. Stretch for 2 min')+'" value="'+(h?HN(h):'')+'"></div>'+
+    '<div class="field"><label>'+T('contentL')+'</label><input type="text" id="fDetails" placeholder="'+(S.lang==='zh'?'如：起床后两杯，饭前一杯':'e.g. two glasses after waking')+'" value="'+(h?(h.details||''):'')+'"></div>'+
+    '<div class="field"><label>'+T('iconL')+'</label><div class="emoji-row">'+em+'</div></div>'+
+    '<div class="field"><label>'+T('colorL')+'</label><div class="swatch-row">'+sw+'</div></div>'+
+    '<div class="stepper"><div><div style="font-size:15.5px;font-weight:600">'+T('goalL')+'</div><div style="font-size:12px;color:var(--label2);margin-top:2px">'+T('goalSub')+'</div></div><button class="step-btn" id="gMinus">−</button><div class="sv" id="gVal">'+draft.goal+'</div><button class="step-btn" id="gPlus">+</button></div>'+
+    '<div class="field"><label>'+T('timeL')+'</label><input type="time" id="fTime" value="'+(h&&h.reminderTime?h.reminderTime:'20:00')+'"></div>'+
+    (id?'':'<div class="field" id="migField"><label>'+T('importL')+'</label>'+
+      '<input type="number" id="mTotal" placeholder="'+T('phTotal')+'" value="'+(draft.mig.total||'')+'">'+
+      '<div style="height:8px"></div><input type="text" id="mCur" placeholder="'+T('phCur')+'" value="'+(draft.mig.cur||'')+'">'+
+      '<div style="height:8px"></div><input type="text" id="mStart" placeholder="'+T('phStart')+'" value="'+(draft.mig.start||'')+'"></div>')+
+    '<div class="btn-stack"><button class="btn-lg" id="fSave">'+T('save')+'</button><button class="btn-lg sec" id="fCancel">'+T('cancel')+'</button></div>'
+  );
+  var body=sheet.querySelector('.sheet-body');
+  body.querySelectorAll('[data-c]').forEach(function(b){b.onclick=function(){draft.color=b.getAttribute('data-c');body.querySelectorAll('[data-c]').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');};});
+  body.querySelectorAll('[data-e]').forEach(function(b){b.onclick=function(){draft.emoji=b.getAttribute('data-e');body.querySelectorAll('[data-e]').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');};});
+  document.getElementById('gMinus').onclick=function(){draft.goal=Math.max(1,draft.goal-1);document.getElementById('gVal').textContent=draft.goal;};
+  document.getElementById('gPlus').onclick=function(){draft.goal=Math.min(7,draft.goal+1);document.getElementById('gVal').textContent=draft.goal;};
+  document.getElementById('fCancel').onclick=closeSheet;
+  document.getElementById('fSave').onclick=function(){
+    var n=document.getElementById('fName').value.trim();if(!n){toast(T('nameFirst'));return;}
+    var zh=null;if(S.lang==='zh')zh=n;
+    var det=document.getElementById('fDetails').value.trim();
+    var tm=document.getElementById('fTime')?document.getElementById('fTime').value:'';
+    if(id){h.name=n;if(zh)h.nameZh=zh;h.details=det;h.reminderTime=tm||null;h.reminderEnabled=!!tm;h.emoji=draft.emoji;h.color=draft.color;h.weeklyGoal=draft.goal;h.successThreshold=Math.min(draft.threshold,draft.goal);}
+    else{
+      var mig={total:0,cur:null,start:null};
+      if(document.getElementById('mTotal')&&document.getElementById('mTotal').value){mig.total=parseInt(document.getElementById('mTotal').value,10)||0;
+        var mcv=document.getElementById('mCur').value.trim();mig.cur=mcv?(parseInt(mcv,10)||null):null;
+        var msv=document.getElementById('mStart').value.trim();mig.start=/^\d{4}-\d{2}-\d{2}$/.test(msv)?msv:null;}
+      S.habits.push({id:'h'+Date.now(),name:n,nameZh:zh,emoji:draft.emoji,color:draft.color,details:det,createdAt:dkey(new Date()),isArchived:false,
+        weeklyGoal:draft.goal,successThreshold:Math.min(5,draft.goal),reminderEnabled:!!tm,reminderTime:tm||null,
+        migratedTotalDays:mig.total,migratedCurrentStreak:mig.cur,migratedStartDate:mig.start,migrationImportedAt:(mig.total?dkey(new Date()):null),checkIns:{}});
+      if(S.habits.length===1){toast(T('tip'));}
+    }
+    save();closeSheet();renderAll();toast(id?T('updated'):T('firstSave'));
+  };
+  setTimeout(function(){var i=document.getElementById('fName');if(i)i.focus();},350);
+}
+function renderHonors(){
+  document.getElementById('honorIntro').textContent=T('honorIntro');
+  var list=document.getElementById('honorList');list.innerHTML='';
+  var hs=(S.honors&&S.honors.length)?S.honors.slice().sort(function(a,b){return b.days-a.days;}):[];
+  if(hs.length===0){
+    var ph=document.createElement('div');ph.className='empty-ph';
+    ph.innerHTML='<div class="ep-ico">🏆</div><div class="ep-t">'+T('honorEmptyT')+'</div><div class="ep-s">'+T('honorEmptyS')+'</div>';
+    ph.addEventListener('click',function(){openHonorForm();});
+    list.appendChild(ph);
+  }else{
+    hs.forEach(function(o){
+      var card=document.createElement('div');card.className='honor-card';card.style.cursor='pointer';
+      var meta='<span class="src-badge">'+(S.lang==='zh'?'来自 ':'from ')+o.source+'</span>'+(o.type?'<span class="type-badge">'+o.type+'</span>':'');
+      card.innerHTML='<div class="honor-ico">🏆</div><div class="honor-main"><div class="honor-title">'+(S.lang==='zh'?(o.titleZh||o.title):o.title)+'</div><div class="honor-meta">'+meta+'</div><div class="honor-days">'+o.days+' '+(S.lang==='zh'?'天':'days')+'</div>'+(o.details?'<div class="honor-details">'+o.details+'</div>':'')+'</div>';
+      card.addEventListener('click',function(){openHonorForm(o.id);});
+      list.appendChild(card);
+    });
+  }
+  var ghost=document.createElement('div');ghost.className='ghost-row honor-ghost';
+  ghost.innerHTML='<div class="ghost-circle">＋</div><div class="ghost-main"><div class="ghost-name">'+T('addHonor')+'</div><div class="ghost-hint">'+(S.lang==='zh'?'标题 / 详情 / 坚持天数 / 来源':'title / details / days / source')+'</div></div><div class="chev">›</div>';
+  ghost.addEventListener('click',function(){openHonorForm();});
+  list.appendChild(ghost);
+}
+function openHonorForm(id){
+  var o=null;if(id)S.honors.forEach(function(x){if(x.id===id)o=x;});
+  openSheet(
+    '<h3>'+(id?T('editHonorT'):T('addHonorT'))+'</h3><p class="sh-sub">'+(S.lang==='zh'?'从其他 App 迁移过来的坚持，作为荣誉保留。':'Persistence migrated from another app, kept here as honor.')+'</p>'+
+    '<div class="field"><label>'+T('titleL')+'</label><input type="text" id="hTitle" placeholder="'+(S.lang==='zh'?'如：每天阅读':'e.g. Daily reading')+'" value="'+(o?(S.lang==='zh'?(o.titleZh||o.title):o.title):'')+'"></div>'+
+    '<div class="field"><label>'+T('contentL')+'</label><input type="text" id="hDetails" placeholder="'+(S.lang==='zh'?'备注（可选）':'Note (optional)')+'" value="'+(o?o.details:'')+'"></div>'+
+    '<div class="field"><label>'+T('daysL')+'</label><input type="number" id="hDays" placeholder="'+T('phDays')+'" value="'+(o?o.days:'')+'"></div>'+
+    '<div class="field"><label>'+T('srcL')+'</label><input type="text" id="hSource" placeholder="'+T('phSrc')+'" value="'+(o?o.source:'')+'"></div>'+
+    '<div class="field"><label>'+T('typeL')+'</label><input type="text" id="hType" placeholder="'+T('phType')+'" value="'+(o?o.type:'')+'"></div>'+
+    '<div class="btn-stack"><button class="btn-lg" id="hSave">'+T('save')+'</button>'+(id?'<button class="btn-lg danger" id="hDelete">'+T('delHonor')+'</button>':'')+'<button class="btn-lg sec" id="hCancel">'+T('cancel')+'</button></div>'
+  );
+  document.getElementById('hCancel').onclick=closeSheet;
+  document.getElementById('hSave').onclick=function(){
+    var t=document.getElementById('hTitle').value.trim();if(!t){toast(S.lang==='zh'?'先填个标题。':'Give it a title first.');return;}
+    var days=parseInt(document.getElementById('hDays').value,10)||0;
+    var det=document.getElementById('hDetails').value.trim();
+    var src=document.getElementById('hSource').value.trim();
+    var typ=document.getElementById('hType').value.trim();
+    if(id){o.title=t;if(S.lang==='zh')o.titleZh=t;o.details=det;o.days=days;o.source=src;o.type=typ;}
+    else{S.honors.push({id:'hon'+Date.now(),title:t,titleZh:(S.lang==='zh'?t:''),details:det,days:days,source:src,type:typ,createdAt:dkey(new Date())});}
+    save();closeSheet();renderAll();toast(id?T('honorUpdated'):T('honorSaved'));
+  };
+  if(id)document.getElementById('hDelete').onclick=function(){S.honors=S.honors.filter(function(x){return x.id!==o.id;});save();closeSheet();renderAll();toast(T('honorRemoved'));};
+  setTimeout(function(){var i=document.getElementById('hTitle');if(i)i.focus();},350);
+}
+function openMigrate(id){
+  var h=null;S.habits.forEach(function(x){if(x.id===id)h=x;});if(!h)return;
+  openSheet('<h3>'+T('editMig')+'</h3><p class="sh-sub">'+T('migT')+'</p>'+
+    '<div class="field"><label>'+T('migPrev')+'</label><input type="number" id="mTotal" value="'+(h.migratedTotalDays||'')+'"></div>'+
+    '<div class="field"><label>'+T('migCur')+'</label><input type="text" id="mCur" value="'+(h.migratedCurrentStreak!=null?h.migratedCurrentStreak:'')+'"></div>'+
+    '<div class="field"><label>'+T('migImp')+'</label><input type="text" id="mStart" value="'+(h.migratedStartDate||'')+'"></div>'+
+    '<div class="btn-stack"><button class="btn-lg" id="mSave">'+T('save')+'</button><button class="btn-lg sec" id="mDelete">'+T('migT')+'×</button><button class="btn-lg sec" id="mCancel">'+T('cancel')+'</button></div>');
+  document.getElementById('mSave').onclick=function(){h.migratedTotalDays=parseInt(document.getElementById('mTotal').value,10)||0;var c=document.getElementById('mCur').value.trim();h.migratedCurrentStreak=c?(parseInt(c,10)||null):null;var s=document.getElementById('mStart').value.trim();h.migratedStartDate=/^\d{4}-\d{2}-\d{2}$/.test(s)?s:null;h.migrationImportedAt=(h.migratedTotalDays?dkey(new Date()):null);save();closeSheet();renderAll();toast(T('importUpd'));};
+  document.getElementById('mDelete').onclick=function(){h.migratedTotalDays=0;h.migratedCurrentStreak=null;h.migratedStartDate=null;h.migrationImportedAt=null;save();closeSheet();renderAll();toast(T('importRem'));};
+  document.getElementById('mCancel').onclick=closeSheet;
+}
+
+function openPurchase(){
+  openSheet('<h3>'+T('purchaseT')+'</h3><p class="sh-sub">'+T('purchaseSub')+'</p>'+
+    '<div class="card" style="background:linear-gradient(135deg,#0FAFA0,#0B7EA8);color:#fff;border:none"><div style="font-size:40px;font-weight:800;letter-spacing:-1.5px">$6.99</div><div style="font-size:13px;opacity:.92">'+T('priceNote')+'</div></div>'+
+    '<div class="group" style="margin-top:6px">'+
+      '<div class="row"><div class="r-title">'+T('noSub')+'</div><div class="spacer"></div><div class="pill-sec" style="background:rgba(255,255,255,.2);color:#fff">✓</div></div>'+
+      '<div class="row"><div class="r-title">'+T('noIap')+'</div><div class="spacer"></div><div class="pill-sec" style="background:rgba(255,255,255,.2);color:#fff">✓</div></div>'+
+      '<div class="row"><div class="r-title">'+T('noAcct')+'</div><div class="spacer"></div><div class="pill-sec" style="background:rgba(255,255,255,.2);color:#fff">✓</div></div>'+
+      '<div class="row"><div class="r-title">'+T('noAd')+'</div><div class="spacer"></div><div class="pill-sec" style="background:rgba(255,255,255,.2);color:#fff">✓</div></div>'+
+    '</div>'+
+    '<div class="card" style="font-size:12.5px;color:var(--label2);line-height:1.5">'+T('privCard')+'</div>'+
+    '<div class="card" style="font-size:11.5px;color:var(--label3);line-height:1.5">'+T('reviewNote')+'</div>'+
+    '<div class="btn-stack"><button class="btn-lg sec" id="pClose">'+T('close')+'</button></div>');
+  document.getElementById('pClose').onclick=closeSheet;
+}
+
+function openExportSheet(){
+  openSheet('<h3>'+T('exportT')+'</h3><p class="sh-sub">'+T('exportSub')+'</p>'+
+    '<div class="btn-stack">'+
+    '<button class="btn-lg" id="exCsv">'+T('fmtCsv')+'</button>'+
+    '<button class="btn-lg" id="exJson">'+T('fmtJson')+'</button>'+
+    '<button class="btn-lg sec" id="exCancel">'+T('cancel')+'</button></div>');
+  document.getElementById('exCsv').onclick=function(){doExport('csv');closeSheet();};
+  document.getElementById('exJson').onclick=function(){doExport('json');closeSheet();};
+  document.getElementById('exCancel').onclick=closeSheet;
+}
+function downloadBlob(blob,name){var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url);},2000);}
+function habitsToCsv(){
+  var head=['name','emoji','color','weeklyGoal','successThreshold','createdAt','isArchived','migratedTotalDays','migratedCurrentStreak','checkInDates'];
+  var rows=[head];
+  S.habits.forEach(function(h){var dates=Object.keys(h.checkIns||{});rows.push([h.name||'',h.emoji||'',h.color||'',h.weeklyGoal,h.successThreshold,h.createdAt||'',h.isArchived?1:0,h.migratedTotalDays||0,(h.migratedCurrentStreak!=null?h.migratedCurrentStreak:''),dates.join(' ')]);});
+  return rows.map(function(r){return r.map(function(c){c=String(c==null?'':c);if(/[",\n]/.test(c))c='"'+c.replace(/"/g,'""')+'"';return c;}).join(',');}).join('\n');
+}
+function doExport(fmt){
+  if(fmt==='json'){downloadBlob(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}),'streakora-backup.json');}
+  else{downloadBlob(new Blob([habitsToCsv()],{type:'text/csv'}),'streakora-habits.csv');}
+  toast(T('exportOk'));
+}
+function openImport(){
+  var inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
+  inp.onchange=function(){
+    var f=inp.files&&inp.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(){
+      try{
+        var data=JSON.parse(r.result);
+        if(!data||!Array.isArray(data.habits))throw new Error('bad');
+        S.habits=S.habits.concat(data.habits);
+        if(data.honors)S.honors=(S.honors||[]).concat(data.honors);
+        save();renderAll();toast(T('importOk',data.habits.length));
+      }catch(e){toast(T('importErr'));}
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+
+function openOnboarding(){
+  var i=0;
+  function draw(){
+    var s=T('ob')[i],dots='';T('ob').forEach(function(_,k){dots+='<i class="'+(k===i?'on':'')+'"></i>';});
+    var last=i===T('ob').length-1;
+    openSheet('<div style="min-height:740px;display:flex;flex-direction:column;padding:34px 30px 30px;text-align:center">'+
+      '<div style="flex:1;display:grid;place-items:center;font-size:66px;min-height:180px">'+s.art+'</div>'+
+      '<h2 style="font-size:27px;font-weight:800;letter-spacing:-.5px;margin:0 0 10px;line-height:1.25;white-space:pre-line">'+s.t+'</h2>'+
+      '<p style="font-size:15px;color:var(--label2);line-height:1.55;margin:0 0 26px;white-space:pre-line">'+s.s+'</p>'+
+      '<div style="display:flex;gap:7px;justify-content:center;margin-bottom:18px">'+dots+'</div>'+
+      '<div style="display:flex;flex-direction:column;gap:10px">'+
+        '<button class="btn-lg" id="obNext">'+T('obNext')[i]+'</button>'+
+        (last?'':'<button class="btn-lg sec" id="obSkip">'+T('obSkip')+'</button>')+
+      '</div></div>',true);
+    document.getElementById('obNext').onclick=function(){if(last){S.onboarded=true;save();closeSheet();renderAll();toast(T('welcome'));}else{i++;draw();}};
+    if(!last)document.getElementById('obSkip').onclick=function(){S.onboarded=true;save();closeSheet();renderAll();};
+  }
+  draw();
+}
+
+var tEl=document.getElementById('toast'),tTimer=null;
+function toast(msg){tEl.textContent=msg;tEl.classList.add('show');clearTimeout(tTimer);tTimer=setTimeout(function(){tEl.classList.remove('show');},2300);}
+
+document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){
+  document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});t.classList.add('active');
+  var k=t.getAttribute('data-tab');document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('page-'+k).classList.add('active');
+  var pg=document.getElementById('page-'+k);
+  document.getElementById('navTitle').textContent=T(k);
+  document.getElementById('navbar').classList.remove('show');pg.querySelector('.scroll').scrollTop=0;
+  if(navigator.vibrate)navigator.vibrate(6);
+});});
+document.querySelectorAll('.scroll').forEach(function(sc){sc.addEventListener('scroll',function(){var nb=document.getElementById('navbar');if(sc.scrollTop>34)nb.classList.add('show');else nb.classList.remove('show');});});
+
+function setTheme(t){S.theme=t;save();document.getElementById('device').setAttribute('data-theme',t);applyStaticTexts();renderSettings();}
+function setLang(l){S.lang=l;save();applyStaticTexts();renderAll();toast(l==='zh'?T('langSwitched'):T('langSwitchedEn'));}
+document.querySelectorAll('#langSeg button').forEach(function(b){b.onclick=function(){setLang(b.getAttribute('data-lang'));};});
+document.querySelectorAll('#themeSeg button').forEach(function(b){b.onclick=function(){setTheme(b.getAttribute('data-theme'));};});
+document.getElementById('replayRow').onclick=openOnboarding;
+document.getElementById('purchaseTap').onclick=openPurchase;
+document.getElementById('btnExport').onclick=openExportSheet;
+document.getElementById('btnImport').onclick=openImport;
+document.getElementById('btnResetIn').onclick=function(){S=freshState();save();applyStaticTexts();renderAll();toast(S.lang==='zh'?'本机数据已抹除。':'All data erased (demo).');};
+document.getElementById('btnWeekStart').onclick=function(){S.weekStartOn=S.weekStartOn===0?1:0;save();renderAll();toast(T('weekStartToast',(S.weekStartOn===0?T('sunday'):T('monday'))));};
+
+function renderAll(){applyStaticTexts();renderToday();renderHistory();renderSettings();}
+load();setTheme(S.theme||'light');renderAll();
+if(!S.onboarded)setTimeout(openOnboarding,420);
+var now=new Date();document.getElementById('sbTime').textContent=now.getHours()+':'+pad(now.getMinutes());
+</script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Streakora · 设计系统预览</title>
+<style>
+  /* ============ 设计令牌 ============ */
+  :root{
+    --bg: #F5F5F7;
+    --surface: #FFFFFF;
+    --surface-2: #FAFAFC;
+    --surface-sunken: #EFEFF1;
+    --border: rgba(0,0,0,0.07);
+    --border-strong: rgba(0,0,0,0.12);
+    --text-1: #1D1D1F;
+    --text-2: #6E6E73;
+    --text-3: #8E8E93;
+    --accent: #5B5BD6;
+    --accent-soft: rgba(91,91,214,0.10);
+    --accent-grad: linear-gradient(135deg,#6366F1 0%,#8B5CF6 55%,#A855F7 100%);
+    --success: #34C759;
+    --warning: #FF9F0A;
+    --danger: #FF3B30;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 22px;
+    --radius-xl: 28px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+            "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  }
+  html[data-theme="dark"]{
+    --bg: #000000;
+    --surface: #1C1C1E;
+    --surface-2: #232325;
+    --surface-sunken: #2C2C2E;
+    --border: rgba(255,255,255,0.09);
+    --border-strong: rgba(255,255,255,0.16);
+    --text-1: #F5F5F7;
+    --text-2: #98989D;
+    --text-3: #636366;
+    --accent: #7C7CFF;
+    --accent-soft: rgba(124,124,255,0.16);
+    --accent-grad: linear-gradient(135deg,#7C7CFF 0%,#A855F7 60%,#C084FC 100%);
+    --success: #30D158;
+    --warning: #FFB340;
+    --danger: #FF453A;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.40);
+    --shadow-md: 0 6px 20px rgba(0,0,0,0.45);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.55);
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:var(--font); background:var(--bg); color:var(--text-1);
+    line-height:1.5; -webkit-font-smoothing:antialiased; padding:0 0 80px;
+    transition:background .4s ease, color .4s ease; }
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 24px; }
+
+  header.topbar{ position:sticky; top:0; z-index:50;
+    backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px);
+    background:color-mix(in srgb, var(--bg) 78%, transparent);
+    border-bottom:1px solid var(--border); }
+  .topbar-in{ max-width:1080px; margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between; }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:19px; letter-spacing:.2px; }
+  .logo{ width:30px; height:30px; display:flex; align-items:center; justify-content:center; }
+  .logo svg{ width:30px; height:30px; display:block; }
+  .theme-btn{ border:1px solid var(--border-strong); background:var(--surface);
+    color:var(--text-1); padding:8px 14px; border-radius:999px; font-size:13px; font-weight:600;
+    cursor:pointer; transition:.2s; }
+  .theme-btn:hover{ background:var(--surface-2); }
+
+  section{ padding:48px 0 8px; }
+  .eyebrow{ font-size:12px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
+    color:var(--accent); margin-bottom:8px; }
+  h2.sec{ font-size:28px; font-weight:800; letter-spacing:-.4px; margin-bottom:6px; }
+  .sec-desc{ color:var(--text-2); font-size:15px; max-width:720px; margin-bottom:28px; }
+
+  /* 色板 */
+  .swatch-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:16px; }
+  .swatch{ border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border);
+    background:var(--surface); box-shadow:var(--shadow-sm); }
+  .swatch .chip{ height:72px; }
+  .swatch .meta{ padding:12px 14px; }
+  .swatch .name{ font-size:13px; font-weight:600; }
+  .swatch .hex{ font-size:12px; color:var(--text-3); font-variant-numeric:tabular-nums; }
+
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media(max-width:720px){ .two-col{ grid-template-columns:1fr; } }
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:22px; box-shadow:var(--shadow-sm); }
+  .panel h3{ font-size:15px; font-weight:700; margin-bottom:14px; color:var(--text-1); }
+
+  .type-row{ display:flex; align-items:baseline; gap:18px; padding:14px 0; border-bottom:1px solid var(--border); }
+  .type-row:last-child{ border-bottom:none; }
+  .type-tag{ width:130px; flex:none; font-size:12px; color:var(--text-3); font-weight:600; text-align:right; }
+  .type-sample{ flex:1; }
+
+  .space-row{ display:flex; align-items:center; gap:14px; padding:8px 0; }
+  .space-box{ background:var(--accent-soft); border:1px solid var(--accent); border-radius:4px; height:18px; }
+
+  .comp-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; }
+
+  .habit-row{ display:flex; align-items:center; gap:14px; padding:16px; background:var(--surface);
+    border:1px solid var(--border); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); }
+  .habit-idx{ width:26px; height:26px; flex:none; border-radius:8px; background:var(--surface-sunken);
+    color:var(--text-2); font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; }
+  .habit-main{ flex:1; min-width:0; }
+  .habit-name{ font-size:16px; font-weight:600; }
+  .habit-sub{ font-size:13px; color:var(--text-2); margin-top:2px; }
+  .check{ width:30px; height:30px; flex:none; border-radius:50%; border:2px solid var(--border-strong);
+    background:transparent; cursor:pointer; transition:.25s; position:relative; }
+  .check.done{ background:var(--accent-grad); border-color:transparent; box-shadow:0 2px 8px var(--accent-soft); }
+  .check.done::after{ content:""; position:absolute; left:9px; top:5px; width:8px; height:13px;
+    border:solid #fff; border-width:0 2.5px 2.5px 0; transform:rotate(45deg); }
+
+  .btn-primary{ display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:14px 22px; border-radius:var(--radius-md); background:var(--accent-grad); color:#fff;
+    font-weight:700; font-size:16px; border:none; box-shadow:var(--shadow-md); cursor:pointer; }
+  .btn-ghost{ display:inline-flex; align-items:center; justify-content:center; padding:13px 20px;
+    border-radius:var(--radius-md); background:var(--surface); color:var(--text-1);
+    border:1px solid var(--border-strong); font-weight:600; font-size:15px; cursor:pointer; }
+
+  .toggle{ width:51px; height:31px; border-radius:999px; background:var(--surface-sunken);
+    border:1px solid var(--border); position:relative; cursor:pointer; transition:.25s; flex:none; }
+  .toggle.on{ background:var(--success); border-color:transparent; }
+  .toggle .knob{ position:absolute; top:2px; left:2px; width:27px; height:27px; border-radius:50%;
+    background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.2); transition:.25s; }
+  .toggle.on .knob{ left:22px; }
+
+  .stat-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:22px; box-shadow:var(--shadow-md); }
+  .stat-card .label{ font-size:13px; color:var(--text-2); font-weight:600; }
+  .stat-card .num{ font-size:40px; font-weight:800; letter-spacing:-1px; margin-top:6px; }
+  .stat-card .num .unit{ font-size:16px; font-weight:600; color:var(--text-3); margin-left:4px; }
+
+  .badge{ display:inline-block; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:600;
+    background:var(--accent-soft); color:var(--accent); }
+
+  .tabbar{ display:flex; background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow-md); }
+  .tab{ flex:1; padding:14px 0 12px; text-align:center; font-size:11px; font-weight:600; color:var(--text-3); }
+  .tab.active{ color:var(--accent); }
+  .tab .ico{ font-size:20px; display:block; margin-bottom:3px; }
+  .tab.active .ico{ filter:drop-shadow(0 2px 4px var(--accent-soft)); }
+
+  .phone{ width:320px; background:var(--bg); border:1px solid var(--border); border-radius:42px;
+    padding:14px; box-shadow:var(--shadow-lg); margin:0 auto; }
+  .phone-screen{ background:var(--bg); border-radius:30px; overflow:hidden; padding:18px 16px 12px; min-height:560px; }
+  .app-hdr{ text-align:center; margin-bottom:18px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .app-hdr .mark{ font-size:20px; font-weight:800; letter-spacing:.3px; display:flex; align-items:center; gap:8px; justify-content:center; }
+  .app-hdr .mark svg{ width:22px; height:22px; }
+  .app-hdr .slogan{ font-size:12px; color:var(--text-3); }
+  .sec-head{ font-size:19px; font-weight:800; margin:22px 2px 12px; letter-spacing:-.2px; }
+  .phone .habit-row{ margin-bottom:10px; }
+  .placeholder-row{ border:1.5px dashed var(--border-strong); border-radius:var(--radius-md);
+    padding:16px; display:flex; align-items:center; gap:12px; color:var(--text-3); font-size:14px; }
+  .placeholder-row .dot{ width:30px; height:30px; border-radius:50%; border:2px dashed var(--border-strong); flex:none; }
+
+  footer{ text-align:center; color:var(--text-3); font-size:12px; padding:40px 24px 0; line-height:1.8; }
+
+  table.tokens{ width:100%; border-collapse:collapse; font-size:13px; }
+  table.tokens th, table.tokens td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); }
+  table.tokens th{ color:var(--text-2); font-weight:600; }
+  table.tokens td code{ background:var(--surface-sunken); padding:2px 7px; border-radius:6px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; color:var(--accent); }
+
+  /* ===== Logo 画廊 ===== */
+  .logo-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; }
+  .logo-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:22px; box-shadow:var(--shadow-sm); position:relative; }
+  .logo-card.selected{ border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft), var(--shadow-sm); }
+  .sel-badge{ position:absolute; top:-11px; left:22px; background:var(--accent-grad); color:#fff;
+    font-size:11px; font-weight:700; padding:4px 11px; border-radius:999px; box-shadow:var(--shadow-sm); }
+  .logo-card .show{ display:flex; align-items:center; gap:22px; padding:10px 4px 18px; border-bottom:1px solid var(--border); }
+  .glyph-box{ width:96px; height:96px; border-radius:var(--radius-md); background:var(--surface-2);
+    border:1px solid var(--border); display:flex; align-items:center; justify-content:center; }
+  .glyph-box svg{ width:60px; height:60px; }
+  .icon-box{ width:72px; height:72px; border-radius:18px; background:var(--accent-grad);
+    display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-md); }
+  .icon-box svg{ width:44px; height:44px; }
+  .show .labels{ flex:1; }
+  .show .labels .t{ font-size:16px; font-weight:800; }
+  .show .labels .s{ font-size:12px; color:var(--text-3); margin-top:2px; }
+  .logo-card .desc{ font-size:13px; color:var(--text-2); margin-top:14px; line-height:1.6; }
+  .logo-card .fit{ display:inline-block; margin-top:10px; font-size:11px; font-weight:600;
+    padding:4px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent); }
+  .pick{ margin-top:14px; font-size:12px; color:var(--text-3); }
+  .pick b{ color:var(--text-1); }
+</style>
+</head>
+<body>
+
+<!-- 共享渐变定义 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="sg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#6366F1"/><stop offset=".55" stop-color="#8B5CF6"/><stop offset="1" stop-color="#A855F7"/>
+  </linearGradient>
+</defs></svg>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="logo">
+        <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="none" stroke="var(--border-strong)" stroke-width="6"/><circle cx="32" cy="32" r="22" fill="none" stroke="url(#sg)" stroke-width="6" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="41" transform="rotate(-90 32 32)"/><circle cx="11" cy="39" r="5" fill="url(#sg)"/></svg>
+      </span>
+      Streakora
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">🌗 切换深浅</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 概念 -->
+  <section>
+    <div class="eyebrow">Design System · v1.0</div>
+    <h2 class="sec">Streakora 习惯打卡 · 视觉规范</h2>
+    <p class="sec-desc">「按周统计、断签不清零、无压力」的 iOS 原生习惯打卡应用。本规范在配色、字体、线条、阴影上做"高级感"升级：克制留白、单一品牌强调色、发丝级分割线、分层柔影，深浅主题共用同一套令牌。</p>
+  </section>
+
+  <!-- LOGO -->
+  <section>
+    <div class="eyebrow">00 · Brand Mark</div>
+    <h2 class="sec">独立图形标识（5 个方向）</h2>
+    <p class="sec-desc">均为纯 SVG 矢量图形（非 emoji），左为单色标志、右为应用图标预览。请选择一个方向，我将据此定稿顶栏与全站品牌。</p>
+    <div class="logo-grid">
+
+      <!-- A 周环 · 已选用 -->
+      <div class="logo-card selected">
+        <div class="sel-badge">✓ 已选用</div>
+        <div class="show">
+          <div class="glyph-box">
+            <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="none" stroke="var(--border-strong)" stroke-width="6"/><circle cx="32" cy="32" r="22" fill="none" stroke="url(#sg)" stroke-width="6" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="41" transform="rotate(-90 32 32)"/><circle cx="11" cy="39" r="5" fill="url(#sg)"/></svg>
+          </div>
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="38" transform="rotate(-90 32 32)"/><circle cx="13" cy="38" r="5" fill="#fff"/></svg>
+          </div>
+          <div class="labels"><div class="t">A · 周环</div><div class="s">Weekly Ring</div></div>
+        </div>
+        <div class="desc">进度环：外圈为一周，渐变弧表示本周达标进度，末端节点为"今日"。极简、几何、最像 App Store 精品。</div>
+        <span class="fit">契合：按周统计 / 达标进度</span>
+        <div class="pick">适合：想强调"每周节奏感"</div>
+      </div>
+
+      <!-- B 升弧 -->
+      <div class="logo-card">
+        <div class="show">
+          <div class="glyph-box">
+            <svg viewBox="0 0 64 64"><path d="M10 50 Q 26 48 34 34 T 54 14" fill="none" stroke="url(#sg)" stroke-width="6" stroke-linecap="round"/><circle cx="10" cy="50" r="4" fill="var(--border-strong)"/><circle cx="34" cy="34" r="4" fill="var(--border-strong)"/><circle cx="54" cy="14" r="6" fill="url(#sg)"/></svg>
+          </div>
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64"><path d="M12 50 Q 28 48 36 34 T 54 14" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><circle cx="54" cy="14" r="6" fill="#fff"/></svg>
+          </div>
+          <div class="labels"><div class="t">B · 升弧</div><div class="s">Ascending Streak</div></div>
+        </div>
+        <div class="desc">上升曲线：习惯随时间向上生长，末端点最大且渐变填充，象征"坚持即成长"。动态、有生命力。</div>
+        <span class="fit">契合：长期累积 / 成长叙事</span>
+        <div class="pick">适合：想强调"越坚持越好"</div>
+      </div>
+
+      <!-- C 连续链 -->
+      <div class="logo-card">
+        <div class="show">
+          <div class="glyph-box">
+            <svg viewBox="0 0 64 64"><path d="M16 32 C 16 22 28 22 32 32 C 36 42 48 42 48 32 C 48 22 36 22 32 32 C 28 42 16 42 16 32 Z" fill="none" stroke="url(#sg)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64"><path d="M16 32 C 16 22 28 22 32 32 C 36 42 48 42 48 32 C 48 22 36 22 32 32 C 28 42 16 42 16 32 Z" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="labels"><div class="t">C · 连续链</div><div class="s">Infinity Loop</div></div>
+        </div>
+        <div class="desc">双环无限符号：直接隐喻"断签不清零、循环不断"。概念最强、最易记，但形似通用 infinity 图标。</div>
+        <span class="fit">契合：断签不清零 / 永续</span>
+        <div class="pick">适合：想强调"永不归零"的理念</div>
+      </div>
+
+      <!-- D 星芒徽 -->
+      <div class="logo-card">
+        <div class="show">
+          <div class="glyph-box">
+            <svg viewBox="0 0 64 64"><rect x="6" y="6" width="52" height="52" rx="15" fill="url(#sg)"/><path d="M32 17 C 33.5 26 38 30.5 47 32 C 38 33.5 33.5 38 32 47 C 30.5 38 26 33.5 17 32 C 26 30.5 30.5 26 32 17 Z" fill="#fff"/></svg>
+          </div>
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64"><path d="M32 17 C 33.5 26 38 30.5 47 32 C 38 33.5 33.5 38 32 47 C 30.5 38 26 33.5 17 32 C 26 30.5 30.5 26 32 17 Z" fill="#fff"/></svg>
+          </div>
+          <div class="labels"><div class="t">D · 星芒徽</div><div class="s">Aura Spark</div></div>
+        </div>
+        <div class="desc">四角星芒置于渐变圆角 tile：既是应用图标也是品牌符号，呼应"荣誉室/成就"。最"高级"、最像成品 App 图标。</div>
+        <span class="fit">契合：荣誉室 / 成就激励</span>
+        <div class="pick">适合：想强调"成就与奖赏感"</div>
+      </div>
+
+      <!-- E 周格 -->
+      <div class="logo-card">
+        <div class="show">
+          <div class="glyph-box">
+            <svg viewBox="0 0 64 64"><g>
+              <circle cx="10" cy="32" r="4.6" fill="url(#sg)"/><circle cx="18.7" cy="32" r="4.6" fill="url(#sg)"/><circle cx="27.3" cy="32" r="4.6" fill="url(#sg)"/><circle cx="36" cy="32" r="4.6" fill="url(#sg)"/><circle cx="44.7" cy="32" r="4.6" fill="url(#sg)"/><circle cx="53.3" cy="32" r="4.6" fill="none" stroke="var(--border-strong)" stroke-width="3"/><circle cx="62" cy="32" r="4.6" fill="none" stroke="var(--border-strong)" stroke-width="3"/>
+            </g></svg>
+          </div>
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64"><g fill="#fff">
+              <circle cx="13" cy="32" r="4.6"/><circle cx="21" cy="32" r="4.6"/><circle cx="29" cy="32" r="4.6"/><circle cx="37" cy="32" r="4.6"/><circle cx="45" cy="32" r="4.6"/><circle cx="53" cy="32" r="4.6" fill="none" stroke="#fff" stroke-width="3"/>
+            </g></svg>
+          </div>
+          <div class="labels"><div class="t">E · 周格</div><div class="s">Weekly Dots</div></div>
+        </div>
+        <div class="desc">7 点一行、前 5 点填充：直译"本周 5/7"，与打卡网格、热力图同源。信息感最强，但识别度略依赖说明。</div>
+        <span class="fit">契合：本周网格 / 打卡密度</span>
+        <div class="pick">适合：想强调"一周七天可见"</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 官方标识规范 -->
+  <section>
+    <div class="eyebrow">00b · Brand Guideline</div>
+    <h2 class="sec">官方标识规范 · A 周环</h2>
+    <p class="sec-desc">已选用方向 A（Weekly Ring）。以下为最终交付的标识用法：彩色主标识、单色适配（深底 / 反白）、安全间距与最小尺寸、以及 1024×1024 应用图标。配套矢量文件已导出为 <code>Streakora-logo.svg</code> / <code>Streakora-appicon.svg</code> / <code>Streakora-wordmark.svg</code>。</p>
+    <div class="two-col">
+      <div class="panel">
+        <h3>主标识（彩色）</h3>
+        <div class="glyph-box" style="width:150px;height:150px;margin:8px auto;"><svg viewBox="0 0 64 64" style="width:104px;height:104px"><circle cx="32" cy="32" r="22" fill="none" stroke="var(--border-strong)" stroke-width="6"/><circle cx="32" cy="32" r="22" fill="none" stroke="url(#sg)" stroke-width="6" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="41" transform="rotate(-90 32 32)"/><circle cx="11" cy="39" r="5" fill="url(#sg)"/></svg></div>
+        <h3 style="margin-top:18px">单色适配</h3>
+        <div style="display:flex;gap:14px;align-items:center;margin-top:8px">
+          <div style="width:56px;height:56px;border-radius:13px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 64 64" style="width:34px;height:34px"><circle cx="32" cy="32" r="22" fill="none" stroke="var(--text-1)" stroke-width="6"/><circle cx="32" cy="32" r="22" fill="none" stroke="var(--text-1)" stroke-width="6" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="41" transform="rotate(-90 32 32)"/><circle cx="11" cy="39" r="5" fill="var(--text-1)"/></svg></div>
+          <span style="font-size:12px;color:var(--text-3)">深底单色</span>
+          <div style="width:56px;height:56px;border-radius:13px;background:var(--text-1);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 64 64" style="width:34px;height:34px"><circle cx="32" cy="32" r="22" fill="none" stroke="#fff" stroke-width="6"/><circle cx="32" cy="32" r="22" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="41" transform="rotate(-90 32 32)"/><circle cx="11" cy="39" r="5" fill="#fff"/></svg></div>
+          <span style="font-size:12px;color:var(--text-3)">反白</span>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>应用图标 1024²</h3>
+        <div class="icon-box" style="width:150px;height:150px;border-radius:34px;margin:8px auto"><svg viewBox="0 0 64 64" style="width:90px;height:90px"><circle cx="32" cy="32" r="22" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="6"/><circle cx="32" cy="32" r="22" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="41" transform="rotate(-90 32 32)"/><circle cx="11" cy="39" r="5" fill="#fff"/></svg></div>
+        <h3 style="margin-top:18px">安全间距 / 最小尺寸</h3>
+        <p style="font-size:13px;color:var(--text-2);margin-top:6px;line-height:1.7">• 安全间距 = 标识高度的 <b>25%</b>（四周留白）。<br/>• 最小尺寸：独立使用 ≥ <b>24px</b>；与文字组合 ≥ <b>16px</b>。<br/>• 禁止：拉伸变形、改色（除单色适配）、加投影、旋转。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 配色 -->
+  <section>
+    <div class="eyebrow">01 · Color</div>
+    <h2 class="sec">配色体系</h2>
+    <p class="sec-desc">以中性灰阶打底，单一靛紫强调色（带微渐变）作为唯一品牌信号；语义色严格采用 iOS 系统值，保证对比度与可访问性达标。</p>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="chip" style="background:var(--bg)"></div><div class="meta"><div class="name">背景 BG</div><div class="hex" data-hex="bg">#F5F5F7</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--surface)"></div><div class="meta"><div class="name">表面 Surface</div><div class="hex" data-hex="surface">#FFFFFF</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--surface-sunken)"></div><div class="meta"><div class="name">下沉 Sunken</div><div class="hex" data-hex="sunken">#EFEFF1</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent)"></div><div class="meta"><div class="name">强调 Accent</div><div class="hex" data-hex="accent">#5B5BD6</div></div></div>
+      <div class="swatch"><div class="chip" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)"></div><div class="meta"><div class="name">渐变 Grad</div><div class="hex">135° indigo→violet</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--success)"></div><div class="meta"><div class="name">达标 Success</div><div class="hex" data-hex="success">#34C759</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--warning)"></div><div class="meta"><div class="name">提醒 Warning</div><div class="hex" data-hex="warning">#FF9F0A</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--danger)"></div><div class="meta"><div class="name">危险 Danger</div><div class="hex" data-hex="danger">#FF3B30</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--text-1)"></div><div class="meta"><div class="name">文字1</div><div class="hex" data-hex="text1">#1D1D1F</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--text-2)"></div><div class="meta"><div class="name">文字2</div><div class="hex" data-hex="text2">#6E6E73</div></div></div>
+    </div>
+  </section>
+
+  <!-- 字体 -->
+  <section>
+    <div class="eyebrow">02 · Typography</div>
+    <h2 class="sec">字体与字阶</h2>
+    <p class="sec-desc">字体栈以 SF Pro 为首（中文回退苹方），严格遵循 iOS 字阶；标题用 800 字重强化"小标题"层级，正文 400/500 保持呼吸感。</p>
+    <div class="panel">
+      <div class="type-row"><div class="type-tag">Display / 34·800</div><div class="type-sample" style="font-size:34px;font-weight:800;letter-spacing:-.5px">今日成就 Today</div></div>
+      <div class="type-row"><div class="type-tag">Title2 / 22·700</div><div class="type-sample" style="font-size:22px;font-weight:700">本周进度概览</div></div>
+      <div class="type-row"><div class="type-tag">Section / 19·800</div><div class="type-sample" style="font-size:19px;font-weight:800">习惯 · Habits</div></div>
+      <div class="type-row"><div class="type-tag">Headline / 17·600</div><div class="type-sample" style="font-size:17px;font-weight:600">晨间冥想 Morning</div></div>
+      <div class="type-row"><div class="type-tag">Body / 15·400</div><div class="type-sample" style="font-size:15px;font-weight:400;color:var(--text-2)">本周 3/5 · 还差 2 天达标（≥5）</div></div>
+      <div class="type-row"><div class="type-tag">Footnote / 13·500</div><div class="type-sample" style="font-size:13px;font-weight:500;color:var(--text-3)">数据仅存于本机与私有 iCloud</div></div>
+    </div>
+  </section>
+
+  <!-- 间距 & 圆角 -->
+  <section>
+    <div class="eyebrow">03 · Spacing & Radius</div>
+    <h2 class="sec">间距 · 圆角 · 线条</h2>
+    <div class="two-col">
+      <div class="panel">
+        <h3>8pt 栅格间距</h3>
+        <div class="space-row"><div class="space-box" style="width:8px"></div><div style="font-size:13px;color:var(--text-2)">4pt ×1 — 元素内微距</div></div>
+        <div class="space-row"><div class="space-box" style="width:16px"></div><div style="font-size:13px;color:var(--text-2)">8pt ×2 — 控件内边距</div></div>
+        <div class="space-row"><div class="space-box" style="width:24px"></div><div style="font-size:13px;color:var(--text-2)">8pt ×3 — 卡片内边距</div></div>
+        <div class="space-row"><div class="space-box" style="width:32px"></div><div style="font-size:13px;color:var(--text-2)">8pt ×4 — 区块间距</div></div>
+        <div class="space-row"><div class="space-box" style="width:48px"></div><div style="font-size:13px;color:var(--text-2)">8pt ×6 — 大区隔</div></div>
+      </div>
+      <div class="panel">
+        <h3>圆角与圆角令牌</h3>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px">
+          <div style="text-align:center"><div style="width:54px;height:54px;border-radius:10px;background:var(--accent-soft);border:1px solid var(--accent)"></div><div style="font-size:11px;color:var(--text-3);margin-top:6px">--r-sm 10</div></div>
+          <div style="text-align:center"><div style="width:54px;height:54px;border-radius:16px;background:var(--accent-soft);border:1px solid var(--accent)"></div><div style="font-size:11px;color:var(--text-3);margin-top:6px">--r-md 16</div></div>
+          <div style="text-align:center"><div style="width:54px;height:54px;border-radius:22px;background:var(--accent-soft);border:1px solid var(--accent)"></div><div style="font-size:11px;color:var(--text-3);margin-top:6px">--r-lg 22</div></div>
+          <div style="text-align:center"><div style="width:54px;height:54px;border-radius:28px;background:var(--accent-soft);border:1px solid var(--accent)"></div><div style="font-size:11px;color:var(--text-3);margin-top:6px">--r-xl 28</div></div>
+        </div>
+        <p style="font-size:12px;color:var(--text-3);margin-top:14px">线条：分割线统一 1px，透明度 7%(浅)/9%(深)，即"发丝线"，不用纯黑实线。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 组件 -->
+  <section>
+    <div class="eyebrow">04 · Components</div>
+    <h2 class="sec">核心组件</h2>
+    <p class="sec-desc">沿用习惯行结构（左序号 + 右圆形打卡钮），统一按钮、开关、卡片、徽章与底部三 Tab 的视觉语言。</p>
+    <div class="comp-grid">
+      <div class="panel">
+        <h3>习惯行 Habit Row</h3>
+        <div class="habit-row" style="margin-top:6px">
+          <div class="habit-idx">1</div>
+          <div class="habit-main"><div class="habit-name">晨间阅读</div><div class="habit-sub">本周 3/5 · 还差 2 天达标</div></div>
+          <button class="check done"></button>
+        </div>
+        <div class="habit-row" style="margin-top:10px">
+          <div class="habit-idx">2</div>
+          <div class="habit-main"><div class="habit-name">夜跑 5km</div><div class="habit-sub">本周 2/5 · 还差 3 天达标</div></div>
+          <button class="check"></button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>按钮 Buttons</h3>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
+          <button class="btn-primary">买断永久版</button>
+          <button class="btn-ghost">导出备份</button>
+        </div>
+        <h3 style="margin-top:22px">开关 Toggle</h3>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
+          <div class="toggle on"><div class="knob"></div></div><span style="font-size:13px;color:var(--text-2)">每日提醒</span>
+          <div class="toggle" style="margin-left:10px"><div class="knob"></div></div><span style="font-size:13px;color:var(--text-2)">iCloud 同步</span>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>数据卡片 Stat Card</h3>
+        <div class="stat-card" style="margin-top:6px">
+          <div class="label">累计坚持天数</div>
+          <div class="num">128<span class="unit">天</span></div>
+          <div style="margin-top:10px"><span class="badge">导入 40</span> <span class="badge" style="margin-left:6px;background:var(--surface-sunken);color:var(--text-2)">本机 88</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>底部导航 Tab Bar</h3>
+        <div class="tabbar" style="margin-top:6px">
+          <div class="tab"><span class="ico">📊</span>历史</div>
+          <div class="tab active"><span class="ico">✓</span>今天</div>
+          <div class="tab"><span class="ico">⚙️</span>设置</div>
+        </div>
+        <p style="font-size:12px;color:var(--text-3);margin-top:12px">History(左) · Today(中,默认) · Settings(右)。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 屏幕 mock -->
+  <section>
+    <div class="eyebrow">05 · Screen</div>
+    <h2 class="sec">Today 首页预览</h2>
+    <p class="sec-desc">顶部品牌头（无重复大标题）+ 习惯列表 + 灰度占位引导行，沿用 Streakora 原型交互骨架。</p>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="app-hdr">
+          <div class="mark">
+            <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="none" stroke="var(--border-strong)" stroke-width="6"/><circle cx="32" cy="32" r="22" fill="none" stroke="url(#sg)" stroke-width="6" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="41" transform="rotate(-90 32 32)"/><circle cx="11" cy="39" r="5" fill="url(#sg)"/></svg>
+            Streakora
+          </div>
+          <div class="slogan">按周统计 · 断签不清零</div>
+        </div>
+        <div class="sec-head">习惯 · Habits</div>
+        <div class="habit-row">
+          <div class="habit-idx">1</div>
+          <div class="habit-main"><div class="habit-name">晨间阅读</div><div class="habit-sub">本周 3/5 · 还差 2 天达标</div></div>
+          <button class="check done"></button>
+        </div>
+        <div class="habit-row">
+          <div class="habit-idx">2</div>
+          <div class="habit-main"><div class="habit-name">夜跑 5km</div><div class="habit-sub">本周 2/5 · 还差 3 天达标</div></div>
+          <button class="check"></button>
+        </div>
+        <div class="habit-row">
+          <div class="habit-idx">3</div>
+          <div class="habit-main"><div class="habit-name">喝水 2L</div><div class="habit-sub">本周 4/5 · 还差 1 天达标</div></div>
+          <button class="check done"></button>
+        </div>
+        <div class="placeholder-row" style="margin-top:14px"><div class="dot"></div>添加习惯 · 数量不限</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 令牌总表 -->
+  <section>
+    <div class="eyebrow">06 · Token Table</div>
+    <h2 class="sec">规范令牌汇总</h2>
+    <div class="panel">
+      <table class="tokens">
+        <thead><tr><th>令牌</th><th>含义</th><th>浅色值</th><th>深色值</th></tr></thead>
+        <tbody>
+          <tr><td><code>--bg</code></td><td>页面背景</td><td>#F5F5F7</td><td>#000000</td></tr>
+          <tr><td><code>--surface</code></td><td>卡片/控件表面</td><td>#FFFFFF</td><td>#1C1C1E</td></tr>
+          <tr><td><code>--surface-sunken</code></td><td>下沉区</td><td>#EFEFF1</td><td>#2C2C2E</td></tr>
+          <tr><td><code>--border</code></td><td>发丝分割线</td><td>rgba(0,0,0,.07)</td><td>rgba(255,255,255,.09)</td></tr>
+          <tr><td><code>--text-1/2/3</code></td><td>主/次/弱文字</td><td>#1D1D1F / #6E6E73 / #8E8E93</td><td>#F5F5F7 / #98989D / #636366</td></tr>
+          <tr><td><code>--accent</code></td><td>品牌强调色</td><td>#5B5BD6</td><td>#7C7CFF</td></tr>
+          <tr><td><code>--accent-grad</code></td><td>主按钮/图标渐变</td><td>135° #6366F1→#8B5CF6→#A855F7</td><td>135° #7C7CFF→#A855F7→#C084FC</td></tr>
+          <tr><td><code>--success</code></td><td>达标/完成</td><td>#34C759</td><td>#30D158</td></tr>
+          <tr><td><code>--r-sm/md/lg/xl</code></td><td>圆角</td><td>10 / 16 / 22 / 28 px</td><td>同左</td></tr>
+          <tr><td><code>--shadow-md/lg</code></td><td>卡片柔影</td><td>0 4px16 / 0 12px40 rgba(0,0,0,.06~.10)</td><td>0 6px20 / 0 16px48 rgba(0,0,0,.45~.55)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    本内容由 AI 生成，请核实后使用。<br/>
+    设计令牌可直接映射到 Expo / RN：颜色→Colors.xxx，圆角→borderRadius，阴影→shadow*，字体→SF Pro（iOS 原生）。Logo 为纯 SVG 矢量，选定后导出 1024×1024 即可上架 App Store。
+  </footer>
+
+</div>
+
+<script>
+  function toggleTheme(){
+    const h=document.documentElement;
+    const next=h.getAttribute('data-theme')==='dark'?'light':'dark';
+    h.setAttribute('data-theme',next);
+    const map={bg:'--bg',surface:'--surface',sunken:'--surface-sunken',accent:'--accent',
+      success:'--success',warning:'--warning',danger:'--danger',text1:'--text-1',text2:'--text-2'};
+    document.querySelectorAll('.hex[data-hex]').forEach(el=>{
+      el.textContent=getComputedStyle(h).getPropertyValue(map[el.dataset.hex]).trim();
+    });
+  }
+  window.addEventListener('DOMContentLoaded',()=>{
+    const map={bg:'--bg',surface:'--surface',sunken:'--surface-sunken',accent:'--accent',
+      success:'--success',warning:'--warning',danger:'--danger',text1:'--text-1',text2:'--text-2'};
+    document.querySelectorAll('.hex[data-hex]').forEach(el=>{
+      el.textContent=getComputedStyle(document.documentElement).getPropertyValue(map[el.dataset.hex]).trim();
+    });
+  });
+</script>
+</body>
+</html>

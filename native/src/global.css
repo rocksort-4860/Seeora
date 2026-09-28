@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * 设计令牌（desing.md 口径）
+ * 唯一强调色 Action Blue #0066cc；正文 17px；字重阶梯 300/400/600/700；
+ * 圆角 sm=8 / lg=18 / pill=9999；间距 8pt 基线（含规范 17px 档）。
+ * 层次靠「亮块 ↔ 暗块」面色切换，阴影只留给落在台面上的产品图。
+ */
+@layer base {
+  :root {
+    --background: #f5f5f7; /* canvas-parchment：页面底 */
+    --foreground: #1d1d1f; /* ink：一级文字 */
+    --card: #ffffff; /* canvas：卡片 */
+    --card-foreground: #1d1d1f;
+    --popover: #ffffff;
+    --popover-foreground: #1d1d1f;
+    --primary: #0066cc; /* Action Blue：唯一强调色 */
+    --primary-foreground: #ffffff;
+    --secondary: #fafafc; /* surface-pearl */
+    --secondary-foreground: #333333; /* ink-muted-80 */
+    --muted: #f0f0f0; /* divider-soft */
+    --muted-foreground: #7a7a7a; /* ink-muted-48 */
+    --accent: #0066cc;
+    --accent-foreground: #ffffff;
+    --destructive: #d2d2d7; /* 规范无红；禁用/危险以中性灰表达 */
+    --destructive-foreground: #1d1d1f;
+    --border: #e0e0e0; /* hairline */
+    --input: #e0e0e0;
+    --ring: #0071e3; /* primary-focus */
+    --radius: 18px;
+  }
+
+  .dark {
+    --background: #1d1d1f;
+    --foreground: #f5f5f7;
+    --card: #272729;
+    --card-foreground: #f5f5f7;
+    --popover: #272729;
+    --popover-foreground: #f5f5f7;
+    --primary: #2997ff;
+    --primary-foreground: #ffffff;
+    --secondary: #2a2a2c;
+    --secondary-foreground: #c9c9ce;
+    --muted: #2c2c2e;
+    --muted-foreground: #7a7a7a;
+    --accent: #2997ff;
+    --accent-foreground: #ffffff;
+    --destructive: #4a4a50;
+    --destructive-foreground: #f5f5f7;
+    --border: #3a3a3c;
+    --input: #3a3a3c;
+    --ring: #0071e3;
+    --radius: 18px;
+  }
+}

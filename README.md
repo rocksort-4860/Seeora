@@ -5,18 +5,23 @@
 ## 结构
 
 ```
-seeora/
-├── index.html     ← 主应用（所有 JS/CSS 内联，单文件分发）
-├── landing.html   ← 营销落地页（中英双语）
-├── privacy.html   ← 隐私政策（中英双语）
-├── terms.html     ← 使用条款（中英双语）
-├── support.html   ← 支持与联系（中英双语）
+习惯927/
+├── index.html        ← 【Web 定稿】主应用（所有 JS/CSS 内联，单文件分发）
+├── landing.html      ← 营销落地页（中英双语）
+├── privacy.html      ← 隐私政策（中英双语）
+├── terms.html        ← 使用条款（中英双语）
+├── support.html      ← 支持与联系（中英双语）
+├── assets/
+│   ├── brand-mark-fill.svg  ← 实心徽标（favicon / 页头）
+│   ├── brand-mark-line.svg  ← 描边徽标（启动画面）
+│   ├── style.css            ← 四个静态页共享样式
+│   └── lang.js              ← 静态页语言切换（en 默认 / zh）
+├── native/           ← 【iOS 工程落地处】从 0923 迁入的 Expo + RN 骨架
+│   └── README-迁移说明.md   ← 转 Seeora 必改配置清单（bundle id / 品牌色 / 权限…）
+├── 参考/             ← 迁移文档库 + 防崩溃三件套 + 0923 完整 git 历史包
 ├── README.md
-└── assets/
-    ├── brand-mark-fill.svg  ← 实心徽标（favicon / 页头）
-    ├── brand-mark-line.svg  ← 描边徽标（启动画面）
-    ├── style.css            ← 四个静态页共享样式
-    └── lang.js              ← 静态页语言切换（en 默认 / zh）
+├── 上架准备清单.md    ← 上架前你要准备的账号 / 后台 / 素材清单
+└── 从0923迁移与删除清单.md
 ```
 
 ## 运行

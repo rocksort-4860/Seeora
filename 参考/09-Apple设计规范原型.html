@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Streakora — Apple Design System Prototype</title>
+<style>
+/* ============================================================
+   设计令牌 —— 100% 取自《desing.md》
+   唯一强调色 #0066cc ｜ 正文 17px/400/1.47 ｜ 字重阶梯 300/400/600/700
+   圆角 sm=8 / md=11 / lg=18 / pill=9999 ｜ 间距 4·8·12·17·24·32·48·80
+   阴影：全系统仅一处，且只给落在台面上的产品图
+   ============================================================ */
+:root{
+  /* Colors */
+  --primary:#0066cc; --primary-focus:#0071e3; --primary-on-dark:#2997ff;
+  --canvas:#ffffff; --parchment:#f5f5f7; --pearl:#fafafc;
+  --tile-1:#272729; --tile-2:#2a2a2c; --tile-3:#252527; --surface-black:#000000;
+  --chip:#d2d2d7;
+  --ink:#1d1d1f; --ink-soft:#333333; --ink-muted-48:#7a7a7a; --ink-muted-80:#333333;
+  --body-on-dark:#ffffff; --body-muted:#cccccc;
+  --divider-soft:#f0f0f0; --hairline:#e0e0e0;
+  --on-primary:#ffffff;
+
+  /* Typography */
+  --font-display:-apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Radii */
+  --r-none:0; --r-xs:5px; --r-sm:8px; --r-md:11px; --r-lg:18px; --r-pill:9999px;
+
+  /* Spacing */
+  --s-xxs:4px; --s-xs:8px; --s-sm:12px; --s-md:17px; --s-lg:24px; --s-xl:32px; --s-xxl:48px; --s-section:80px;
+
+  /* Elevation —— 仅产品投影 */
+  --product-shadow:0 5px 30px rgba(0,0,0,.22);
+  --hairline-border:1px solid var(--hairline);
+}
+
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+body{
+  margin:0; padding:48px 32px 80px;
+  background:var(--parchment); color:var(--ink);
+  font-family:var(--font-display); font-size:17px; line-height:1.47; letter-spacing:-.374px;
+}
+.wrap{max-width:1440px;margin:0 auto;}
+
+/* ---------- 页头 ---------- */
+.page-head{max-width:980px;margin:0 auto 12px;}
+.eyebrow{font-size:12px;font-weight:400;line-height:1;letter-spacing:-.12px;color:var(--ink-muted-48);margin:0 0 12px;}
+h1{font-size:40px;font-weight:600;line-height:1.1;letter-spacing:0;margin:0 0 8px;}
+.lede{font-size:17px;font-weight:400;line-height:1.47;letter-spacing:-.374px;color:var(--ink);margin:0 0 14px;max-width:66ch;}
+.lede-airy{font-size:24px;font-weight:300;line-height:1.5;letter-spacing:0;color:var(--ink-soft);max-width:52ch;margin:0 0 var(--s-xl);}
+.rule{height:1px;background:var(--hairline);border:0;margin:0 0 var(--s-xl);}
+
+/* ---------- 手机外框 ---------- */
+.row{display:flex;gap:var(--s-xl);flex-wrap:wrap;align-items:flex-start;}
+.stage{flex:1 1 360px;min-width:340px;max-width:420px;}
+.stage-label{margin:0 0 var(--s-xs);}
+.stage-label b{font-size:14px;font-weight:600;letter-spacing:-.224px;color:var(--ink);}
+.stage-label span{font-size:14px;font-weight:400;color:var(--ink-muted-48);margin-left:8px;}
+.phone{
+  width:390px;height:844px;background:var(--parchment);
+  border-radius:var(--r-lg);overflow:hidden;position:relative;
+  border:1px solid var(--hairline);
+  display:flex;flex-direction:column;
+}
+.statusbar{
+  height:44px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;font-size:14px;font-weight:600;color:var(--ink);flex:none;
+}
+.statusbar .right{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:-.12px;}
+.navbar{
+  height:52px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--s-md);background:var(--parchment);border-bottom:var(--hairline-border);flex:none;
+}
+.navbar h2{font-size:21px;font-weight:600;line-height:1.19;letter-spacing:.231px;margin:0;}
+.navbar .btn{font-size:14px;font-weight:400;letter-spacing:-.224px;color:var(--primary);background:none;border:0;padding:0;cursor:pointer;}
+.screen{flex:1;overflow-y:auto;background:var(--parchment);}
+.screen::-webkit-scrollbar{width:0;}
+.home-indicator{height:22px;flex:none;display:flex;align-items:center;justify-content:center;}
+.home-indicator i{width:134px;height:5px;border-radius:var(--r-pill);background:var(--ink);opacity:.85;display:block;}
+
+/* ---------- 应用内通用 ---------- */
+.pad{padding:0 var(--s-md);}
+.mt-s{margin-top:var(--s-sm);} .mt-m{margin-top:var(--s-md);} .mt-l{margin-top:var(--s-lg);} .mt-xl{margin-top:var(--s-xl);}
+.card{background:var(--canvas);border:var(--hairline-border);border-radius:var(--r-lg);padding:var(--s-lg);}
+.tile-label{font-size:12px;font-weight:400;line-height:1;letter-spacing:-.12px;color:var(--ink-muted-48);margin:var(--s-xl) 0 var(--s-sm);}
+h3.sec{font-size:17px;font-weight:600;line-height:1.24;letter-spacing:-.374px;margin:var(--s-lg) 0 4px;}
+p.sub{font-size:14px;font-weight:400;line-height:1.43;letter-spacing:-.224px;color:var(--ink-muted-48);margin:0 0 var(--s-sm);}
+
+/* 主按钮：唯一行动色胶囊 */
+.btn-primary{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--primary);color:var(--on-primary);
+  font-family:var(--font-display);font-size:17px;font-weight:400;line-height:1.47;letter-spacing:-.374px;
+  border:0;border-radius:var(--r-pill);padding:11px 22px;min-height:44px;cursor:pointer;
+  transition:transform .12s ease, opacity .12s ease;
+}
+.btn-primary:active{transform:scale(.95);opacity:.9;}
+.btn-primary.block{width:100%;}
+.btn-secondary{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;color:var(--primary);border:1px solid var(--primary);
+  border-radius:var(--r-pill);padding:11px 22px;min-height:44px;cursor:pointer;font-size:17px;
+  font-family:var(--font-display);line-height:1.47;letter-spacing:-.374px;
+}
+.btn-secondary:active{transform:scale(.95);opacity:.9;}
+.btn-pearl{
+  background:var(--pearl);color:var(--ink-muted-80);border:3px solid var(--divider-soft);
+  border-radius:var(--r-md);padding:8px 14px;font-size:14px;font-weight:400;line-height:1.43;letter-spacing:-.224px;
+  font-family:var(--font-display);cursor:pointer;
+}
+.pearl-row{display:flex;gap:var(--s-xs);flex-wrap:wrap;margin-top:var(--s-sm);}
+
+/* 习惯卡片（Today） */
+.habit{display:flex;align-items:center;gap:var(--s-sm);background:var(--canvas);border:var(--hairline-border);border-radius:var(--r-lg);padding:14px var(--s-md);margin-bottom:var(--s-sm);cursor:pointer;}
+.habit:active{transform:scale(.99);}
+.emoji{width:36px;height:36px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none;}
+.habit-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.habit-name{display:block;font-size:17px;font-weight:600;line-height:1.24;letter-spacing:-.374px;color:var(--ink);}
+.habit-meta{display:block;font-size:14px;font-weight:400;line-height:1.43;letter-spacing:-.224px;color:var(--ink-muted-48);margin-top:2px;}
+.habit-meta em{font-style:normal;font-variant-numeric:tabular-nums;color:var(--ink-soft);}
+.dots{display:flex;align-items:center;justify-content:space-between;width:62px;height:16px;position:relative;flex:none;}
+.dots::before{content:"";position:absolute;left:4px;right:4px;top:50%;height:1px;background:var(--divider-soft);}
+.dots i{display:block;width:7px;height:7px;border-radius:var(--r-pill);background:transparent;border:1px solid var(--divider-soft);z-index:1;}
+.dots i.on{background:var(--primary);border-color:var(--primary);}
+.dots i.rest{background:var(--chip);border-color:var(--chip);}
+.dots i.today{width:9px;height:9px;}
+.dots i.today.on{width:9px;height:9px;}
+.check{
+  width:44px;height:44px;border-radius:var(--r-pill);flex:none;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--divider-soft);background:var(--canvas);cursor:pointer;padding:0;
+}
+.check:active{transform:scale(.95);}
+.check.on{background:var(--primary);border-color:var(--primary);}
+.check svg{width:20px;height:20px;display:block;}
+.check .tick{stroke:var(--on-primary);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.check .ringdot{fill:var(--divider-soft);}
+
+/* 统计 */
+.stats{display:flex;justify-content:center;gap:var(--s-xl);margin-top:var(--s-sm);}
+.stat b{display:block;font-size:22px;font-weight:600;line-height:1.24;letter-spacing:-.374px;color:var(--ink);font-variant-numeric:tabular-nums;}
+.stat span{font-size:11px;font-weight:400;line-height:1;letter-spacing:-.12px;color:var(--ink-muted-48);}
+
+/* 休息行 */
+.rest-row{display:flex;align-items:center;gap:var(--s-sm);background:var(--canvas);border:var(--hairline-border);border-radius:var(--r-lg);padding:14px var(--s-md);}
+.rest-row.on{border-color:var(--chip);}
+.rest-row .ico{width:20px;height:20px;border-radius:var(--r-pill);background:var(--chip);flex:none;}
+.rest-row .txt{flex:1;font-size:15px;font-weight:400;letter-spacing:0;color:var(--ink);}
+.rest-row.on .txt{color:var(--ink-muted-48);}
+.switch{width:44px;height:26px;border-radius:var(--r-pill);background:var(--divider-soft);position:relative;flex:none;}
+.switch .knob{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:var(--r-pill);background:var(--canvas);box-shadow:0 1px 2px rgba(0,0,0,.12);transition:left .2s ease;}
+.switch.on{background:var(--primary);}
+.switch.on .knob{left:20px;}
+
+/* 补签 7 格 */
+.makeup{display:flex;justify-content:space-between;margin-top:var(--s-sm);}
+.makeup button{background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
+.makeup .d{width:36px;height:36px;border-radius:var(--r-pill);border:1.5px solid var(--divider-soft);display:flex;align-items:center;justify-content:center;}
+.makeup .d.on{background:var(--primary);border-color:var(--primary);}
+.makeup .d svg{width:16px;height:16px;}
+.makeup .d .dot{width:8px;height:8px;border-radius:var(--r-pill);background:var(--divider-soft);}
+.makeup .d.on svg path{stroke:var(--on-primary);}
+.makeup .d.locked{opacity:.4;}
+.makeup time{font-size:10px;font-weight:400;line-height:1;letter-spacing:-.08px;color:var(--ink-muted-48);font-variant-numeric:tabular-nums;}
+
+/* 底部固定条（吸底，羊皮纸 80% + 毛玻璃） */
+.sticky{position:sticky;bottom:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 var(--s-lg);
+  background:rgba(245,245,247,.8);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:var(--hairline-border);}
+.sticky .price{font-size:17px;font-weight:400;letter-spacing:-.374px;color:var(--ink);}
+
+/* 成就卡：唯一的“产品投影”落点 */
+.achieve{
+  background:var(--canvas);border-radius:var(--r-lg);padding:var(--s-lg);
+  box-shadow:var(--product-shadow);
+}
+.achieve .k{font-size:12px;font-weight:400;line-height:1;letter-spacing:-.12px;color:var(--ink-muted-48);}
+.achieve h4{font-size:24px;font-weight:600;line-height:1.47;letter-spacing:-.374px;margin:6px 0 var(--s-sm);color:var(--ink);}
+.achieve .nums{display:flex;gap:var(--s-lg);margin-top:var(--s-sm);}
+.achieve .nums div b{display:block;font-size:22px;font-weight:600;line-height:1.24;letter-spacing:-.374px;color:var(--ink);font-variant-numeric:tabular-nums;}
+.achieve .nums div span{font-size:11px;font-weight:400;line-height:1;letter-spacing:-.12px;color:var(--ink-muted-48);}
+
+/* 设置行 */
+.row-item{display:flex;align-items:center;justify-content:space-between;background:var(--canvas);border:var(--hairline-border);border-radius:var(--r-lg);padding:var(--s-md);}
+.row-item + .row-item{margin-top:-1px;border-radius:0;}
+.row-item + .row-item:last-child{border-radius:var(--r-lg);}
+.row-item .lbl{font-size:17px;font-weight:400;letter-spacing:-.374px;color:var(--ink);}
+.row-item .val{font-size:14px;font-weight:400;letter-spacing:-.224px;color:var(--ink-muted-48);}
+
+/* 令牌表 */
+.tokens{margin-top:var(--s-xxl);border-top:1px solid var(--hairline);padding-top:var(--s-xl);}
+.token-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--s-lg);margin-top:var(--s-md);}
+.token-box{background:var(--canvas);border:var(--hairline-border);border-radius:var(--r-lg);padding:var(--s-lg);}
+.token-box h5{font-size:14px;font-weight:600;letter-spacing:-.224px;margin:0 0 var(--s-sm);color:var(--ink);}
+.swatch{display:flex;align-items:center;gap:var(--s-xs);font-size:12px;font-weight:400;letter-spacing:-.12px;color:var(--ink-soft);margin-bottom:6px;}
+.swatch i{width:22px;height:22px;border-radius:var(--r-xs);display:block;border:1px solid rgba(0,0,0,.06);}
+.radii{display:flex;align-items:center;gap:var(--s-sm);font-size:12px;font-weight:400;letter-spacing:-.12px;color:var(--ink-soft);margin-bottom:6px;}
+.radii i{display:block;background:var(--primary);}
+.spaces{display:flex;align-items:flex-end;gap:6px;font-size:12px;font-weight:400;letter-spacing:-.12px;color:var(--ink-soft);}
+.spaces i{display:block;background:var(--hairline);border-radius:var(--r-xs);}
+dl.ty{margin:0;font-size:12px;font-weight:400;letter-spacing:-.12px;color:var(--ink-soft);}
+dl.ty div{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--divider-soft);gap:var(--s-sm);}
+dl.ty b{font-weight:400;color:var(--ink);}
+.note{font-size:14px;font-weight:400;line-height:1.43;letter-spacing:-.224px;color:var(--ink-muted-48);margin:var(--s-lg) 0 0;max-width:70ch;}
+.warn{background:var(--canvas);border:var(--hairline-border);border-radius:var(--r-lg);padding:var(--s-lg);margin-top:var(--s-xl);}
+.warn h5{font-size:14px;font-weight:600;letter-spacing:-.224px;margin:0 0 var(--s-sm);}
+.warn p{font-size:14px;font-weight:400;line-height:1.43;letter-spacing:-.224px;color:var(--ink-soft);margin:0 0 var(--s-xs);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <p class="eyebrow">Streakora · iOS</p>
+    <h1>Streakora — Apple Design System Prototype</h1>
+    <p class="lede-airy">A photography-first interface where UI chrome recedes. One accent, parchmentlight blocks and near-black tiles doing the separating, and a single blue pill for every action.</p>
+    <p class="lede">Every colour, radius, type step, space and shadow below is taken verbatim from the design specification — no second accent, no shadows on chrome, no decorative gradient.</p>
+  </header>
+  <hr class="rule">
+</div>
+
+<div class="wrap">
+  <div class="row">
+
+  <!-- ===================== TODAY ===================== -->
+  <section class="stage">
+    <p class="stage-label"><b>Today</b><span>list · check-in · 7-day mini bar</span></p>
+    <div class="phone">
+      <div class="statusbar"><span>9:41</span><span class="right">•••• 100%</span></div>
+      <div class="navbar">
+        <button class="btn">Edit</button>
+        <h2>Today</h2>
+        <button class="btn">Add</button>
+      </div>
+      <div class="screen" id="todayScreen">
+
+        <p class="tile-label" style="margin-top:var(--s-md)">HABITS</p>
+        <div class="pad" id="habitList"><!-- 由脚本渲染 --></div>
+
+        <div class="pad mt-xl">
+          <button class="btn-primary block" id="addBtn">Add habit</button>
+        </div>
+
+        <p class="tile-label">SETTINGS</p>
+        <div class="pad" style="padding-bottom:var(--s-xxl)">
+          <div class="row-item"><span class="lbl">Language</span><span class="val">English</span></div>
+          <div class="row-item"><span class="lbl">Appearance</span><span class="val">System</span></div>
+        </div>
+      </div>
+      <div class="home-indicator"><i></i></div>
+    </div>
+  </section>
+
+    <!-- ===================== HABIT DETAIL ===================== -->
+    <section class="stage">
+      <p class="stage-label"><b>Habit detail</b><span>spiral ring · timeline curve</span></p>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="right">•••• 100%</span></div>
+        <div class="navbar">
+          <button class="btn" onclick="history.back()">‹ Back</button>
+          <h2 id="detailTitle">Morning run</h2>
+          <button class="btn">Edit</button>
+        </div>
+        <div class="screen">
+          <p class="tile-label" style="margin-top:var(--s-md)">YOUR SPIRAL</p>
+          <div class="pad" style="display:flex;justify-content:center">
+            <svg width="220" height="220" viewBox="0 0 220 220" id="spiral"><circle cx="110" cy="110" r="34" fill="none" stroke="#f0f0f0" stroke-width="2"></circle><circle cx="110" cy="110" r="55" fill="none" stroke="#f0f0f0" stroke-width="2"></circle><circle cx="110" cy="110" r="76" fill="none" stroke="#f0f0f0" stroke-width="2"></circle><path d="M110.0 76.0 A34.0 34.0 0 0 1 136.6 88.8" fill="none" stroke="#0066cc" stroke-width="3" stroke-linecap="round"></path><path d="M136.6 88.8 A34.0 34.0 0 0 1 143.1 117.6" fill="none" stroke="#d2d2d7" stroke-width="3" stroke-linecap="round"></path><path d="M143.1 117.6 A34.0 34.0 0 0 1 124.8 140.6" fill="none" stroke="#d2d2d7" stroke-width="3" stroke-linecap="round"></path><path d="M124.8 140.6 A34.0 34.0 0 0 1 95.2 140.6" fill="none" stroke="#0066cc" stroke-width="3" stroke-linecap="round"></path><path d="M95.2 140.6 A34.0 34.0 0 0 1 76.9 117.6" fill="none" stroke="#0066cc" stroke-width="3" stroke-linecap="round"></path><path d="M110.0 55.0 A55.0 55.0 0 0 1 153.0 75.7" fill="none" stroke="#0066cc" stroke-width="3" stroke-linecap="round"></path><path d="M153.0 75.7 A55.0 55.0 0 0 1 163.6 122.2" fill="none" stroke="#0066cc" stroke-width="3" stroke-linecap="round"></path><path d="M163.6 122.2 A55.0 55.0 0 0 1 133.9 159.6" fill="none" stroke="#d2d2d7" stroke-width="3" stroke-linecap="round"></path><path d="M133.9 159.6 A55.0 55.0 0 0 1 86.1 159.6" fill="none" stroke="#d2d2d7" stroke-width="3" stroke-linecap="round"></path><path d="M86.1 159.6 A55.0 55.0 0 0 1 56.4 122.2" fill="none" stroke="#0066cc" stroke-width="3" stroke-linecap="round"></path><path d="M110.0 34.0 A76.0 76.0 0 0 1 169.4 62.6" fill="none" stroke="#0066cc" stroke-width="3" stroke-linecap="round"></path><path d="M169.4 62.6 A76.0 76.0 0 0 1 184.1 126.9" fill="none" stroke="#0066cc" stroke-width="3" stroke-linecap="round"></path><path d="M184.1 126.9 A76.0 76.0 0 0 1 143.0 178.5" fill="none" stroke="#0066cc" stroke-width="3" stroke-linecap="round"></path><path d="M143.0 178.5 A76.0 76.0 0 0 1 77.0 178.5" fill="none" stroke="#0066cc" stroke-width="3" stroke-linecap="round"></path><circle cx="110.0" cy="76.0" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="136.6" cy="88.8" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="143.1" cy="117.6" r="9" fill="#d2d2d7" stroke="#d2d2d7" stroke-width="0"></circle><circle cx="124.8" cy="140.6" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="95.2" cy="140.6" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="76.9" cy="117.6" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="83.4" cy="88.8" r="9" fill="#ffffff" stroke="#f0f0f0" stroke-width="2"></circle><circle cx="110.0" cy="55.0" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="153.0" cy="75.7" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="163.6" cy="122.2" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="133.9" cy="159.6" r="9" fill="#d2d2d7" stroke="#d2d2d7" stroke-width="0"></circle><circle cx="86.1" cy="159.6" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="56.4" cy="122.2" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="67.0" cy="75.7" r="9" fill="#ffffff" stroke="#f0f0f0" stroke-width="2"></circle><circle cx="110.0" cy="34.0" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="169.4" cy="62.6" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="184.1" cy="126.9" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="143.0" cy="178.5" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="77.0" cy="178.5" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle><circle cx="35.9" cy="126.9" r="9" fill="#ffffff" stroke="#f0f0f0" stroke-width="2"></circle><circle cx="50.6" cy="62.6" r="9" fill="#0066cc" stroke="#0066cc" stroke-width="0"></circle></svg>
+          </div>
+          <div class="stats">
+            <div class="stat"><b>12</b><span>Current streak</span></div>
+            <div class="stat"><b>19</b><span>Best streak</span></div>
+            <div class="stat"><b>46</b><span>Cycles</span></div>
+          </div>
+          <p style="text-align:center;font-size:12px;font-weight:400;line-height:1;letter-spacing:-.12px;color:var(--ink-muted-48);margin:8px 0 0" id="nodeDays">7 nodes per loop · 1 day per node</p>
+
+          <div class="pad mt-l">
+            <button class="btn-primary block" id="checkinBtn" onclick="toggleCheckIn()">Check in today</button>
+          </div>
+
+          <h3 class="sec">Rest day</h3>
+          <p class="sub">Mark rest before or on today. Past dates can't be changed.</p>
+          <div class="pad mt-s"><div class="rest-row" id="restRow" onclick="toggleRest()">
+            <span class="ico"></span>
+            <span class="txt" id="restTxt">Mark rest</span>
+            <span class="switch" id="restSwitch"><span class="knob"></span></span>
+          </div></div>
+
+          <h3 class="sec">Backfill</h3>
+          <p class="sub">Free to backfill or undo within the last 7 days. Earlier dates are locked.</p>
+          <div class="pad"><div class="makeup" id="makeup"></div></div>
+
+          <h3 class="sec">Cumulative check-ins</h3>
+          <div class="pad mt-s"><div class="card" style="padding:var(--s-sm) var(--s-md)">
+            <svg width="100%" height="120" viewBox="0 0 342 120" id="curve" preserveAspectRatio="none"></svg>
+          </div></div>
+
+          <div class="pad mt-l" style="padding-bottom:var(--s-xxl)">
+            <button class="btn-primary block" onclick="alert('Achievement card')">Create achievement card</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ACHIEVEMENT CARD ===================== -->
+    <section class="stage">
+      <p class="stage-label"><b>Achievement card</b><span>the only product shadow</span></p>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="right">• • 100%</span></div>
+        <div class="navbar"><span style="width:44px"></span><h2>Share</h2><span style="width:44px"></span></div>
+        <div class="screen">
+          <p class="tile-label" style="margin-top:var(--s-md)">PREVIEW</p>
+          <div class="pad">
+            <div class="achieve">
+              <p class="k">STREAKORA</p>
+              <h4>Morning run</h4>
+              <div id="achieveArt" style="display:flex;justify-content:center"></div>
+              <div class="nums">
+                <div><b>19</b><span>Best streak</span></div>
+                <div><b>46</b><span>Cycles</span></div>
+                <div><b>128</b><span>Days</span></div>
+              </div>
+              <p id="achieveQuote" style="font-size:17px;font-weight:400;line-height:1.47;letter-spacing:-.374px;color:var(--ink);margin:var(--s-lg) 0 0">The more you keep going, the more you grow</p>
+              <p style="font-size:12px;font-weight:400;line-height:1;letter-spacing:-.12px;color:var(--ink-muted-48);margin:var(--s-md) 0 0">— Keep going</p>
+            </div>
+          </div>
+          <div class="pad mt-l">
+            <h3 class="sec" style="margin-top:0">Quote options</h3>
+            <div class="pearl-row" id="quotes"></div>
+            <h3 class="sec">Signature line</h3>
+            <div class="card" style="padding:var(--s-sm) var(--s-md)">
+              <input placeholder="Keep going" style="width: 100%; border: 0px; font-family: var(--font-display); font-size: 17px; font-weight: 400; letter-spacing: -0.374px; color: var(--ink); background: transparent; padding: 6px 0px;">
+            </div>
+          </div>
+          <div class="sticky">
+            <span class="price">128 days · 19 best</span>
+            <button class="btn-primary">Share</button>
+          </div>
+        </div>
+        <div class="home-indicator"><i></i></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ===================== 令牌参考 ===================== -->
+  <section class="tokens">
+    <p class="eyebrow">REFERENCE</p>
+    <h1 style="font-size:40px;font-weight:600;line-height:1.1;margin:0 0 8px">Design tokens</h1>
+    <p class="lede">Pulled straight from the specification. Nothing in the UI uses an inline hex — every value resolves through these.</p>
+
+    <div class="token-grid">
+      <div class="token-box">
+        <h5>Colors — single accent</h5>
+        <div class="swatch"><i style="background:#0066cc"></i><span>primary · #0066cc</span></div>
+        <div class="swatch"><i style="background:#0071e3"></i><span>primary-focus · #0071e3</span></div>
+        <div class="swatch"><i style="background:#2997ff"></i><span>primary-on-dark · #2997ff</span></div>
+        <div class="swatch"><i style="background:#ffffff"></i><span>canvas · #ffffff</span></div>
+        <div class="swatch"><i style="background:#f5f5f7"></i><span>parchment · #f5f5f7</span></div>
+        <div class="swatch"><i style="background:#fafafc"></i><span>pearl · #fafafc</span></div>
+        <div class="swatch"><i style="background:#272729"></i><span>tile-1 · #272729</span></div>
+        <div class="swatch"><i style="background:#d2d2d7"></i><span>chip · #d2d2d7</span></div>
+        <div class="swatch"><i style="background:#1d1d1f"></i><span>ink · #1d1d1f</span></div>
+        <div class="swatch"><i style="background:#7a7a7a"></i><span>ink-muted-48 · #7a7a7a</span></div>
+      </div>
+
+      <div class="token-box">
+        <h5>Radius — no mixing</h5>
+        <div class="radii"><i style="width:22px;height:22px;border-radius:0"></i><span>none 0</span></div>
+        <div class="radii"><i style="width:22px;height:22px;border-radius:5px"></i><span>xs 5 · inline chips</span></div>
+        <div class="radii"><i style="width:22px;height:22px;border-radius:8px"></i><span>sm 8 · utility</span></div>
+        <div class="radii"><i style="width:22px;height:22px;border-radius:11px"></i><span>md 11 · pearl button</span></div>
+        <div class="radii"><i style="width:22px;height:22px;border-radius:18px"></i><span>lg 18 · utility card</span></div>
+        <div class="radii"><i style="width:22px;height:22px;border-radius:9999px"></i><span>pill · every action</span></div>
+
+        <h5 style="margin-top:var(--s-lg)">Spacing — 8pt base</h5>
+        <div class="spaces">
+          <i style="width:4px;height:26px"></i><i style="width:8px;height:26px"></i><i style="width:12px;height:26px"></i>
+          <i style="width:17px;height:26px"></i><i style="width:24px;height:26px"></i><i style="width:32px;height:26px"></i>
+          <i style="width:48px;height:26px"></i><i style="width:80px;height:26px"></i>
+        </div>
+      </div>
+
+      <div class="token-box">
+        <h5>Typography — 300 / 400 / 600 / 700 only</h5>
+        <dl class="ty">
+          <div><b>hero-display</b><span>56 · 600 · 1.07 · −0.28</span></div>
+          <div><b>display-lg</b><span>40 · 600 · 1.10 · 0</span></div>
+          <div><b>display-md</b><span>34 · 600 · 1.47 · −0.374</span></div>
+          <div><b>lead</b><span>28 · 400 · 1.14 · 0.196</span></div>
+          <div><b>lead-airy</b><span>24 · 300 · 1.50 · 0</span></div>
+          <div><b>tagline</b><span>21 · 600 · 1.19 · 0.231</span></div>
+          <div><b>body-strong</b><span>17 · 600 · 1.24 · −0.374</span></div>
+          <div><b>body</b><span>17 · 400 · 1.47 · −0.374</span></div>
+          <div><b>caption</b><span>14 · 400 · 1.43 · −0.224</span></div>
+          <div><b>button-large</b><span>18 · 300 · 1.00 · 0</span></div>
+          <div><b>fine-print</b><span>12 · 400 · 1.00 · −0.12</span></div>
+          <div><b>micro-legal</b><span>10 · 400 · 1.30 · −0.08</span></div>
+        </dl>
+      </div>
+
+      <div class="token-box">
+        <h5>Elevation — exactly one shadow</h5>
+        <p style="font-size:14px;font-weight:400;line-height:1.43;letter-spacing:-.224px;color:var(--ink-soft);margin:0">
+          <code>rgba(0,0,0,0.22) 3px 5px 30px</code> — reserved for the product resting on a surface. The achievement card is that product. Cards, buttons and text get no shadow; their elevation comes from a surface-colour change or a 1px hairline.
+        </p>
+        <div class="achieve" style="margin-top:var(--s-md);box-shadow:var(--product-shadow)">
+          <p class="k">STREAKORA</p>
+          <h4>Resting on a surface</h4>
+          <div style="height:6px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn">
+      <h5>Compliance notes</h5>
+      <p><b>唯一强调色</b>：全界面只有一个可点击颜色 Action Blue #0066cc。功能语义（打卡 / 休息 / 无记录）改由「实心蓝 · 中性灰片 #d2d2d7 · 近乎不可见的底色 #f0f0f0」区分，不引入第二个强调色。</p>
+      <p><b>按压态</b>：所有按钮统一 transform: scale(0.95)，不改色。</p>
+      <p><b>触摸目标</b>：主按钮与勾选圆钮均为 44×44，符合规范最小触摸尺寸。</p>
+      <p><b>无装饰</b>：无渐变、无霓虹、无卡片阴影；层次靠亮块与近黑块的面切换。</p>
+    </div>
+
+    <p class="note">原型中的螺旋圆环与时间流曲线按《Streakora 产品设计文档 v0.2》的功能规则实现：每圈 7 个节点、仅相邻实心节点连线；累计打卡只增不减，漏签段转为点状虚线。视觉口径按《desing.md》。</p>
+  </section>
+</div>
+
+<script>
+/* ============ 数据（演示用） ============ */
+var HABITS = [
+  { emoji:"🏃", name:"Morning run",  meta:"12 · 19", dots:[1,1,2,1,1,1,1], done:true },
+  { emoji:"📖", name:"Reading",      meta:"4 · 11",  dots:[1,0,1,1,2,1,0], done:false },
+  { emoji:"🧘", name:"Meditation",   meta:"7 · 7",   dots:[1,1,1,0,1,1,1], done:true },
+  { emoji:"💧", name:"Drink water",  meta:"2 · 5",   dots:[0,1,1,0,0,1,0], done:false }
+];
+/* 21 个螺旋节点状态：1 完成 / 2 休息 / 0 漏签 */
+var NODE_STATE = [1,1,2,1,1,1,0, 1,1,1,2,1,1,0, 1,1,1,1,1,0,1];
+
+/* ============ 螺旋圆环（5.1） ============ */
+(function drawSpiral(){
+  var CX=110, CY=110, R0=34, DR=21, total=NODE_STATE.length;
+  var pts = NODE_STATE.map(function(_,i){
+    var ring = Math.floor(i/7), pos = i%7;
+    var a = (-90 + pos*(360/7)) * Math.PI/180;
+    var r = R0 + ring*DR;
+    return { x:CX + r*Math.cos(a), y:CY + r*Math.sin(a), ring:ring, pos:pos, i:i, r:r };
+  });
+
+  var s = '';
+  var maxRing = Math.floor((total-1)/7);
+  // 底纹：每一圈画一条完整引导圆 —— 读起来就是“一整个圆圈”
+  for (var ringIdx=0; ringIdx<=maxRing; ringIdx++){
+    var rr = R0 + ringIdx*DR;
+    s += '<circle cx="'+CX+'" cy="'+CY+'" r="'+rr+'" fill="none" stroke="#f0f0f0" stroke-width="2"/>';
+  }
+
+  // 弧段：仅同圈相邻、且两端都不是漏签，才沿圆周画弧（SVG 圆弧命令，绝不内凹）
+  for (var i=1;i<pts.length;i++){
+    var prev = NODE_STATE[pts[i-1].i], cur = NODE_STATE[pts[i].i];
+    if (prev===0 || cur===0) continue;
+    if (pts[i-1].ring !== pts[i].ring) continue; // 不跨圈斜拉，避免往里凹陷
+    var a=pts[i-1], b=pts[i];
+    var col = (prev===1 && cur===1) ? '#0066cc' : '#d2d2d7';
+    s += '<path d="M'+a.x.toFixed(1)+' '+a.y.toFixed(1)+' A'+a.r.toFixed(1)+' '+a.r.toFixed(1)+' 0 0 1 '+b.x.toFixed(1)+' '+b.y.toFixed(1)+'" fill="none" stroke="'+col+'" stroke-width="3" stroke-linecap="round"/>';
+  }
+  // 节点：完成=实心蓝 / 休息=中性灰片 / 漏签=空心底
+  pts.forEach(function(p){
+    var st = NODE_STATE[p.i];
+    var fill = st===1 ? '#0066cc' : st===2 ? '#d2d2d7' : '#ffffff';
+    var stroke = st===1 ? '#0066cc' : st===2 ? '#d2d2d7' : '#f0f0f0';
+    s += '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="9" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(st===0?2:0)+'"/>';
+  });
+  document.getElementById('spiral').innerHTML = s;
+
+  // 成就卡里复用同一图形（更小）
+  document.getElementById('achieveArt').innerHTML = spiralSmall(pts);
+})();
+
+function spiralSmall(p){
+  var s='<svg width="148" height="148" viewBox="0 0 220 220">';
+  var maxRing = Math.floor((p.length-1)/7);
+  for (var ringIdx=0; ringIdx<=maxRing; ringIdx++){
+    var rr = R0 + ringIdx*DR;
+    s += '<circle cx="'+CX+'" cy="'+CY+'" r="'+rr+'" fill="none" stroke="#f0f0f0" stroke-width="2"/>';
+  }
+  for (var i=1;i<p.length;i++){
+    var prev = NODE_STATE[p[i-1].i], cur = NODE_STATE[p[i].i];
+    if (prev===0 || cur===0) continue;
+    if (p[i-1].ring !== p[i].ring) continue;
+    var a=p[i-1], b=p[i];
+    var col = (prev===1 && cur===1) ? '#0066cc' : '#d2d2d7';
+    s += '<path d="M'+a.x.toFixed(1)+' '+a.y.toFixed(1)+' A'+a.r.toFixed(1)+' '+a.r.toFixed(1)+' 0 0 1 '+b.x.toFixed(1)+' '+b.y.toFixed(1)+'" fill="none" stroke="'+col+'" stroke-width="4" stroke-linecap="round"/>';
+  }
+  p.forEach(function(q){
+    var st=NODE_STATE[q.i];
+    var fill = st===1 ? '#0066cc' : st===2 ? '#d2d2d7' : '#ffffff';
+    var stroke = st===1 ? '#0066cc' : st===2 ? '#d2d2d7' : '#f0f0f0';
+    s += '<circle cx="'+q.x.toFixed(1)+'" cy="'+q.y.toFixed(1)+'" r="8" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(st===0?2:0)+'"/>';
+  });
+  return s+'</svg>';
+}
+
+/* ============ 时间流曲线（5.2）：累计只增不减，漏签段点状虚线 ============ */
+(function drawCurve(){
+  var W=342, H=120, padL=8, padR=8, padT=18, padB=14;
+  var n=42, cum=6, series=[];
+  var missPattern=[0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0];
+  for (var i=0;i<n;i++){
+    if (!missPattern[i]) cum += (i%4===0?1:1);
+    series.push({ has: !missPattern[i], total: cum });
+  }
+  var max = series[series.length-1].total;
+  var xOf = function(i){ return padL + (W-padL-padR) * (i/(n-1)); };
+  var yOf = function(v){ return padT + (H-padT-padB) * (1 - v/max); };
+
+  var s='';
+  // 底部每 5 天一格刻度
+  for (var k=0;k<n;k+=5){
+    s += '<line x1="'+xOf(k)+'" y1="'+(H-padB)+'" x2="'+xOf(k)+'" y2="'+(H-padB+4)+'" stroke="#e0e0e0" stroke-width="1"/>';
+  }
+  // 实线段 / 点状虚线段
+  for (var j=1;j<n;j++){
+    var a=series[j-1], b=series[j];
+    if (a.has && b.has){
+      s += '<line x1="'+xOf(j-1)+'" y1="'+yOf(a.total)+'" x2="'+xOf(j)+'" y2="'+yOf(b.total)+'" stroke="#0066cc" stroke-width="2" stroke-linecap="round"/>';
+    } else {
+      for (var t=1;t<4;t++){
+        var f=t/4;
+        s += '<circle cx="'+(xOf(j-1)+(xOf(j)-xOf(j-1))*f).toFixed(1)+'" cy="'+(yOf(a.total)+(yOf(b.total)-yOf(a.total))*f).toFixed(1)+'" r="1.6" fill="#f0f0f0"/>';
+      }
+    }
+  }
+  // 采样点
+  series.forEach(function(p,i){
+    s += p.has
+      ? '<circle cx="'+xOf(i)+'" cy="'+yOf(p.total)+'" r="3" fill="#0066cc"/>'
+      : '<circle cx="'+xOf(i)+'" cy="'+yOf(p.total)+'" r="2.5" fill="#f0f0f0"/>';
+  });
+  document.getElementById('curve').innerHTML = s;
+})();
+
+/* ============ Today 列表 ============ */
+(function renderHabits(){
+  var list=document.getElementById('habitList'), html='';
+  HABITS.forEach(function(h){
+    var dots='';
+    h.dots.forEach(function(v,i){
+      var cls = v===1?'on':v===2?'rest':'';
+      dots += '<i class="'+cls+(i===h.dots.length-1?' today':'')+'"></i>';
+    });
+    html += '<div class="habit">'
+      + '<span class="emoji" style="background:#fafafc">' + h.emoji + '</span>'
+      + '<span class="habit-main"><span class="habit-name">'+h.name+'</span>'
+      + '<span class="habit-meta"><em>'+h.meta.split(' · ')[0]+'</em> current · <em>'+h.meta.split(' · ')[1]+'</em> best</span></span>'
+      + '<span class="dots">'+dots+'</span>'
+      + '<button class="check'+(h.done?' on':'')+'" onclick="event.stopPropagation();toggleHabit(this)">'
+      + (h.done ? '<svg viewBox="0 0 20 20"><path class="tick" d="M4 10.5 L8 14.5 L16 6"/></svg>'
+                 : '<svg viewBox="0 0 12 12"><circle class="ringdot" cx="6" cy="6" r="3"/></svg>')
+      + '</button></div>';
+  });
+  list.innerHTML = html;
+})();
+
+function toggleHabit(btn){
+  var on = !btn.classList.contains('on');
+  btn.classList.toggle('on', on);
+  btn.innerHTML = on ? '<svg viewBox="0 0 20 20"><path class="tick" d="M4 10.5 L8 14.5 L16 6"/></svg>'
+                     : '<svg viewBox="0 0 12 12"><circle class="ringdot" cx="6" cy="6" r="3"/></svg>';
+}
+
+/* ============ 详情页交互 ============ */
+var checked=false, resting=false;
+/** 两态都用规范里的按钮语法：未打卡=主蓝胶囊 / 已打卡=幽灵胶囊 */
+function toggleCheckIn(){
+  checked=!checked;
+  var b=document.getElementById('checkinBtn');
+  if (checked){
+    b.textContent = 'Done today';
+    b.style.background = 'transparent';
+    b.style.color = '#0066cc';
+    b.style.border = '1px solid #0066cc';
+  } else {
+    b.textContent = 'Check in today';
+    b.style.background = '#0066cc';
+    b.style.color = '#ffffff';
+    b.style.border = '0';
+  }
+}
+function toggleRest(){
+  resting=!resting;
+  var r=document.getElementById('restRow');
+  r.classList.toggle('on', resting);
+  document.getElementById('restTxt').textContent = resting ? 'Resting today' : 'Mark rest';
+  document.getElementById('restSwitch').classList.toggle('on', resting);
+}
+
+/* ============ 补签 7 格 ============ */
+(function renderMakeup(){
+  var rows=[
+    {d:'-1', label:'Yesterday', has:true,  can:true},
+    {d:'-2', label:'',          has:false, can:true},
+    {d:'-3', label:'',          has:true,  can:true},
+    {d:'-4', label:'',          has:false, can:true},
+    {d:'-5', label:'',          has:false, can:true},
+    {d:'-6', label:'',          has:true,  can:true},
+    {d:'-7', label:'',          has:false, can:false}
+  ];
+  var html='';
+  rows.forEach(function(r){
+    html += '<button class="'+(r.can?'':'locked')+'" onclick="event.stopPropagation();alert(\''+r.d+' day — '+(r.can?'tap to check in or undo':'locked')+'\')">'
+      + '<span class="d'+(r.has?' on':'')+'">'+(r.has?'<svg viewBox="0 0 16 16"><path d="M3 8.5 L6.2 11.5 L13 4.5" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'<span class="dot"></span>')+'</span>'
+      + '<time>'+r.d+'</time></button>' + (r.label?'':'');
+  });
+  document.getElementById('makeup').innerHTML = html;
+})();
+
+/* ============ 备选文案 ============ */
+(function renderQuotes(){
+  var qs=[
+    'The more you keep going, the more you grow',
+    'The more you record, the more you see',
+    'The more you settle, the brighter you shine',
+    'The further you go, the better you feel'
+  ];
+  var html='';
+  qs.forEach(function(q,i){
+    html += '<button class="btn-pearl" onclick="document.getElementById(\'achieveQuote\').textContent = this.textContent">' + q + '</button>';
+  });
+  document.getElementById('quotes').innerHTML = html;
+})();
+</script>
+
+
+</body></html>

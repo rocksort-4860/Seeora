@@ -1,0 +1,111 @@
+{
+  "expo": {
+    "name": "Streakora",
+    "slug": "streakora",
+    "scheme": "streakora",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "buildNumber": "1",
+      "bundleIdentifier": "com.streakora.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIFileSharingEnabled": true,
+        "LSApplicationQueriesSchemes": [
+          "mailto"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#5B5BD6"
+      },
+      "predictiveBackGestureEnabled": false,
+      "versionCode": 1,
+      "package": "com.streakora.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.INTERNET"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font",
+      "expo-system-ui",
+      "expo-image",
+      [
+        "expo-notifications",
+        {
+          "color": "#5B5BD6"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "允许 Streakora 访问相册，用于为分享卡片添加图片 / Allow Streakora to access your photos to attach images to your share card.",
+          "cameraPermission": "允许 Streakora 使用相机拍摄分享图片 / Allow Streakora to use the camera to take photos for sharing."
+        }
+      ],
+      "expo-file-system",
+      "@react-native-async-storage/expo-with-async-storage",
+      "expo-sharing",
+      "expo-document-picker",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "imageWidth": 1242,
+          "resizeMode": "contain",
+          "backgroundColor": "#5B5BD6"
+        }
+      ],
+      [
+        "expo-router",
+        {
+          "root": "src/app"
+        }
+      ],
+      "./plugins/crashReason/withCrashReason",
+      "./plugins/turboModuleFix/withTurboModuleFix",
+      "./plugins/withFmtConstevalFix",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "buildReactNativeFromSource": true
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "autolinking": {
+      "ios": {
+        "buildFromSource": [
+          "react-native-reanimated",
+          "react-native-worklets"
+        ]
+      }
+    },
+    "extra": {
+      "router": {
+        "root": "src/app"
+      },
+      "eas": {
+        "projectId": "00000000-0000-0000-0000-000000000000"
+      }
+    },
+    "owner": "streakora"
+  }
+}
