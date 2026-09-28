@@ -6,9 +6,17 @@
 
 ```
 seeora/
-├── index.html   ← 主文件（所有 JS/CSS 内联，单文件分发）
+├── index.html     ← 主应用（所有 JS/CSS 内联，单文件分发）
+├── landing.html   ← 营销落地页（中英双语）
+├── privacy.html   ← 隐私政策（中英双语）
+├── terms.html     ← 使用条款（中英双语）
+├── support.html   ← 支持与联系（中英双语）
 ├── README.md
-└── assets/      ← 预留，未来放图片
+└── assets/
+    ├── brand-mark-fill.svg  ← 实心徽标（favicon / 页头）
+    ├── brand-mark-line.svg  ← 描边徽标（启动画面）
+    ├── style.css            ← 四个静态页共享样式
+    └── lang.js              ← 静态页语言切换（en 默认 / zh）
 ```
 
 ## 运行
@@ -67,9 +75,29 @@ localStorage.setItem("seeora_lang", "zh");
 - `assets/brand-mark-line.svg`：描边徽标，显示在应用**启动画面（splash）**中央。
 - 启动画面 `#splash`：打开页面时全屏淡入，居中显示描边徽标 + 应用名 "Seeora" + 本地化标语（见 `t().slogan`）+ 加载圈；`window.load` 后约 600ms 淡出并移除 DOM（另有 3 秒兜底，防止卡死）。无论深浅色主题，启动画面均为浅色品牌底，保证描边徽标清晰可读。
 
+## 线上地址（已部署）
+
+站点：**https://rocksort-4860.github.io/Streakora/**
+
+| 页面 | 线上 URL | App Store Connect 用途 |
+|---|---|---|
+| 应用页 / 首页 | `https://rocksort-4860.github.io/Streakora/` | — |
+| 隐私政策 | `https://rocksort-4860.github.io/Streakora/privacy.html` | **Privacy Policy URL（必填）** |
+| 使用条款 | `https://rocksort-4860.github.io/Streakora/terms.html` | 自定义 EULA（如用） |
+| 支持与联系 | `https://rocksort-4860.github.io/Streakora/support.html` | **Support URL（必填）** |
+| 营销落地页 | `https://rocksort-4860.github.io/Streakora/landing.html` | Marketing URL（可选） |
+
+**对外身份口径（已确认）**
+- 开发者：个人开发者 **张新华 / Zhang Xinhua**（非公司主体）
+- 联系邮箱：`365504860@qq.com`
+- 生效日期：**2026 年 10 月 1 日**
+- 版权署名：`© 2026 Seeora · 张新华`（EN：`© 2026 Seeora · Zhang Xinhua`）
+- 隐私卖点：无账号 / 无服务端 / 无第三方埋点 / 数据本地存储；IAP 经 Apple App Store + RevenueCat 处理
+
 ## 关键约束
 
 - 绝不使用 file://，必须走 localhost
 - 每次改完代码测试前，控制台 `localStorage.clear()`
 - 所有 localStorage key 前缀必须是 `seeora_`，不要混入其他项目数据
 - 若未来拆分 styles.css / app.js，保持 index.html 的 id 不变
+- 静态页语言切换复用 `seeora_lang` 键（与 App 内一致），默认英文（`en`），中文为 `zh`
