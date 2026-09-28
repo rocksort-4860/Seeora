@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Seeora · v8</title>
+<link rel="icon" type="image/svg+xml" href="assets/brand-mark-fill.svg">
+<link rel="apple-touch-icon" href="assets/brand-mark-fill.svg">
+<style>
+:root{
+  --brand:#2d7a6b;--brandRgb:45,122,107;--brand-deep:#245f54;
+  --brand-soft:#e8f2ef;--brand-soft-text:#245f54;
+  --rest:#94a8a2;--missFill:rgba(0,0,0,0.04);--missStroke:rgba(0,0,0,0.12);
+  --bg:#f1ede6;--bg-outer:#e3ded4;--card:#ffffff;--input-bg:#ffffff;
+  --ink:#2a2a2a;--muted:#8a8a85;--tagline:#b9b3a8;--hair:rgba(0,0,0,0.06);
+  --tabbar-bg:rgba(255,255,255,.94);
+  --mig-card-bg:#eef4f2;--mig-card-border:rgba(45,122,107,.20);--mig-card-hair:rgba(45,122,107,.14);--mig-t:#245f54;
+  --add-row-border:rgba(0,0,0,0.10);--add-row-bg:rgba(255,255,255,.55);
+  --ringGuide:rgba(0,0,0,0.06);--ringTodayStroke:#f1ede6;
+  --gridLine:rgba(0,0,0,0.06);--axisLine:rgba(0,0,0,0.12);--axisText:#8a8a85;--heatEmpty:rgba(0,0,0,0.05);
+  --icon-btn-shadow:0 1px 2px rgba(0,0,0,.03);
+  --card-shadow:0 1px 2px rgba(0,0,0,.03),0 4px 12px rgba(0,0,0,.05);
+  --card-shadow-press:0 1px 2px rgba(0,0,0,.04);
+}
+[data-theme="dark"]{
+  --brand:#4a9c8a;--brandRgb:74,156,138;--brand-deep:#2d7a6b;
+  --brand-soft:rgba(74,156,138,0.14);--brand-soft-text:#7fc0b0;
+  --rest:#6b7d78;--missFill:rgba(255,255,255,0.05);--missStroke:rgba(255,255,255,0.15);
+  --bg:#1c1b19;--bg-outer:#0f0e0d;--card:#292725;--input-bg:#322f2c;
+  --ink:#ebe8e2;--muted:#8a8a85;--tagline:#6b6862;--hair:rgba(255,255,255,0.08);
+  --tabbar-bg:rgba(37,36,33,.94);
+  --mig-card-bg:rgba(74,156,138,0.10);--mig-card-border:rgba(74,156,138,.28);--mig-card-hair:rgba(74,156,138,.15);--mig-t:#7fc0b0;
+  --add-row-border:rgba(255,255,255,0.12);--add-row-bg:rgba(255,255,255,.03);
+  --ringGuide:rgba(255,255,255,0.08);--ringTodayStroke:#1c1b19;
+  --gridLine:rgba(255,255,255,0.06);--axisLine:rgba(255,255,255,0.12);--axisText:#8a8a85;--heatEmpty:rgba(255,255,255,0.06);
+  --icon-btn-shadow:0 1px 2px rgba(0,0,0,.2);
+  --card-shadow:0 1px 2px rgba(0,0,0,.25),0 4px 12px rgba(0,0,0,.3);
+  --card-shadow-press:0 1px 2px rgba(0,0,0,.3);
+}
+/* ===== 启动画面 splash ===== */
+#splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#ffffff 0%,#e8f2ef 100%);transition:opacity .45s ease,visibility .45s ease}
+#splash.splash-hidden{opacity:0;visibility:hidden;pointer-events:none}
+#splash .sp-logo{width:96px;height:96px;display:block;animation:sp-pop .5s ease}
+#splash .sp-name{margin-top:18px;font-size:26px;font-weight:700;letter-spacing:.5px;color:var(--brand)}
+#splash .sp-slogan{margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:.2px}
+#splash .sp-spin{margin-top:26px;width:26px;height:26px;border-radius:50%;border:3px solid rgba(45,122,107,.18);border-top-color:var(--brand);animation:sp-spin .8s linear infinite}
+@keyframes sp-spin{to{transform:rotate(360deg)}}
+@keyframes sp-pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center;min-height:100vh;transition:background-color .25s ease}
+#app{width:375px;min-height:100vh;background:var(--bg);position:relative;overflow:hidden;box-shadow:0 0 30px rgba(0,0,0,.10);transition:background-color .25s ease}
+.view{display:none}.view.on{display:block}
+.brand{padding:12px 16px 0;text-align:center}
+.brand-row{display:flex;align-items:center;justify-content:center;gap:8px}
+.brand-name{font-size:20px;font-weight:700;letter-spacing:.5px}
+.brand-icon{width:22px;height:22px;flex:none;display:block}
+.slogan{text-align:center;color:var(--muted);font-size:12px;padding:6px 20px 8px;letter-spacing:.2px}
+.head{display:flex;align-items:center;justify-content:space-between;padding:2px 16px 10px;position:relative}
+.head-title{font-size:24px;font-weight:700}
+.head-side{display:flex;align-items:center;gap:8px}
+.icon-btn{width:36px;height:36px;border-radius:999px;border:1px solid var(--hair);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;color:var(--ink);font-size:16px;box-shadow:var(--icon-btn-shadow)}
+.icon-btn:active{transform:scale(.95)}.icon-btn svg{width:18px;height:18px;display:block}
+.center-title{position:absolute;left:0;right:0;text-align:center;font-size:17px;font-weight:600;pointer-events:none}
+.card{margin:10px 16px;background:var(--card);border-radius:14px;padding:14px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:10px;transition:transform .12s ease,box-shadow .12s ease}
+.card:active{transform:scale(.99);box-shadow:var(--card-shadow-press)}
+.card-main{flex:1;min-width:0}
+.h-name{font-size:17px;font-weight:700;color:var(--ink)}
+.h-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.mini{margin-top:8px}
+.chev{flex:none;margin-left:-2px;margin-right:-2px;opacity:.85}
+.check{width:44px;height:44px;border-radius:999px;border:1.5px solid var(--missStroke);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:border-color .3s ease,background-color .3s ease;flex:none}
+.check.on{background:var(--brand);border-color:var(--brand)}
+.check svg{width:22px;height:22px}
+.check path{stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;fill:none;opacity:0;transition:opacity .3s ease}
+.check.on path{opacity:1}
+.check.breathe{animation:breathe 1.05s cubic-bezier(.38,0,.28,1)}
+@keyframes breathe{
+  0%{transform:scale(1);box-shadow:0 0 0 0 rgba(var(--brandRgb),.5)}
+  50%{transform:scale(1.08);box-shadow:0 0 0 11px rgba(var(--brandRgb),0)}
+  100%{transform:scale(1);box-shadow:0 0 0 0 rgba(var(--brandRgb),0)}
+}
+.card.hint{animation:cardHint 1.6s ease 2}
+@keyframes cardHint{0%,100%{box-shadow:var(--card-shadow)}50%{box-shadow:0 0 0 5px rgba(var(--brandRgb),.16),var(--card-shadow)}}
+.add-row{margin:10px 16px;height:56px;border-radius:14px;border:1.5px dashed var(--add-row-border);background:var(--add-row-bg);display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:15px;cursor:pointer;transition:transform .12s ease}
+.add-row:active{transform:scale(.98)}
+.add-row i{width:20px;height:20px;border-radius:999px;background:var(--brand);color:#fff;font-style:normal;font-size:15px;line-height:20px;text-align:center}
+.detail{position:absolute;inset:0;background:var(--bg);z-index:20;overflow-y:auto;display:none}
+.detail.on{display:block}
+.hero-guide{margin:6px 16px 0;background:var(--brand-soft);color:var(--brand-soft-text);font-size:12px;padding:8px 10px;border-radius:10px;display:flex;align-items:center;justify-content:space-between}
+.ring-wrap{display:flex;justify-content:center;padding:14px 0 6px;position:relative}
+.ring-glow{position:absolute;border-radius:999px;width:230px;height:230px;border:2px solid var(--brand);opacity:0;pointer-events:none}
+.ring-glow.play{animation:glow 1.5s ease}
+@keyframes glow{0%{opacity:.35;transform:scale(.9)}100%{opacity:0;transform:scale(1.3)}}
+.arc-new{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw .7s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.pop-in{animation:popIn .45s ease}
+@keyframes popIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.ring-breathe{animation:ringBreathe 1.05s ease}
+@keyframes ringBreathe{
+  0%{filter:drop-shadow(0 0 0 rgba(var(--brandRgb),0))}
+  50%{filter:drop-shadow(0 0 7px rgba(var(--brandRgb),.5))}
+  100%{filter:drop-shadow(0 0 0 rgba(var(--brandRgb),0))}
+}
+.stats{display:flex;margin:6px 16px 0;background:var(--card);border-radius:14px;padding:12px 0;box-shadow:var(--card-shadow)}
+.stat{flex:1;text-align:center;border-right:1px solid var(--hair)}.stat:last-child{border-right:none}
+.stat-num{font-size:22px;font-weight:700;color:var(--ink)}
+.stat-lab{font-size:11px;color:var(--muted);margin-top:2px}
+.big-btn{margin:14px 16px 0;height:50px;border-radius:999px;background:var(--brand);color:#fff;font-size:17px;font-weight:600;border:none;cursor:pointer;transition:transform .12s ease;width:calc(100% - 32px)}
+.big-btn:active{transform:scale(.95)}
+.big-btn.done{background:var(--card);color:var(--brand);border:1.5px solid var(--brand)}
+.big-btn.rest{background:var(--rest);color:#fff}
+.row{display:flex;align-items:center;justify-content:space-between;margin:10px 16px 0;background:var(--card);border-radius:14px;padding:12px 14px;box-shadow:var(--card-shadow)}
+.row-lab{font-size:15px}.row-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.tick{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--missStroke);background:var(--input-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s ease;flex:none}
+.tick svg{width:16px;height:16px}
+.tick path{stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;fill:none;opacity:0;transition:opacity .25s ease}
+.tick.on{background:var(--rest);border-color:var(--rest)}.tick.on path{opacity:1}
+.block{margin:10px 16px 0;background:var(--card);border-radius:14px;padding:12px 14px;box-shadow:var(--card-shadow)}
+.block-title{font-size:13px;font-weight:600;margin-bottom:10px}
+.makeup{display:flex;gap:6px}
+.mk{flex:1;height:48px;border-radius:10px;border:1px solid var(--hair);background:var(--input-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease,background-color .2s ease}
+.mk:active{transform:scale(.95)}
+.mk i{width:9px;height:9px;border-radius:999px;background:var(--missStroke)}
+.mk i.done{background:var(--brand)}.mk i.rest{background:var(--rest)}
+.mk span{font-size:10px;color:var(--muted);margin-top:6px}
+.ghost-btn{margin:12px 16px 24px;height:48px;border-radius:999px;background:var(--card);color:var(--brand);border:1.5px solid var(--brand);font-size:16px;font-weight:600;cursor:pointer;transition:transform .12s ease;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--card-shadow)}
+.ghost-btn:active{transform:scale(.95)}
+.heat12{display:grid;grid-template-rows:repeat(7,12px);grid-auto-flow:column;grid-auto-columns:1fr;gap:3px}
+.heat12 i{display:block;border-radius:3px;background:var(--heatEmpty)}
+.heat12 i.on{background:var(--brand)}.heat12 i.rest{background:var(--rest)}
+.heat-legend{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:10px;color:var(--muted)}
+.heat-legend i{display:inline-block;width:10px;height:10px;border-radius:2px}
+.usage-card{margin:12px 16px 0;background:var(--card);border-radius:14px;padding:12px 0 8px;box-shadow:var(--card-shadow)}
+.usage-t{font-size:13px;font-weight:600;padding:0 14px 8px}
+.usage-grid{display:flex}
+.usage-grid>div{flex:1;text-align:center;border-right:1px solid var(--hair);padding:2px 0}
+.usage-grid>div:last-child{border-right:none}
+.usage-num{font-size:22px;font-weight:700;color:var(--ink)}
+.usage-lab{font-size:11px;color:var(--muted);margin-top:3px}
+.mig-card{margin:12px 16px 0;background:var(--mig-card-bg);border:1.5px solid var(--mig-card-border);border-radius:14px;padding:12px 14px}
+.mig-t{font-size:13px;font-weight:700;color:var(--mig-t)}
+.mig-rows{margin-top:8px}
+.mig-swipe{position:relative;overflow:hidden;border-top:1px solid var(--mig-card-hair);touch-action:pan-y}
+.mig-swipe:first-child{border-top:none}
+.mig-actions{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:stretch}
+.mig-actions span{display:flex;align-items:center;justify-content:center;width:60px;font-size:12.5px;font-weight:600;color:#fff;cursor:pointer}
+.mig-act-edit{background:#b8932c}.mig-act-del{background:#b23b34}
+.mig-front{position:relative;background:var(--mig-card-bg);display:flex;align-items:center;gap:10px;padding:9px 0;transition:transform .22s ease;will-change:transform}
+.mig-swipe.open .mig-front{transform:translateX(-120px)}
+.mig-em{width:30px;height:30px;border-radius:999px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;border:1px solid var(--hair)}
+.mig-main{flex:1;min-width:0}
+.mig-n1{font-size:13.5px;font-weight:600}
+.mig-n2{font-size:11px;color:var(--muted);margin-top:2px}
+.mig-empty-row{margin-top:8px;height:44px;border:1.5px dashed var(--mig-card-border);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--brand);font-size:13px;font-weight:600;cursor:pointer;background:var(--add-row-bg);transition:transform .12s ease}
+.mig-empty-row:active{transform:scale(.98)}
+.mig-empty-row i{width:18px;height:18px;border-radius:999px;background:var(--brand);color:#fff;font-style:normal;font-size:14px;line-height:18px;text-align:center}
+.honors-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 16px 0}
+.badge{background:var(--card);border-radius:14px;padding:14px 6px;text-align:center;border:1.5px solid transparent;box-shadow:var(--card-shadow)}
+.badge.locked{opacity:.5;box-shadow:none;background:transparent;border-color:var(--hair)}
+.badge .em{font-size:26px;line-height:1}
+.badge .bn{font-size:12px;font-weight:600;margin-top:8px}
+.badge .bc{font-size:10px;color:var(--muted);margin-top:4px}
+.badge.got{border-color:var(--brand);background:var(--brand-soft)}
+.honor-item{display:flex;align-items:center;gap:10px;margin:10px 16px 0;background:var(--card);border-radius:14px;padding:12px 14px;box-shadow:var(--card-shadow);cursor:pointer;transition:transform .12s ease}
+.honor-item:active{transform:scale(.99)}
+.honor-item .em{font-size:22px}
+.honor-item .tx{flex:1;min-width:0}
+.honor-item .t1{font-size:15px;font-weight:600}
+.honor-item .t2{font-size:11px;color:var(--muted);margin-top:3px}
+.pro-card{margin:14px 16px 0;background:linear-gradient(135deg,var(--brand),var(--brand-deep));border-radius:14px;padding:14px 60px 14px 16px;color:#fff;cursor:pointer;position:relative;transition:transform .12s ease}
+.pro-card:active{transform:scale(.99)}
+.pro-card-t{font-size:15px;font-weight:700}
+.pro-card-s{font-size:12px;opacity:.85;margin-top:4px}
+.pro-card-a{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600}
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:56px;background:var(--tabbar-bg);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);border-top:1px solid var(--hair);display:flex;z-index:15;transition:background-color .25s ease}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;color:var(--muted);cursor:pointer;gap:3px}
+.tab .ti{font-size:16px;line-height:1}
+.tab.on{color:var(--brand)}
+.pad-bottom{height:70px}
+.sheet-mask{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:30;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.sheet-mask.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--bg);border-radius:20px 20px 0 0;z-index:31;transform:translateY(102%);transition:transform .3s cubic-bezier(.2,.8,.2,1),background-color .25s ease;padding:8px 16px 20px;max-height:88%;overflow-y:auto}
+.sheet.on{transform:translateY(0)}
+.sheet-bar{width:36px;height:4px;border-radius:999px;background:var(--hair);margin:6px auto 12px}
+.sheet-title{font-size:19px;font-weight:700;margin-bottom:14px}
+.field{margin-bottom:14px}
+.field-lab{font-size:12px;color:var(--muted);margin-bottom:6px}
+.rem-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:14px;box-shadow:var(--card-shadow)}
+.rem-row .t1{font-size:15px;font-weight:500;color:var(--ink)}
+.rem-row .t2{font-size:11px;color:var(--muted);margin-top:3px}
+.switch{width:50px;height:30px;border-radius:999px;background:var(--missStroke);position:relative;cursor:pointer;transition:background-color .25s ease;flex:none}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:999px;background:#fff;transition:transform .25s ease;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch.on{background:var(--brand)}
+.switch.on::after{transform:translateX(20px)}
+.input{width:100%;height:46px;border-radius:12px;border:1px solid var(--hair);background:var(--input-bg);padding:0 12px;font-size:15px;color:var(--ink);font-family:inherit;outline:none;box-shadow:var(--icon-btn-shadow)}
+.textarea{height:66px;padding-top:12px;resize:none}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;height:42px;border-radius:12px;border:1px solid var(--hair);background:var(--input-bg);font-size:13px;cursor:pointer;color:var(--ink);font-family:inherit;transition:background-color .15s ease}
+.seg button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.sheet-actions{display:flex;gap:10px;margin-top:6px}
+.btn{flex:1;height:48px;border-radius:999px;font-size:16px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:transform .12s ease}
+.btn:active{transform:scale(.95)}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-ghost{background:var(--card);color:var(--ink);border:1px solid var(--hair)}
+.set-group-title{font-size:12px;font-weight:600;color:var(--muted);padding:14px 4px 8px;letter-spacing:.2px}
+.set-group-title:first-child{padding-top:6px}
+.set-list{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:var(--card-shadow)}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-top:1px solid var(--hair);cursor:pointer;transition:background-color .15s ease;gap:12px}
+.set-row:first-child{border-top:none}
+.set-row:active{background:rgba(0,0,0,.03)}
+[data-theme="dark"] .set-row:active{background:rgba(255,255,255,.04)}
+.set-row .t1{font-size:15px;font-weight:500;color:var(--ink)}
+.set-row .t2{font-size:11px;color:var(--muted);margin-top:3px}
+.set-row .val{font-size:14px;color:var(--muted);flex:none}
+.set-row .arrow{color:var(--muted);font-size:14px;flex:none;opacity:.7}
+.set-row .t1-wrap{flex:1;min-width:0}
+.pay-close{position:absolute;top:14px;right:16px;width:32px;height:32px;border-radius:999px;border:0;background:var(--hair);font-size:14px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.pay-hero{text-align:center;padding:6px 0 18px}
+.pay-icon{width:56px;height:56px;display:block;margin:0 auto 12px}
+.pay-title{font-size:22px;font-weight:700;margin:0 0 4px}
+.pay-sub{font-size:13px;color:var(--muted);margin:0}
+.pay-benefits{list-style:none;padding:0;margin:0 0 18px;background:var(--card);border-radius:14px;overflow:hidden;box-shadow:var(--card-shadow)}
+.pay-benefits li{position:relative;padding:12px 16px 12px 40px;border-top:1px solid var(--hair)}
+.pay-benefits li:first-child{border-top:none}
+.pay-benefits li b{display:block;font-size:15px;font-weight:600}
+.pay-benefits li span{font-size:12px;color:var(--muted);margin-top:2px;display:block}
+.pay-benefits li::before{content:"✓";position:absolute;left:14px;top:14px;color:var(--brand);font-weight:700;font-size:14px}
+.pay-actions{display:flex;flex-direction:column;gap:10px}
+.pay-foot{display:flex;justify-content:center;gap:6px;margin-top:14px;font-size:12px;color:var(--muted)}
+.pay-foot span{cursor:pointer}
+.pay-fine{font-size:11px;color:var(--muted);text-align:center;margin:8px 0 0;line-height:1.5}
+.pay-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 0;gap:12px}
+.pay-spinner{width:28px;height:28px;border:3px solid var(--hair);border-top-color:var(--brand);border-radius:999px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pay-loading-text{font-size:13px;color:var(--muted)}
+.pay-fail{background:var(--brand-soft);border:1.5px solid var(--brand-soft-text);border-radius:14px;padding:16px;text-align:center;margin-bottom:18px}
+.pay-fail-t{font-size:15px;font-weight:700;color:var(--brand-soft-text);margin:0 0 6px}
+.pay-fail-s{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+.pay-retry{display:inline-block;padding:8px 20px;background:var(--brand);color:#fff;border-radius:999px;font-size:14px;font-weight:600;border:0;cursor:pointer;font-family:inherit}
+.doc-sheet{max-height:88%}
+.doc-title{font-size:22px;font-weight:700;margin:0 0 6px}
+.doc-updated{font-size:11px;color:var(--muted);margin:0 0 18px}
+.doc-h{font-size:15px;font-weight:700;margin:20px 0 8px}
+.doc-p{font-size:14px;line-height:1.65;color:var(--ink);margin:0 0 10px}
+details.faq{background:var(--card);border-radius:12px;margin-bottom:8px;padding:0;overflow:hidden;box-shadow:var(--card-shadow)}
+details.faq summary{list-style:none;cursor:pointer;padding:14px 16px;font-size:14px;font-weight:600;position:relative}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::after{content:"＋";position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;transition:transform .2s ease}
+details.faq[open] summary::after{content:"−"}
+details.faq .faq-body{padding:0 16px 14px;font-size:13.5px;line-height:1.6;color:var(--muted)}
+.perm-hero{text-align:center;padding:6px 0 20px}
+.perm-icon{width:64px;height:64px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:var(--brand-soft);border-radius:999px;font-size:30px;line-height:1}
+.perm-title{font-size:22px;font-weight:700;margin:0 0 8px}
+.perm-sub{font-size:13px;color:var(--muted);margin:0;line-height:1.55;max-width:290px;margin-left:auto;margin-right:auto}
+.perm-points{list-style:none;padding:0;margin:0 0 18px;background:var(--card);border-radius:14px;overflow:hidden;box-shadow:var(--card-shadow)}
+.perm-points li{position:relative;padding:13px 16px 13px 40px;border-top:1px solid var(--hair);font-size:14px;line-height:1.45;color:var(--ink)}
+.perm-points li:first-child{border-top:none}
+.perm-points li::before{content:"✓";position:absolute;left:14px;top:14px;color:var(--brand);font-weight:700;font-size:14px}
+.poster-box{text-align:center;padding:6px 0 4px}
+.poster-box img{width:300px;height:auto;border-radius:16px;box-shadow:0 8px 26px rgba(0,0,0,.16)}
+.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;font-size:13px;padding:9px 14px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:60;white-space:nowrap;max-width:88%;overflow:hidden;text-overflow:ellipsis}
+.toast.on{opacity:1}
+.float-msg{position:absolute;top:120px;left:50%;transform:translateX(-50%);font-size:13px;color:var(--brand);opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:40;white-space:nowrap}
+.float-msg.on{opacity:1}
+button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visible,.mk:focus-visible,.icon-btn:focus-visible,.tick:focus-visible,.mig-empty-row:focus-visible,.set-row:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="splash" aria-hidden="true">
+  <img class="sp-logo" src="assets/brand-mark-line.svg" alt="Seeora">
+  <div class="sp-name">Seeora</div>
+  <div class="sp-slogan"></div>
+  <div class="sp-spin"></div>
+</div>
+<script>
+  (function(){
+    function hideSplash(){
+      var s = document.getElementById('splash');
+      if (!s) return;
+      s.classList.add('splash-hidden');
+      setTimeout(function(){ if (s && s.parentNode) s.parentNode.removeChild(s); }, 500);
+    }
+    if (document.readyState === 'complete') setTimeout(hideSplash, 600);
+    else window.addEventListener('load', function(){ setTimeout(hideSplash, 600); });
+    setTimeout(hideSplash, 3000); // 兜底：最多 3 秒强制隐藏，避免卡死
+  })();
+</script>
+<div id="app">
+
+<section id="view-home" class="view on">
+  <div class="brand">
+    <div class="brand-row">
+      <img class="brand-icon" src="assets/brand-mark-fill.svg" alt="Seeora">
+      <span class="brand-name" id="brandHome"></span>
+    </div>
+    <div class="slogan" id="sloganHome"></div>
+  </div>
+  <div class="head">
+    <div class="head-title" id="titleToday">Today</div>
+    <div class="head-side">
+      <button class="icon-btn" id="btnSet" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+  </div>
+  <div id="list"></div>
+  <div class="add-row" id="btnAdd" role="button" tabindex="0"><i>+</i><span id="addLab">Add habit</span></div>
+  <div class="pad-bottom"></div>
+</section>
+
+<section id="view-detail" class="detail">
+  <div class="brand">
+    <div class="brand-row">
+      <img class="brand-icon" src="assets/brand-mark-fill.svg" alt="Seeora">
+      <span class="brand-name" id="brandDetail"></span>
+    </div>
+    <div class="slogan" id="sloganDetail"></div>
+  </div>
+  <div class="head" style="padding-bottom:6px">
+    <div class="icon-btn" id="btnBack" style="z-index:2">‹</div>
+    <div class="center-title" id="detailTitle">Detail</div>
+    <div class="head-side">
+      <button class="icon-btn" id="btnSet2" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+  </div>
+  <div class="hero-guide" id="guideBox" style="display:none"><span id="guideText"></span><span style="text-decoration:underline" id="guideOk"></span></div>
+  <div class="ring-wrap"><div class="ring-glow" id="ringGlow"></div><div id="ring"></div></div>
+  <div class="stats" id="dStats"></div>
+  <button class="big-btn done" id="btnCheck">Checked in</button>
+  <div class="row">
+    <div><div class="row-lab" id="restLab"></div><div class="row-sub" id="restSub"></div></div>
+    <div class="tick" id="tickRest" role="checkbox" tabindex="0"><svg viewBox="0 0 24 24"><path d="M5 12.5 L10 17.5 L19 7"></path></svg></div>
+  </div>
+  <div class="block"><div class="block-title" id="mkTitle"></div><div class="makeup" id="mkGrid"></div></div>
+  <div class="block"><div class="block-title" id="curveTitle"></div><div id="curve"></div></div>
+  <div class="block">
+    <div class="block-title" id="heatTitleDetail"></div>
+    <div class="heat12" id="detailHeat"></div>
+    <div class="heat-legend">
+      <i style="background:var(--heatEmpty)"></i><span id="lgMiss"></span>
+      <i style="background:var(--rest);margin-left:8px"></i><span id="lgRest"></span>
+      <i style="background:var(--brand);margin-left:8px"></i><span id="lgOn"></span>
+    </div>
+  </div>
+  <div class="ghost-btn" id="btnShare" role="button" tabindex="0"><span>⤴</span><span id="shareLab"></span></div>
+  <div class="pad-bottom"></div>
+</section>
+
+<section id="view-honors" class="view">
+  <div class="brand">
+    <div class="brand-row">
+      <img class="brand-icon" src="assets/brand-mark-fill.svg" alt="Seeora">
+      <span class="brand-name" id="brandHonors"></span>
+    </div>
+    <div class="slogan" id="sloganHonors"></div>
+  </div>
+  <div class="head">
+    <div class="head-title" id="titleHonors">Honors</div>
+    <div class="head-side">
+      <button class="icon-btn" id="btnSet4" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+  </div>
+  <div class="usage-card"><div class="usage-t" id="usageTitle"></div><div class="usage-grid" id="usageGrid"></div></div>
+  <div class="mig-card"><div class="mig-t" id="migTitle"></div><div class="mig-rows" id="migRows"></div></div>
+  <div class="honors-grid" id="badges"></div>
+  <div id="honorList"></div>
+  <div class="pro-card" id="proCard" role="button" tabindex="0">
+    <div class="pro-card-t" id="proCardT"></div>
+    <div class="pro-card-s" id="proCardS"></div>
+    <span class="pro-card-a" id="proCardA"></span>
+  </div>
+  <div class="pad-bottom"></div>
+</section>
+
+<div class="tabbar">
+  <div class="tab on" id="tabHabits"><span class="ti">◎</span><span id="labHabits">Habits</span></div>
+  <div class="tab" id="tabHonors"><span class="ti">★</span><span id="labHonors">Honors</span></div>
+</div>
+
+<div class="sheet-mask" id="maskSet"></div>
+<div class="sheet" id="sheetSet">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title" id="setTitle"></div>
+  <div class="set-list" style="margin-bottom:4px">
+    <div class="set-row" id="proEntry" role="button" tabindex="0">
+      <div class="t1-wrap"><div class="t1" id="proEntryT"></div><div class="t2" id="proEntrySub"></div></div>
+      <span class="arrow">›</span>
+    </div>
+  </div>
+  <div class="set-group-title" id="grpGeneral"></div>
+  <div class="set-list">
+    <div class="set-row" id="rowLang" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="langLab"></div></div><span class="val" id="langVal"></span><span class="arrow">›</span></div>
+    <div class="set-row" id="rowTheme" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="themeLab"></div></div><span class="val" id="themeVal"></span><span class="arrow">›</span></div>
+  </div>
+  <div class="set-group-title" id="grpNotif"></div>
+  <div class="set-list">
+    <div class="set-row" id="rowNotif" role="button" tabindex="0">
+      <div class="t1-wrap"><div class="t1" id="notifLab"></div><div class="t2" id="notifStatus"></div></div>
+      <span class="val" id="notifVal"></span>
+      <span class="arrow" id="notifArrow">›</span>
+    </div>
+  </div>
+  <div class="set-group-title" id="grpData"></div>
+  <div class="set-list">
+    <div class="set-row" id="rowExport" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="exportLab"></div><div class="t2" id="exportSub"></div></div><span class="arrow">›</span></div>
+    <div class="set-row" id="rowImport" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="importLab"></div><div class="t2" id="importSub"></div></div><span class="arrow">›</span></div>
+  </div>
+  <div class="set-group-title" id="grpAbout"></div>
+  <div class="set-list">
+    <div class="set-row" id="rowFeedback" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="feedbackLab"></div></div><span class="arrow">›</span></div>
+    <div class="set-row" id="rowFaq" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="faqLab"></div></div><span class="arrow">›</span></div>
+    <div class="set-row" id="rowPrivacy" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="privacyLab"></div></div><span class="arrow">›</span></div>
+    <div class="set-row" id="rowTerms" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="termsLab"></div></div><span class="arrow">›</span></div>
+    <div class="set-row" id="rowLanding" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="landingLab"></div></div><span class="arrow">↗</span></div>
+    <div class="set-row" style="cursor:default"><div class="t1-wrap"><div class="t1" id="versionLab"></div></div><span class="val">v8.0</span></div>
+  </div>
+  <div class="sheet-actions" style="margin-top:16px"><button class="btn btn-ghost" id="btnSetClose"></button></div>
+</div>
+
+<div class="sheet-mask" id="maskPerm"></div>
+<div class="sheet" id="sheetPerm">
+  <div class="sheet-bar"></div>
+  <button class="pay-close" id="btnPermClose">✕</button>
+  <div class="perm-hero">
+    <div class="perm-icon" id="permIcon">🔔</div>
+    <h2 class="perm-title" id="permTitle"></h2>
+    <p class="perm-sub" id="permSub"></p>
+  </div>
+  <ul class="perm-points">
+    <li id="permP1"></li>
+    <li id="permP2"></li>
+    <li id="permP3"></li>
+  </ul>
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="btnPermLater"></button>
+    <button class="btn btn-primary" id="btnPermAllow"></button>
+  </div>
+</div>
+
+<div class="sheet-mask" id="maskTheme"></div>
+<div class="sheet" id="sheetTheme">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title" id="themeTitle"></div>
+  <div class="set-list" style="margin-bottom:16px">
+    <div class="set-row" data-theme-val="system" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="themeOptSystem"></div></div><span class="val" id="checkSystem"></span></div>
+    <div class="set-row" data-theme-val="light" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="themeOptLight"></div></div><span class="val" id="checkLight"></span></div>
+    <div class="set-row" data-theme-val="dark" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="themeOptDark"></div></div><span class="val" id="checkDark"></span></div>
+  </div>
+  <div class="sheet-actions"><button class="btn btn-ghost" id="btnThemeClose"></button></div>
+</div>
+
+<div class="sheet-mask" id="maskLang"></div>
+<div class="sheet" id="sheetLang">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title" id="langTitle"></div>
+  <div class="set-list" style="margin-bottom:16px">
+    <div class="set-row" data-lang-val="zh" role="button" tabindex="0"><div class="t1-wrap"><div class="t1">中文</div></div><span class="val" id="checkZh"></span></div>
+    <div class="set-row" data-lang-val="en" role="button" tabindex="0"><div class="t1-wrap"><div class="t1">English</div></div><span class="val" id="checkEn"></span></div>
+  </div>
+  <div class="sheet-actions"><button class="btn btn-ghost" id="btnLangClose"></button></div>
+</div>
+
+<div class="sheet-mask" id="maskDoc"></div>
+<div class="sheet doc-sheet" id="sheetDoc">
+  <div class="sheet-bar"></div>
+  <button class="pay-close" id="btnDocClose2" aria-label="Close">✕</button>
+  <div id="docBody"></div>
+  <div class="sheet-actions" style="margin-top:16px"><button class="btn btn-ghost" id="btnDocClose"></button></div>
+</div>
+
+<div class="sheet-mask" id="maskPay"></div>
+<div class="sheet" id="sheetPay">
+  <div class="sheet-bar"></div>
+  <button class="pay-close" id="btnPayClose">✕</button>
+  <div class="pay-hero">
+    <svg class="pay-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="var(--brand)"/><path d="M6.5 12.2 L10.2 16 L17.5 8.2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h2 class="pay-title" id="payTitle"></h2>
+    <p class="pay-sub" id="paySub"></p>
+  </div>
+
+  <div id="payLoading" class="pay-loading" style="display:none">
+    <div class="pay-spinner"></div>
+    <div class="pay-loading-text" id="payLoadingText"></div>
+  </div>
+
+  <div id="payFail" class="pay-fail" style="display:none">
+    <p class="pay-fail-t" id="payFailTitle"></p>
+    <p class="pay-fail-s" id="payFailSub"></p>
+    <button class="pay-retry" id="payRetry"></button>
+  </div>
+
+  <ul class="pay-benefits">
+    <li><b id="b1t"></b><span id="b1s"></span></li>
+    <li><b id="b2t"></b><span id="b2s"></span></li>
+    <li><b id="b3t"></b><span id="b3s"></span></li>
+    <li><b id="b4t"></b><span id="b4s"></span></li>
+  </ul>
+  <div class="pay-actions">
+    <button class="btn btn-primary" id="btnTrial"></button>
+    <button class="btn btn-ghost" id="btnBuy"></button>
+  </div>
+  <div class="pay-foot"><span id="btnRestore"></span><span>·</span><span id="btnPayPrivacy"></span><span>·</span><span id="btnPayTerms"></span></div>
+  <p class="pay-fine" id="payFine"></p>
+</div>
+
+<div class="sheet-mask" id="maskAdd"></div>
+<div class="sheet" id="sheetAdd">
+  <div class="sheet-bar"></div>
+  <button class="pay-close" id="btnAddClose" aria-label="Close">✕</button>
+  <div class="sheet-title" id="addTitle"></div>
+  <div class="field"><div class="field-lab" id="fNameLab"></div><input class="input" id="inpName" type="text"></div>
+  <div class="field"><div class="field-lab" id="fDescLab"></div><textarea class="input textarea" id="inpDesc"></textarea></div>
+
+  <div class="rem-row">
+    <div>
+      <div class="t1" id="fRemLab"></div>
+      <div class="t2" id="fRemSub"></div>
+    </div>
+    <div class="switch" id="swAddRem" role="switch" tabindex="0"></div>
+  </div>
+  <div class="field" id="addTimeWrap" style="display:none">
+    <div class="field-lab" id="fAddTimeLab"></div>
+    <input class="input" id="inpAddTime" type="time" value="20:00">
+  </div>
+
+  <div class="field"><div class="field-lab" id="fFreqLab"></div>
+    <div class="seg" id="segFreq"><button class="on" data-v="1">1d</button><button data-v="2">2d</button><button data-v="3">3d</button><button data-v="7">7d</button></div>
+  </div>
+  <div class="field"><div class="field-lab" id="fGoalLab"></div>
+    <div class="seg" id="segGoal"><button class="on" data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="8">8</button></div>
+  </div>
+  <div class="sheet-actions"><button class="btn btn-ghost" id="btnAddCancel"></button><button class="btn btn-primary" id="btnAddSave"></button></div>
+</div>
+
+<div class="sheet-mask" id="maskMig"></div>
+<div class="sheet" id="sheetMig">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title" id="migFormTitle"></div>
+  <div class="field"><div class="field-lab" id="migSrcLab"></div><input class="input" id="inpMigSrc" placeholder="Streaks / Habitica / 其他"></div>
+  <div class="field"><div class="field-lab" id="migHabitLab"></div><select class="input" id="selMigHabit"></select></div>
+  <div class="field"><div class="field-lab" id="migDaysLab"></div><input class="input" id="inpMigDays" type="number" min="0" inputmode="numeric" placeholder="如 237"></div>
+  <div class="field"><div class="field-lab" id="migCurLab"></div><input class="input" id="inpMigCur" type="number" min="0" inputmode="numeric" placeholder="可留空"></div>
+  <div class="field"><div class="field-lab" id="migDateLab"></div><input class="input" id="inpMigDate" type="date"></div>
+  <div class="sheet-actions"><button class="btn btn-ghost" id="btnMigCancel"></button><button class="btn btn-ghost" id="btnMigDel"></button><button class="btn btn-primary" id="btnMigSave"></button></div>
+</div>
+
+<div class="sheet-mask" id="maskPoster"></div>
+<div class="sheet" id="sheetPoster" style="padding-bottom:24px">
+  <div class="sheet-bar"></div>
+  <button class="pay-close" id="btnPosterClose" aria-label="Close">✕</button>
+  <div class="sheet-title" id="posterTitle"></div>
+  <div class="poster-box"><img id="posterImg" alt="poster"></div>
+  <div class="sheet-actions"><button class="btn btn-ghost" id="btnPosterSave"></button><button class="btn btn-primary" id="btnPosterShare"></button></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="float-msg" id="floatMsg"></div>
+<input type="file" id="fileImport" accept=".json,application/json" style="display:none">
+</div>
+
+<script>
+/* ============================================================
+   Seeora v8
+   打包上线时的关键纪律（对应 RockSort 上架前踩过的坑）：
+   1. IAP 原生模块用动态 import，失败返 null 不崩溃
+   2. getOfferings() 必须有 8 秒超时，超时进 failed 态
+   3. 失败时绝不显示"加载中"，要有可见原因 + 重试按钮
+   4. purchasePackage / restorePurchases 全包 try/catch
+   5. Product ID / Entitlement ID 与 ASC、RC 后台一字不差
+   6. 绝不与 RockSort 的任何 ID 重叠
+   ============================================================ */
+
+/* ===== 品牌常量（会跟随主题刷新） ===== */
+var C = { brand:"#2d7a6b", brandRgb:"45,122,107", rest:"#94a8a2",
+  missFill:"rgba(0,0,0,0.04)", missStroke:"rgba(0,0,0,0.12)",
+  ringGuide:"rgba(0,0,0,0.06)", ringTodayStroke:"#f1ede6",
+  gridLine:"rgba(0,0,0,0.06)", axisLine:"rgba(0,0,0,0.12)",
+  axisText:"#8a8a85", heatEmpty:"rgba(0,0,0,0.05)" };
+function refreshColors(){
+  var cs = getComputedStyle(document.documentElement), g = function(k){ return cs.getPropertyValue(k).trim(); };
+  C.brand=g('--brand'); C.brandRgb=g('--brandRgb'); C.rest=g('--rest');
+  C.missFill=g('--missFill'); C.missStroke=g('--missStroke');
+  C.ringGuide=g('--ringGuide'); C.ringTodayStroke=g('--ringTodayStroke');
+  C.gridLine=g('--gridLine'); C.axisLine=g('--axisLine');
+  C.axisText=g('--axisText'); C.heatEmpty=g('--heatEmpty');
+}
+
+/* ===== 通知 API 封装 ===== */
+var NOTIF_ICON = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#2d7a6b"/><path d="M6.5 12.2 L10.2 16 L17.5 8.2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+);
+var NOTIF_BADGE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#2d7a6b"/></svg>'
+);
+function notifSupported(){ return typeof Notification !== "undefined" && "requestPermission" in Notification; }
+function notifPermission(){
+  if (!notifSupported()) return "unsupported";
+  try { return Notification.permission; } catch(e) { return "unsupported"; }
+}
+function requestNotifPermission(){
+  return new Promise(function(resolve){
+    if (!notifSupported()){ resolve("unsupported"); return; }
+    try {
+      var p = Notification.requestPermission(function(res){ resolve(res); });
+      if (p && typeof p.then === "function") p.then(resolve);
+    } catch(e){ resolve("default"); }
+  });
+}
+function fireNotification(title, body, tag){
+  if (notifPermission() !== "granted") return false;
+  try {
+    var n = new Notification(title, {
+      body: body, tag: tag || "seeora",
+      icon: NOTIF_ICON, badge: NOTIF_BADGE,
+      renotify: true, silent: false
+    });
+    n.onclick = function(){ try{ window.focus(); }catch(e){} n.close(); };
+    return true;
+  } catch(e){ console.warn("[notify] failed:", e); return false; }
+}
+
+/* 提醒调度占位（真正上线时由 Capacitor / RN / 原生接管） */
+function scheduleReminder(habit){
+  if (!habit || !habit.reminder || !habit.reminder.on) return;
+  console.log("[schedule] (stub) daily at", habit.reminder.time, "for", habit.id);
+}
+
+/* 前台定时检查 */
+function checkReminders(){
+  if (notifPermission() !== "granted") return;
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2, "0");
+  var mm = String(now.getMinutes()).padStart(2, "0");
+  var timeNow = hh + ":" + mm;
+  var todayKey = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
+  HABITS.forEach(function(h){
+    if (!h.reminder || !h.reminder.on) return;
+    if (h.reminder.time !== timeNow) return;
+    if (h.week[6] === 1) return;
+    var firedKey = "seeora_fired_" + h.id + "_" + todayKey;
+    try {
+      if (localStorage.getItem(firedKey)) return;
+      localStorage.setItem(firedKey, "1");
+    } catch(e){}
+    fireNotification(tr(h), isZh() ? "今天还没打卡哦,现在去做吧" : "Not checked in yet today — go do it.", "seeora-" + h.id);
+  });
+}
+setInterval(checkReminders, 30000);
+document.addEventListener("visibilitychange", function(){ if (!document.hidden) checkReminders(); });
+
+/* ===== 主题 ===== */
+var THEME = "system";
+try{ THEME = localStorage.getItem("seeora_theme") || "system"; }catch(e){}
+function applyTheme(){
+  var th = THEME;
+  if (th === "system") th = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", th);
+}
+function setTheme(v){
+  THEME = v; try{ localStorage.setItem("seeora_theme", v); }catch(e){}
+  applyTheme(); refreshColors();
+  renderList();
+  if (document.getElementById("view-detail").classList.contains("on")) renderDetail();
+  updateThemeUI();
+}
+function updateThemeUI(){
+  var lbl = THEME === "system" ? (isZh() ? "跟随系统" : "System") :
+            THEME === "dark" ? (isZh() ? "深色" : "Dark") :
+                               (isZh() ? "浅色" : "Light");
+  var el = document.getElementById("themeVal"); if (el) el.textContent = lbl;
+  ["system","light","dark"].forEach(function(k){
+    var id = "check" + k.charAt(0).toUpperCase() + k.slice(1);
+    var c = document.getElementById(id); if (c) c.textContent = (k === THEME) ? "✓" : "";
+  });
+}
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){
+  if (THEME === "system"){ applyTheme(); refreshColors(); renderList();
+    if (document.getElementById("view-detail").classList.contains("on")) renderDetail(); }
+});
+
+/* ===== 字典 ===== */
+var I18N = {
+en:{
+  brand:"Seeora", slogan:"See yourself getting better.",
+  today:"Today", honors:"Honors",
+  add:"Add habit", addTitle:"New habit",
+  nameLab:"Name", descLab:"Description", freqLab:"Repeat every", goalLab:"Times per day",
+  fRemLab:"Reminder", fRemSub:"Push a nudge at the chosen time", fAddTimeLab:"Reminder time",
+  save:"Save", cancel:"Cancel",
+  detailTitle:"Detail", share:"Share achievement",
+  settings:"Settings", close:"Close",
+  currentStreak:"Current streak", longest:"Longest", total:"Total", days:"days",
+  checkIn:"Check in", checked:"Checked in", resting:"Resting today",
+  restLab:"Rest day", restSub:"Mark today as a rest day · streak keeps",
+  restOn:"Rest day marked", restOff:"Rest day cleared",
+  mkTitle:"Make up (last 7 days)", curveTitle:"Cumulative check-ins", heatTitleDetail:"Last 12 weeks",
+  lgMiss:"miss", lgRest:"rest", lgOn:"done",
+  posterTitle:"Achievement card", posterSave:"Save image", posterShare:"Share", posterSaved:"Saved to your downloads",
+  tabHabits:"Habits", tabHonors:"Honors",
+  usageTitle:"Your usage", usageTotal:"Total checks", usageLongest:"Longest streak", usageWeek:"This week",
+  honorsTitle:"Honors",
+  migTitle:"Imported history", migAdd:"＋ Add a record", migEmptyAdd:"Add an imported record",
+  migPrev:"Previously", migCur:"streak", migAt:"Imported", migEdit:"Edit", migDel:"Delete",
+  migFormTitle:"Add imported record", editMig:"Edit imported record",
+  migSrcLab:"Source app", migHabitLab:"Habit", migDaysLab:"Days kept before",
+  migCurLab:"Current streak (optional)", migDateLab:"Date",
+  migSaved:"Imported record saved", migRemoved:"Record removed", migNeedDays:"Enter the days kept first",
+  guide:"7 dots per ring, starting from your first day", guideOk:"Got it",
+  newBest:"New longest streak: ", gotBadge:"unlocked",
+  habitSub:function(s,f){ var x = f===1?"Daily":("Every "+f+" days"); return s+" "+(s===1?"day":"days")+" · "+x; },
+  pro:"Seeora Pro", proSubFree:"Free · up to 5 habits", proSubPro:"Purchased · Thank you", proSubTrial:"Pro trial · {n} days left",
+  grpGeneral:"GENERAL", grpNotif:"NOTIFICATIONS", grpData:"DATA", grpAbout:"ABOUT",
+  langLab:"Language", themeLab:"Appearance", themeTitle:"Appearance",
+  themeSystem:"System", themeLight:"Light", themeDark:"Dark",
+  dataExport:"Export data", dataExportSub:"Save a JSON file yourself",
+  dataImport:"Import data", dataImportSub:"Restore from a JSON file",
+  feedbackLab:"Send feedback", faqLab:"Help & FAQ",
+  privacyLab:"Privacy Policy", termsLab:"Terms of Service",
+  landingLab:"Visit website", versionLab:"Version",
+  exported:"Data exported", imported:"Data imported", importFail:"Import failed: invalid file",
+  importConfirm:"This will replace all current data. Continue?",
+  payTitle:"Unlock Seeora Pro", paySub:"One-time purchase · yours forever",
+  b1t:"Unlimited habits", b1s:"No 5-habit cap",
+  b2t:"Watermark-free cards", b2s:"Share a card that's truly yours",
+  b3t:"Data export", b3s:"JSON backup, always in your hands",
+  b4t:"Unlimited imports", b4s:"Bring every streak with you",
+  btnTrial:"Start 7-day free trial", btnBuy:"Buy now · $4.99",
+  restore:"Restore", payFine:"Pay $4.99 once after the 7-day trial to unlock forever.",
+  trialStarted:"7-day Pro trial started", bought:"Pro unlocked · Thank you",
+  payLimitT:"Free plan limit reached", payLimitS:"Up to 5 habits · upgrade to add more",
+  payShareT:"Remove the watermark", payShareS:"Share a card that's truly yours",
+  payExportT:"Export your data", payExportS:"JSON backup, take it anywhere",
+  payMigrateT:"Unlimited imports", payMigrateS:"Treasure every past streak",
+  payHonorsT:"Unlock Seeora Pro", payHonorsS:"One-time purchase · yours forever",
+  payLoadingPrices:"Loading prices…",
+  payFailTitle:"Couldn't load prices",
+  payFailTimeout:"Network timed out. Check connection and retry.",
+  payFailGeneric:"Please try again.",
+  payRetry:"Retry",
+  restoring:"Restoring…",
+  restored:"Pro restored · Thank you", noPurchase:"No previous purchase found", restoreFailed:"Restore failed, try again",
+  notifLab:"Notification permission",
+  notifGranted:"Enabled · reminders will fire",
+  notifDenied:"Denied · enable in system settings",
+  notifUnsupported:"Not supported in this browser",
+  notifDefault:"Not yet enabled · tap to allow",
+  permTitle:"Turn on reminders",
+  permSub:"Seeora needs notification permission to nudge you at the time you set.",
+  permP1:"Only fires at the times you choose",
+  permP2:"Content stays on your device — we never see it",
+  permP3:"Turn it off anytime in Settings",
+  permAllow:"Allow notifications",
+  permLater:"Maybe later",
+  permDeniedTitle:"Notifications are blocked",
+  permDeniedSub:"Enable Seeora notifications in your system settings, then come back and try again.",
+  permDeniedBtn:"Got it",
+  permDeniedOK:"Notification permission already granted",
+  permUnsupported:"This browser doesn't support notifications"
+},
+zh:{
+  brand:"见好", slogan:"看见自己越来越好",
+  today:"今天", honors:"荣誉室",
+  add:"添加习惯", addTitle:"新建习惯",
+  nameLab:"习惯名称", descLab:"描述", freqLab:"重复周期", goalLab:"每天目标次数",
+  fRemLab:"提醒", fRemSub:"到点推送一条提醒", fAddTimeLab:"提醒时间",
+  save:"保存", cancel:"取消",
+  detailTitle:"详情", share:"分享成就",
+  settings:"设置", close:"关闭",
+  currentStreak:"当前连续", longest:"历史最长", total:"累计", days:"天",
+  checkIn:"打卡", checked:"今日已打卡", resting:"今日休息中",
+  restLab:"标记休息日", restSub:"今天休息一下 · 连续不中断",
+  restOn:"已标记休息日", restOff:"已取消休息日",
+  mkTitle:"补签（最近 7 天）", curveTitle:"累计打卡", heatTitleDetail:"最近 12 周",
+  lgMiss:"漏签", lgRest:"休息", lgOn:"打卡",
+  posterTitle:"成就卡片", posterSave:"保存到本地", posterShare:"分享", posterSaved:"已保存到下载目录",
+  tabHabits:"习惯", tabHonors:"荣誉室",
+  usageTitle:"使用数据", usageTotal:"累计打卡", usageLongest:"最长连续", usageWeek:"本周完成",
+  honorsTitle:"荣誉室",
+  migTitle:"迁移的坚持", migAdd:"＋ 添加迁移成绩", migEmptyAdd:"添加一条迁移成绩",
+  migPrev:"此前", migCur:"连续", migAt:"导入于", migEdit:"编辑", migDel:"删除",
+  migFormTitle:"添加迁移成绩", editMig:"编辑迁移成绩",
+  migSrcLab:"来源软件", migHabitLab:"归入习惯", migDaysLab:"此前坚持天数",
+  migCurLab:"当前连续天数（可留空）", migDateLab:"导入日期",
+  migSaved:"迁移成绩已保存", migRemoved:"已删除", migNeedDays:"请先填写此前坚持的天数",
+  guide:"每圈 7 个点，从你开始的那天算", guideOk:"知道了",
+  newBest:"新的最长连续：", gotBadge:"已解锁",
+  habitSub:function(s,f){ var x = f===1?"每天":("每 "+f+" 天"); return s+" 天 · "+x; },
+  pro:"Seeora Pro", proSubFree:"未升级 · 5 条习惯上限", proSubPro:"已购买 · 感谢支持", proSubTrial:"Pro 试用 · 剩 {n} 天",
+  grpGeneral:"通用", grpNotif:"通知", grpData:"数据", grpAbout:"关于",
+  langLab:"语言", themeLab:"外观", themeTitle:"外观",
+  themeSystem:"跟随系统", themeLight:"浅色", themeDark:"深色",
+  dataExport:"导出数据", dataExportSub:"导出为 JSON 文件，自己保存",
+  dataImport:"导入数据", dataImportSub:"从 JSON 文件恢复",
+  feedbackLab:"意见反馈", faqLab:"帮助与常见问题",
+  privacyLab:"隐私政策", termsLab:"用户协议",
+  landingLab:"访问官网", versionLab:"版本",
+  exported:"数据已导出", imported:"数据已导入", importFail:"导入失败：文件格式不对",
+  importConfirm:"导入会覆盖现有全部数据，确定继续？",
+  payTitle:"解锁 Seeora Pro", paySub:"一次性买断 · 永久使用",
+  b1t:"无限习惯", b1s:"不再受 5 条限制",
+  b2t:"无水印成就卡", b2s:"分享属于你自己的时刻",
+  b3t:"数据导出", b3s:"JSON 备份，数据始终在你手里",
+  b4t:"无限迁移记录", b4s:"把别处的坚持都带过来",
+  btnTrial:"开始 7 天免费试用", btnBuy:"直接购买 · $4.99",
+  restore:"恢复购买", payFine:"试用 7 天后一次性支付 $4.99，永久解锁。",
+  trialStarted:"已开启 7 天 Pro 试用", bought:"已购买 Pro · 感谢支持",
+  payLimitT:"免费版已达上限", payLimitS:"最多 5 条习惯 · 升级解锁更多",
+  payShareT:"去除水印", payShareS:"分享一张只属于你的成就卡",
+  payExportT:"导出你的数据", payExportS:"JSON 备份，随时带走",
+  payMigrateT:"无限迁移记录", payMigrateS:"把每段坚持都珍藏下来",
+  payHonorsT:"解锁 Seeora Pro", payHonorsS:"一次性买断 · 永久使用",
+  payLoadingPrices:"正在获取价格…",
+  payFailTitle:"暂时无法加载价格",
+  payFailTimeout:"网络超时,请检查网络后重试",
+  payFailGeneric:"请稍后重试",
+  payRetry:"重试",
+  restoring:"正在恢复…",
+  restored:"已恢复 Pro · 感谢支持", noPurchase:"没有可恢复的购买记录", restoreFailed:"恢复失败，请稍后重试",
+  notifLab:"通知权限",
+  notifGranted:"已开启 · 提醒可正常送达",
+  notifDenied:"已被拒绝 · 请到系统设置里打开",
+  notifUnsupported:"此浏览器不支持",
+  notifDefault:"尚未授权 · 点击开启",
+  permTitle:"开启通知提醒",
+  permSub:"Seeora 需要通知权限,才能在你设定的时间提醒你打卡。",
+  permP1:"只在你设定的时间触发",
+  permP2:"内容只留在这台设备上,我们不接触",
+  permP3:"随时可在设置里关闭",
+  permAllow:"允许通知",
+  permLater:"以后再说",
+  permDeniedTitle:"通知已被拒绝",
+  permDeniedSub:"请在系统设置里打开 Seeora 的通知权限,然后回到这里重新开启。",
+  permDeniedBtn:"我知道了",
+  permDeniedOK:"通知权限已开启",
+  permUnsupported:"此浏览器不支持通知"
+}
+};
+
+function mkCurve(vals, missIdx){
+  return vals.map(function(v, i){ return { v:v, ok:(missIdx||[]).indexOf(i)<0?1:0 }; });
+}
+
+/* ===== 数据 ===== */
+var HABITS = [
+  { id:"read", zh:"阅读", en:"Read", desc:{zh:"每天读一点，慢慢积累", en:"Read a little every day"},
+    freqDays:1, goal:1, streak:12, best:28, total:74, week:[1,1,1,1,0,1,1],
+    reminder:{ on:true, time:"20:00" },
+    curve: mkCurve([1,2,3,4,5,6,7,8,9,10,10,10,11,12,13,14,15,16,17,18,19], [10,11]) },
+  { id:"sport", zh:"运动", en:"Workout", desc:{zh:"保持身体活力", en:"Keep the body alive"},
+    freqDays:3, goal:1, streak:5, best:8, total:31, week:[1,1,2,1,1,1,0],
+    reminder:{ on:false, time:"07:30" },
+    curve: mkCurve([0,0,1,1,2,2,3,3,4,4,5,5,5,6,6,7,7,8,8,9,10], [0,1,2,3,4]) },
+  { id:"meditate", zh:"冥想", en:"Meditate", desc:{zh:"静下来，听见自己", en:"Slow down and listen"},
+    freqDays:1, goal:3, streak:6, best:15, total:48, week:[1,0,1,1,1,1,0],
+    reminder:{ on:true, time:"07:00" },
+    curve: mkCurve([3,6,9,12,15,18,21,24,27,30,30,33,36,39,42,45,45,48,51,54,57], [10,11,16]) },
+  { id:"water", zh:"喝水", en:"Water", desc:{zh:"一天八杯，基础中的基础", en:"Eight cups a day"},
+    freqDays:1, goal:8, streak:9, best:21, total:120, week:[1,1,1,0,1,1,1],
+    reminder:{ on:true, time:"09:00" },
+    curve: mkCurve([8,16,24,32,40,48,56,64,72,80,80,80,96,104,112,120,128,136,144,152,160], [10,11,12]) }
+];
+
+function saveHabits(){ try{ localStorage.setItem("seeora_habits", JSON.stringify(HABITS)); }catch(e){} }
+function loadHabits(){
+  try{
+    var raw = localStorage.getItem("seeora_habits"); if (!raw) return;
+    var arr = JSON.parse(raw);
+    if (Array.isArray(arr) && arr.length){
+      arr.forEach(function(h){
+        if (h.curve && typeof h.curve[0] === "number") h.curve = h.curve.map(function(v){ return { v:v, ok:1 }; });
+        if (h.ring){ for (var i=0;i<h.ring.length;i++) if (h.week[i]!==h.ring[i]) h.week[i]=h.ring[i]; delete h.ring; }
+      });
+      HABITS = arr;
+    }
+  }catch(e){}
+}
+loadHabits();
+
+var LANG = "en";
+try{ var sl = localStorage.getItem("seeora_lang"); if(sl) LANG=sl; }catch(e){}
+function saveLang(){ try{ localStorage.setItem("seeora_lang", LANG); }catch(e){} }
+function t(){ return I18N[LANG]; }
+function tr(s){ return s ? (LANG==="zh"?s.zh:s.en) : ""; }
+function setLang(l){ LANG=l; saveLang(); renderAll(); updateThemeUI(); updateLangUI(); }
+function isZh(){ return LANG==="zh"; }
+
+var PRO = false;
+try{ PRO = localStorage.getItem("seeora_pro")==="1"; }catch(e){}
+var PRO_TRIAL_UNTIL = 0;
+try{ var _pt = parseInt(localStorage.getItem("seeora_pro_trial_until")||"0",10); PRO_TRIAL_UNTIL = _pt || 0; }catch(e){}
+// 清理已过期但未清除的试用标记，保持状态整洁
+try{ if (PRO_TRIAL_UNTIL && Date.now() >= PRO_TRIAL_UNTIL){ localStorage.removeItem("seeora_pro_trial_until"); PRO_TRIAL_UNTIL = 0; } }catch(e){}
+// 购买凭证：模拟 App Store 服务端记录（买断后持久化，与本地解锁标记分离，供「恢复购买」找回）
+var PRO_RECEIPT = null;
+try { var _rc = localStorage.getItem("seeora_receipt"); PRO_RECEIPT = _rc ? JSON.parse(_rc) : null; }catch(e){ PRO_RECEIPT = null; }
+function isPro(){
+  if (PRO) return true;
+  if (PRO_TRIAL_UNTIL && Date.now() < PRO_TRIAL_UNTIL) return true;
+  return false;
+}
+function proMode(){ // "permanent" | "trial" | "free"
+  if (PRO) return "permanent";
+  if (PRO_TRIAL_UNTIL && Date.now() < PRO_TRIAL_UNTIL) return "trial";
+  return "free";
+}
+function trialDaysLeft(){
+  if (!PRO_TRIAL_UNTIL) return 0;
+  return Math.max(0, Math.ceil((PRO_TRIAL_UNTIL - Date.now())/86400000));
+}
+function setPro(v){
+  PRO = !!v;
+  if (PRO){ // 正式买断：清空试用标记 + 写入购买凭证
+    PRO_TRIAL_UNTIL = 0;
+    try{ localStorage.removeItem("seeora_pro_trial_until"); }catch(e){}
+    saveReceipt({ type:"lifetime", at: Date.now() });
+  }
+  // 注意：setPro(false) 不清空凭证，保留供「恢复购买」找回（与真机重装后本地标记丢失、服务端凭证仍在一致）
+  try{ localStorage.setItem("seeora_pro", PRO?"1":"0"); }catch(e){}
+  renderAll();
+}
+function startTrial(days){
+  if (PRO) return; // 已买断不降级
+  PRO = false;
+  PRO_TRIAL_UNTIL = Date.now() + (days||7)*86400000;
+  try{
+    localStorage.setItem("seeora_pro","0");
+    localStorage.setItem("seeora_pro_trial_until", String(PRO_TRIAL_UNTIL));
+  }catch(e){}
+  renderAll();
+}
+function saveReceipt(rec){
+  PRO_RECEIPT = rec;
+  try { if (rec) localStorage.setItem("seeora_receipt", JSON.stringify(rec)); else localStorage.removeItem("seeora_receipt"); }catch(e){}
+}
+// 模拟从商店恢复已购：读取服务端购买凭证，返回 lifetime 凭证或 null
+function restorePurchases(){
+  return new Promise(function(resolve, reject){
+    setTimeout(function(){
+      if (getIapSimMode() === "fail"){ reject(new Error("restore_failed")); return; }
+      try { var raw = localStorage.getItem("seeora_receipt"); PRO_RECEIPT = raw ? JSON.parse(raw) : null; }catch(e){ PRO_RECEIPT = null; }
+      resolve(PRO_RECEIPT && PRO_RECEIPT.type === "lifetime" ? PRO_RECEIPT : null);
+    }, 1500);
+  });
+}
+
+/* ===== 7天迷你点 ===== */
+function miniDots(states){
+  var W = 7*20-6, H = 16;
+  var s = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
+  var pts = states.map(function(st,i){ return { x:i*20+6, y:H/2, st:st }; });
+  for (var i=1;i<pts.length;i++){
+    if (pts[i-1].st===1 && pts[i].st===1){
+      s += '<line x1="'+(pts[i-1].x+3)+'" y1="'+(H/2)+'" x2="'+(pts[i].x-3)+'" y2="'+(H/2)+'" stroke="'+C.brand+'" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>';
+    }
+  }
+  pts.forEach(function(p){
+    var fill = p.st===1?C.brand:p.st===2?C.rest:C.missFill;
+    var stroke = p.st===0?' stroke="'+C.missStroke+'" stroke-width="1.2"':'';
+    s += '<circle cx="'+p.x+'" cy="'+p.y+'" r="4.6" fill="'+fill+'"'+stroke+'/>';
+  });
+  return s+"</svg>";
+}
+
+/* ===== 首页 ===== */
+function renderList(){
+  var box = document.getElementById("list"), html = "";
+  HABITS.forEach(function(h,i){
+    var done = h.week[6]===1;
+    html += '<div class="card" data-idx="'+i+'" role="button" tabindex="0">'+
+      '<div class="card-main"><div class="h-name">'+tr(h)+'</div>'+
+      '<div class="h-sub">'+t().habitSub(h.streak,h.freqDays)+'</div>'+
+      '<div class="mini">'+miniDots(h.week)+'</div></div>'+
+      '<button class="check'+(done?" on":"")+'" data-i="'+i+'"><svg viewBox="0 0 24 24"><path d="M4 12.5 L9.5 18 L20 6.5"/></svg></button>'+
+      '<svg class="chev" viewBox="0 0 8 14" width="8" height="14"><path d="M1.5 1 L6.5 7 L1.5 13" fill="none" stroke="currentColor" opacity="0.35" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+      '</div>';
+  });
+  box.innerHTML = html;
+}
+
+/* ===== 圆环 ===== */
+var RING_R = 104, RING_N = 7, animatedArcs = {};
+function renderRing(h){
+  var S = 280, Cc = S/2, pts = [];
+  for (var p=0;p<RING_N;p++){
+    var a = (-90 + p*(360/RING_N))*Math.PI/180;
+    pts.push({ x:Cc+RING_R*Math.cos(a), y:Cc+RING_R*Math.sin(a), p:p, st:h.week[p], today:p===RING_N-1 });
+  }
+  var s = '<svg width="280" height="280" viewBox="0 0 280 280">';
+  s += '<circle cx="'+Cc+'" cy="'+Cc+'" r="'+RING_R+'" fill="none" stroke="'+C.ringGuide+'" stroke-width="1.5"/>';
+  for (var k=0;k<RING_N;k++){
+    var a1=pts[k], b1=pts[(k+1)%RING_N];
+    if (a1.st!==1 || b1.st!==1) continue;
+    var key = "a"+k, len = (2*Math.PI*RING_R)/RING_N*1.06;
+    var anim = !animatedArcs[key];
+    var dash = anim?' style="--len:'+len.toFixed(1)+';stroke-dasharray:'+len.toFixed(1)+';stroke-dashoffset:'+len.toFixed(1)+'"':'';
+    s += '<path d="M'+a1.x.toFixed(1)+' '+a1.y.toFixed(1)+' A'+RING_R+' '+RING_R+' 0 0 1 '+b1.x.toFixed(1)+' '+b1.y.toFixed(1)+'" fill="none" stroke="'+C.brand+'" stroke-width="3" stroke-linecap="round"'+(anim?' class="arc-new"':'')+dash+'/>';
+    if (anim) animatedArcs[key] = 1;
+  }
+  pts.forEach(function(q){
+    var fill = q.st===1?C.brand:q.st===2?C.rest:C.missFill;
+    var stroke = q.st===0?' stroke="'+C.missStroke+'" stroke-width="1.5"':'';
+    s += '<circle cx="'+q.x.toFixed(1)+'" cy="'+q.y.toFixed(1)+'" r="13" fill="'+fill+'"'+stroke+
+         (q.today?' stroke="'+C.ringTodayStroke+'" stroke-width="3"':'')+
+         (q.today&&q.st===1?' class="pop-in"':'')+'/>';
+  });
+  return s+"</svg>";
+}
+
+/* ===== 曲线 ===== */
+function renderCurve(h){
+  var W=320, H=150, pad={l:30,r:14,t:14,b:26};
+  var d = h.curve, n = d.length; if (!n) return "";
+  var maxV = Math.max.apply(null, d.map(function(x){ return x.v; })) || 1;
+  var X = function(i){ return pad.l + i*(W-pad.l-pad.r)/(n-1); };
+  var Y = function(v){ return H-pad.b - (v/maxV)*(H-pad.t-pad.b); };
+  var segs=[], cur={type:d[0].ok?"solid":"gap",pts:[{x:X(0),y:Y(d[0].v)}]};
+  for (var i=1;i<n;i++){
+    var type = d[i].ok?"solid":"gap";
+    if (type!==cur.type){ cur.pts.push({x:X(i),y:Y(d[i].v)}); segs.push(cur); cur={type:type,pts:[{x:X(i),y:Y(d[i].v)}]}; }
+    else cur.pts.push({x:X(i),y:Y(d[i].v)});
+  }
+  segs.push(cur);
+  function smooth(pts){
+    if (pts.length===1) return "M"+pts[0].x+" "+pts[0].y;
+    var dd = "M"+pts[0].x.toFixed(1)+" "+pts[0].y.toFixed(1);
+    for (var k=1;k<pts.length-1;k++){
+      var mx=(pts[k].x+pts[k+1].x)/2, my=(pts[k].y+pts[k+1].y)/2;
+      dd += " Q"+pts[k].x.toFixed(1)+" "+pts[k].y.toFixed(1)+" "+mx.toFixed(1)+" "+my.toFixed(1);
+    }
+    var last = pts[pts.length-1];
+    return dd+" L"+last.x.toFixed(1)+" "+last.y.toFixed(1);
+  }
+  var s = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
+  [0,0.5,1].forEach(function(r){
+    var yv = maxV*r, y = Y(yv);
+    s += '<line x1="'+pad.l+'" y1="'+y.toFixed(1)+'" x2="'+(W-pad.r)+'" y2="'+y.toFixed(1)+'" stroke="'+C.gridLine+'" stroke-width="1" stroke-dasharray="'+(r===0?"0":"3 4")+'"/>';
+    s += '<text x="'+(pad.l-6)+'" y="'+(y+3.5).toFixed(1)+'" font-size="9" fill="'+C.axisText+'" text-anchor="end">'+Math.round(yv)+'</text>';
+  });
+  s += '<line x1="'+pad.l+'" y1="'+pad.t+'" x2="'+pad.l+'" y2="'+(H-pad.b)+'" stroke="'+C.axisLine+'" stroke-width="1"/>';
+  segs.forEach(function(g){
+    if (g.pts.length<2) return;
+    if (g.type==="solid") s += '<path d="'+smooth(g.pts)+'" fill="none" stroke="'+C.brand+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    else s += '<path d="'+smooth(g.pts)+'" fill="none" stroke="'+C.brand+'" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 5" opacity="0.45"/>';
+  });
+  d.forEach(function(x,i){
+    s += '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(x.v).toFixed(1)+'" r="'+(x.ok?2.6:2)+'" fill="'+(x.ok?C.brand:"rgba("+C.brandRgb+",0.35)")+'"/>';
+  });
+  s += '<line x1="'+pad.l+'" y1="'+(H-pad.b)+'" x2="'+(W-pad.r)+'" y2="'+(H-pad.b)+'" stroke="'+C.axisLine+'" stroke-width="1"/>';
+  [0,6,13,20].forEach(function(i){
+    s += '<text x="'+X(i).toFixed(1)+'" y="'+(H-8)+'" font-size="9.5" fill="'+C.axisText+'" text-anchor="'+(i===0?"start":i===20?"end":"middle")+'">'+(isZh()?"第"+(i+1)+"天":"Day "+(i+1))+'</text>';
+  });
+  return s+"</svg>";
+}
+
+/* ===== 热力图 ===== */
+function heatData(h){
+  var arr = [], rnd = function(i){ return ((i*9301+49297)%233280)/233280; };
+  for (var w=0;w<12;w++) for (var d=0;d<7;d++){
+    var i = w*7+d;
+    if (w===11) arr.push(h.week[d]);
+    else { var r = rnd(i+h.id.length*13); arr.push(r<0.14?2:r<0.26?0:1); }
+  }
+  return arr;
+}
+function renderHeat(h){
+  var data = heatData(h), html = "";
+  data.forEach(function(st){ html += '<i class="'+(st===1?"on":st===2?"rest":"")+'"></i>'; });
+  return html;
+}
+
+/* ===== 详情 ===== */
+var curIdx = 0;
+function renderDetail(){
+  var h = HABITS[curIdx];
+  document.getElementById("detailTitle").textContent = t().detailTitle;
+  document.getElementById("dStats").innerHTML =
+    '<div class="stat"><div class="stat-num">'+h.streak+'</div><div class="stat-lab">'+t().currentStreak+'</div></div>'+
+    '<div class="stat"><div class="stat-num">'+h.best+'</div><div class="stat-lab">'+t().longest+'</div></div>'+
+    '<div class="stat"><div class="stat-num">'+h.total+'</div><div class="stat-lab">'+t().total+'</div></div>';
+  var bc = document.getElementById("btnCheck");
+  if (h.week[6]===2){ bc.textContent = t().resting; bc.className = "big-btn rest"; }
+  else if (h.week[6]===1){ bc.textContent = t().checked; bc.className = "big-btn done"; }
+  else { bc.textContent = t().checkIn; bc.className = "big-btn"; }
+  document.getElementById("restLab").textContent = t().restLab;
+  document.getElementById("restSub").textContent = t().restSub;
+  document.getElementById("tickRest").className = "tick" + (h.week[6]===2?" on":"");
+  document.getElementById("mkTitle").textContent = t().mkTitle;
+  var mk = "";
+  for (var i=1;i<=7;i++){
+    var idx = 7-i, st = h.week[idx];
+    mk += '<div class="mk" data-idx="'+idx+'"><i class="'+(st===1?"done":st===2?"rest":"")+'"></i><span>'+(isZh()?"第"+i+"天":"-"+i+"d")+'</span></div>';
+  }
+  document.getElementById("mkGrid").innerHTML = mk;
+  document.getElementById("curveTitle").textContent = t().curveTitle;
+  document.getElementById("curve").innerHTML = renderCurve(h);
+  document.getElementById("heatTitleDetail").textContent = t().heatTitleDetail;
+  document.getElementById("lgMiss").textContent = t().lgMiss;
+  document.getElementById("lgRest").textContent = t().lgRest;
+  document.getElementById("lgOn").textContent = t().lgOn;
+  document.getElementById("detailHeat").innerHTML = renderHeat(h);
+  document.getElementById("ring").innerHTML = renderRing(h);
+  document.getElementById("shareLab").textContent = t().share;
+}
+
+/* ===== 使用数据 ===== */
+function renderUsage(){
+  var totalChecks=0, maxLongest=0, weekDone=0, weekSlots=0;
+  HABITS.forEach(function(h){
+    totalChecks += h.total;
+    if (h.best > maxLongest) maxLongest = h.best;
+    h.week.forEach(function(st){ weekDone += (st===1?1:0); weekSlots++; });
+  });
+  var rate = weekSlots ? Math.round(weekDone/weekSlots*100) : 0;
+  document.getElementById("usageTitle").textContent = t().usageTitle;
+  document.getElementById("usageGrid").innerHTML =
+    '<div><div class="usage-num">'+totalChecks+'</div><div class="usage-lab">'+t().usageTotal+'</div></div>'+
+    '<div><div class="usage-num">'+maxLongest+'</div><div class="usage-lab">'+t().usageLongest+'</div></div>'+
+    '<div><div class="usage-num">'+rate+'%</div><div class="usage-lab">'+t().usageWeek+'</div></div>';
+}
+
+/* ===== 荣誉室 ===== */
+var BADGES = [
+  {em:"🌱",zh:"启程",en:"First step",need:1},{em:"🔥",zh:"坚持一周",en:"Week one",need:7},
+  {em:"🌤",zh:"两周",en:"Two weeks",need:14},{em:"💪",zh:"三周",en:"Three weeks",need:21},
+  {em:"🏅",zh:"满月",en:"One month",need:30},{em:"⭐",zh:"双月",en:"Two months",need:60},
+  {em:"🦾",zh:"季度",en:"A quarter",need:90},{em:"👑",zh:"半年",en:"Half year",need:180},
+  {em:"🚀",zh:"一年",en:"One year",need:365}
+];
+function bestOf(h){ return Math.max(h.best, h.streak); }
+function renderHonors(){
+  document.getElementById("titleHonors").textContent = t().honorsTitle;
+  var bestAll = HABITS.map(bestOf), got = [], locked = [];
+  BADGES.forEach(function(b){ (bestAll.some(function(v){ return v>=b.need; }) ? got : locked).push(b); });
+  var html = "";
+  got.concat(locked).forEach(function(b){
+    var unlocked = got.indexOf(b) >= 0;
+    html += '<div class="badge'+(unlocked?" got":" locked")+'"><div class="em">'+b.em+'</div>'+
+            '<div class="bn">'+(isZh()?b.zh:b.en)+'</div>'+
+            '<div class="bc">'+(unlocked?t().gotBadge:b.need+" "+t().days)+'</div></div>';
+  });
+  document.getElementById("badges").innerHTML = html;
+  var items = "";
+  HABITS.forEach(function(h,i){
+    var unlocked = got.filter(function(b){ return bestOf(h)>=b.need; });
+    var migSum = migDaysOf(h.id);
+    items += '<div class="honor-item" data-idx="'+i+'" role="button" tabindex="0">'+
+             '<div class="em">'+(unlocked.length?unlocked[unlocked.length-1].em:"🔒")+'</div>'+
+             '<div class="tx"><div class="t1">'+tr(h)+'</div>'+
+             '<div class="t2">'+(isZh()?"最长 ":"Longest ")+bestOf(h)+" "+t().days+" · "+unlocked.length+(isZh()?" 个已解锁":" unlocked")+
+             (migSum>0?" · "+t().migTitle+" "+migSum+" "+t().days:"")+'</div></div></div>';
+  });
+  document.getElementById("honorList").innerHTML = items;
+  renderMig();
+}
+
+/* ===== 迁移 ===== */
+var MIG = [];
+try{ MIG = JSON.parse(localStorage.getItem("seeora_mig")||"[]"); }catch(e){ MIG=[]; }
+function saveMig(){ try{ localStorage.setItem("seeora_mig", JSON.stringify(MIG)); }catch(e){} }
+function todayISO(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function habitById(id){ for (var i=0;i<HABITS.length;i++) if (HABITS[i].id===id) return HABITS[i]; return null; }
+function migDaysOf(hid){ var s=0; MIG.forEach(function(m){ if (m.habitId===hid) s += (m.prevDays||0); }); return s; }
+function renderMig(){
+  var T = t();
+  document.getElementById("migTitle").textContent = T.migTitle;
+  var box = document.getElementById("migRows"), html = "";
+  if (MIG.length){
+    MIG.forEach(function(m){
+      var h = habitById(m.habitId) || { zh:m.habitId, en:m.habitId };
+      html += '<div class="mig-swipe" data-id="'+m.id+'">'+
+        '<div class="mig-actions"><span class="mig-act-edit" data-act="edit" data-id="'+m.id+'">'+T.migEdit+'</span>'+
+        '<span class="mig-act-del" data-act="del" data-id="'+m.id+'">'+T.migDel+'</span></div>'+
+        '<div class="mig-front"><div class="mig-em">🔁</div>'+
+        '<div class="mig-main"><div class="mig-n1">'+(isZh()?h.zh:h.en)+" · "+m.source+'</div>'+
+        '<div class="mig-n2">'+T.migPrev+" "+m.prevDays+" "+t().days+
+        (m.curDays!=null?" · "+T.migCur+" "+m.curDays:"")+" · "+T.migAt+" "+(m.importedAt||"")+'</div></div></div></div>';
+    });
+  }
+  html += '<div class="mig-empty-row" id="migEmptyRow" role="button" tabindex="0"><i>+</i><span>'+
+          (MIG.length?T.migAdd:T.migEmptyAdd)+'</span></div>';
+  box.innerHTML = html;
+  var er = document.getElementById("migEmptyRow");
+  if (er){
+    er.addEventListener("click", function(){
+      if (!isPro() && MIG.length>=1){ showPaywall("migrate"); return; }
+      openMig(null);
+    });
+    er.addEventListener("keydown", function(e){ if (e.key==="Enter"||e.key===" "){ e.preventDefault(); er.click(); } });
+  }
+}
+var swipeRow=null, swipeStartX=0, swipeStartY=0, swipeMoved=false, swipeBaseTx=0, swipeCurTx=0;
+document.getElementById("migRows").addEventListener("pointerdown", function(e){
+  if (e.target.closest(".mig-actions")) return;
+  var row = e.target.closest(".mig-swipe"); if (!row) return;
+  document.querySelectorAll(".mig-swipe.open").forEach(function(r){ if (r!==row) r.classList.remove("open"); });
+  swipeRow = row; swipeStartX = e.clientX; swipeStartY = e.clientY; swipeMoved = false;
+  swipeBaseTx = row.classList.contains("open") ? -120 : 0; swipeCurTx = swipeBaseTx;
+}, { passive: true });
+document.addEventListener("pointermove", function(e){
+  if (!swipeRow) return;
+  var dx = e.clientX-swipeStartX, dy = e.clientY-swipeStartY;
+  if (!swipeMoved){
+    if (Math.abs(dx)>6 && Math.abs(dx)>Math.abs(dy)) swipeMoved = true;
+    else if (Math.abs(dy)>6){ swipeRow=null; return; }
+  }
+  if (swipeMoved){
+    e.preventDefault();
+    var front = swipeRow.querySelector(".mig-front");
+    swipeCurTx = Math.max(-120, Math.min(0, swipeBaseTx+dx));
+    front.style.transition = "none"; front.style.transform = "translateX("+swipeCurTx+"px)";
+  }
+}, { passive: false });
+document.addEventListener("pointerup", function(){
+  if (!swipeRow) return;
+  var row = swipeRow, front = row.querySelector(".mig-front");
+  front.style.transition = ""; front.style.transform = "";
+  if (swipeMoved) row.classList.toggle("open", swipeCurTx < -60);
+  else row.classList.remove("open");
+  swipeRow = null; swipeMoved = false;
+});
+document.getElementById("migRows").addEventListener("click", function(e){
+  var s = e.target.closest ? e.target.closest("[data-act]") : null; if (!s) return;
+  var act = s.getAttribute("data-act"), mid = s.getAttribute("data-id");
+  if (act === "edit") openMig(mid);
+  else if (act === "del"){ MIG = MIG.filter(function(x){ return x.id!==mid; }); saveMig(); renderMig(); renderHonors(); toast(t().migRemoved); }
+});
+var migEditId = null;
+function openMig(id){
+  migEditId = id || null;
+  var T = t();
+  document.getElementById("migFormTitle").textContent = id ? T.editMig : T.migFormTitle;
+  document.getElementById("btnMigSave").textContent = T.save;
+  document.getElementById("btnMigDel").textContent = T.migDel;
+  document.getElementById("btnMigCancel").textContent = T.cancel;
+  document.getElementById("btnMigDel").style.visibility = id ? "visible" : "hidden";
+  document.getElementById("migSrcLab").textContent = T.migSrcLab;
+  document.getElementById("migHabitLab").textContent = T.migHabitLab;
+  document.getElementById("migDaysLab").textContent = T.migDaysLab;
+  document.getElementById("migCurLab").textContent = T.migCurLab;
+  document.getElementById("migDateLab").textContent = T.migDateLab;
+  var sel = document.getElementById("selMigHabit");
+  sel.innerHTML = HABITS.map(function(h){ return '<option value="'+h.id+'">'+tr(h)+'</option>'; }).join("");
+  var m = id ? MIG.filter(function(x){ return x.id===id; })[0] : null;
+  document.getElementById("inpMigSrc").value = m ? m.source : "";
+  sel.value = m ? m.habitId : (HABITS[0]?HABITS[0].id:"");
+  document.getElementById("inpMigDays").value = m ? m.prevDays : "";
+  document.getElementById("inpMigCur").value = (m && m.curDays!=null) ? m.curDays : "";
+  document.getElementById("inpMigDate").value = m ? (m.importedAt||"") : todayISO();
+  showSheet("sheetMig","maskMig");
+}
+document.getElementById("btnMigSave").addEventListener("click", function(){
+  var src = document.getElementById("inpMigSrc").value.trim();
+  var hid = document.getElementById("selMigHabit").value;
+  var days = parseInt(document.getElementById("inpMigDays").value,10) || 0;
+  var cur = document.getElementById("inpMigCur").value.trim();
+  var date = document.getElementById("inpMigDate").value || todayISO();
+  if (!src || !hid){ toast(isZh()?"请填写来源软件与归入习惯":"Fill in source and habit"); return; }
+  if (days <= 0){ toast(t().migNeedDays); return; }
+  var curV = cur === "" ? null : parseInt(cur,10);
+  if (migEditId){
+    MIG.forEach(function(m){ if (m.id===migEditId){ m.source=src; m.habitId=hid; m.prevDays=days; m.curDays=curV; m.importedAt=date; } });
+  } else {
+    MIG.push({ id:"m"+Date.now(), habitId:hid, source:src, prevDays:days, curDays:curV, importedAt:date });
+  }
+  saveMig(); hideSheet("sheetMig","maskMig"); renderMig(); renderHonors(); toast(t().migSaved);
+});
+document.getElementById("btnMigDel").addEventListener("click", function(){
+  if (!migEditId) return;
+  MIG = MIG.filter(function(m){ return m.id!==migEditId; });
+  saveMig(); hideSheet("sheetMig","maskMig"); renderMig(); renderHonors(); toast(t().migRemoved);
+});
+document.getElementById("btnMigCancel").addEventListener("click", function(){ hideSheet("sheetMig","maskMig"); });
+document.getElementById("maskMig").addEventListener("click", function(){ hideSheet("sheetMig","maskMig"); });
+
+/* ============================================================
+   付费墙 · 带完整状态机（防拒审）
+   - 8 秒超时
+   - 失败态 + 重试
+   - 所有 IAP 调用包 try/catch
+   ============================================================ */
+var DEFAULT_PRICE_TIMEOUT_MS = 8000;
+var payState = "idle";
+var payReason = null;
+var lastPaywallReason = "honors";
+
+function getIapSimMode(){
+  try { return localStorage.getItem("seeora_iap_sim") || "ok"; } catch(e){ return "ok"; }
+}
+
+function fetchOfferings(){
+  var mode = getIapSimMode();
+  return new Promise(function(resolve, reject){
+    var timer = setTimeout(function(){ reject(new Error("timeout")); }, DEFAULT_PRICE_TIMEOUT_MS);
+    if (mode === "fail"){
+      // 挂起，让 8 秒超时触发
+      return;
+    }
+    setTimeout(function(){
+      clearTimeout(timer);
+      resolve({ monthly:{price:"$1.99"}, yearly:{price:"$9.99"}, lifetime:{price:"$4.99"} });
+    }, 800);
+  });
+}
+
+function setPaywallState(state, reason){
+  payState = state;
+  payReason = reason || null;
+  var loading = document.getElementById("payLoading");
+  var fail = document.getElementById("payFail");
+  var benefits = document.querySelector(".pay-benefits");
+  var actions = document.querySelector(".pay-actions");
+  var foot = document.querySelector(".pay-foot");
+  var fine = document.getElementById("payFine");
+
+  loading.style.display = state === "loading" ? "flex" : "none";
+  fail.style.display = state === "failed" ? "block" : "none";
+
+  var hideBody = (state === "loading" || state === "failed");
+  benefits.style.display = hideBody ? "none" : "block";
+  actions.style.display = hideBody ? "none" : "flex";
+  foot.style.display = hideBody ? "none" : "flex";
+  fine.style.display = hideBody ? "none" : "block";
+
+  if (state === "loading"){
+    document.getElementById("payLoadingText").textContent = t().payLoadingPrices;
+  }
+  if (state === "failed"){
+    document.getElementById("payFailTitle").textContent = t().payFailTitle;
+    document.getElementById("payFailSub").textContent =
+      reason === "timeout" ? t().payFailTimeout : t().payFailGeneric;
+    document.getElementById("payRetry").textContent = t().payRetry;
+  }
+}
+
+async function showPaywall(reason){
+  lastPaywallReason = reason || "honors";
+  var c = PAY_COPY[reason] || PAY_COPY.honors;
+  document.getElementById("payTitle").textContent = t()[c[0]];
+  document.getElementById("paySub").textContent = t()[c[1]];
+  showSheet("sheetPay","maskPay");
+  setPaywallState("loading");
+  try {
+    await fetchOfferings();
+    setPaywallState("ready");
+  } catch(err){
+    setPaywallState("failed", err && err.message === "timeout" ? "timeout" : "error");
+  }
+}
+
+var PAY_COPY = { limit:["payLimitT","payLimitS"], share:["payShareT","payShareS"],
+                 export:["payExportT","payExportS"], migrate:["payMigrateT","payMigrateS"],
+                 honors:["payHonorsT","payHonorsS"] };
+
+document.getElementById("payRetry").addEventListener("click", function(){
+  if (payState === "failed") showPaywall(lastPaywallReason);
+});
+
+document.getElementById("btnPayClose").addEventListener("click", function(){ hideSheet("sheetPay","maskPay"); });
+document.getElementById("maskPay").addEventListener("click", function(){ hideSheet("sheetPay","maskPay"); });
+document.getElementById("btnTrial").addEventListener("click", function(){ startTrial(7); hideSheet("sheetPay","maskPay"); toast(t().trialStarted); });
+document.getElementById("btnBuy").addEventListener("click", function(){ setPro(true); hideSheet("sheetPay","maskPay"); toast(t().bought); });
+
+/* 恢复购买：模拟从商店读取已购记录并重新解锁 Pro */
+document.getElementById("btnRestore").addEventListener("click", async function(){
+  var btn = this;
+  var orig = btn.textContent;
+  btn.textContent = t().restoring;
+  btn.style.pointerEvents = "none";
+  try {
+    var rec = await restorePurchases();
+    if (rec){
+      setPro(true);                  // 重新写入本地解锁标记 + 刷新凭证时间戳
+      hideSheet("sheetPay","maskPay");
+      toast(t().restored);
+    } else {
+      toast(t().noPurchase);
+    }
+  } catch(err){
+    toast(t().restoreFailed);
+  } finally {
+    btn.textContent = orig;
+    btn.style.pointerEvents = "";
+  }
+});
+document.getElementById("btnPayPrivacy").addEventListener("click", function(){ openDoc("privacy"); });
+document.getElementById("btnPayTerms").addEventListener("click", function(){ openDoc("terms"); });
+
+/* ===== 权限引导页 ===== */
+var pendingReminderToggle = false;
+
+function showPermIntro(){
+  var T = t();
+  document.getElementById("permIcon").textContent = "🔔";
+  document.getElementById("permTitle").textContent = T.permTitle;
+  document.getElementById("permSub").textContent = T.permSub;
+  document.getElementById("permP1").textContent = T.permP1;
+  document.getElementById("permP2").textContent = T.permP2;
+  document.getElementById("permP3").textContent = T.permP3;
+  document.getElementById("btnPermLater").textContent = T.permLater;
+  document.getElementById("btnPermAllow").textContent = T.permAllow;
+  document.getElementById("btnPermAllow").style.display = "block";
+  document.getElementById("btnPermAllow").onclick = onPermAllow;
+  showSheet("sheetPerm","maskPerm");
+}
+function showPermDenied(){
+  var T = t();
+  document.getElementById("permIcon").textContent = "🚫";
+  document.getElementById("permTitle").textContent = T.permDeniedTitle;
+  document.getElementById("permSub").textContent = T.permDeniedSub;
+  document.getElementById("permP1").style.display = "none";
+  document.getElementById("permP2").style.display = "none";
+  document.getElementById("permP3").style.display = "none";
+  document.getElementById("btnPermLater").textContent = T.permDeniedBtn;
+  document.getElementById("btnPermAllow").style.display = "none";
+  showSheet("sheetPerm","maskPerm");
+}
+async function onPermAllow(){
+  var res = await requestNotifPermission();
+  if (res === "granted"){
+    hideSheet("sheetPerm","maskPerm");
+    toast(t().permDeniedOK);
+    updateNotifUI();
+    if (pendingReminderToggle){
+      document.getElementById("swAddRem").classList.add("on");
+      document.getElementById("addTimeWrap").style.display = "block";
+      pendingReminderToggle = false;
+    }
+  } else if (res === "denied"){
+    showPermDenied();
+  } else {
+    hideSheet("sheetPerm","maskPerm");
+  }
+}
+document.getElementById("btnPermClose").addEventListener("click", function(){ hideSheet("sheetPerm","maskPerm"); pendingReminderToggle = false; });
+document.getElementById("btnPermLater").addEventListener("click", function(){ hideSheet("sheetPerm","maskPerm"); pendingReminderToggle = false; });
+document.getElementById("maskPerm").addEventListener("click", function(){ hideSheet("sheetPerm","maskPerm"); pendingReminderToggle = false; });
+
+function updateNotifUI(){
+  var perm = notifPermission();
+  var T = t();
+  var sub, arrow;
+  if (perm === "granted"){ sub = T.notifGranted; arrow = "✓"; }
+  else if (perm === "denied"){ sub = T.notifDenied; arrow = "!"; }
+  else if (perm === "unsupported"){ sub = T.notifUnsupported; arrow = "—"; }
+  else { sub = T.notifDefault; arrow = "›"; }
+  document.getElementById("notifLab").textContent = T.notifLab;
+  document.getElementById("notifStatus").textContent = sub;
+  document.getElementById("notifVal").textContent = "";
+  document.getElementById("notifArrow").textContent = arrow;
+}
+document.getElementById("rowNotif").addEventListener("click", async function(){
+  var perm = notifPermission();
+  if (perm === "granted"){ toast(isZh()?"已开启，如需关闭请到系统设置":"Already enabled. Change it in system settings."); return; }
+  if (perm === "unsupported"){ toast(t().permUnsupported); return; }
+  if (perm === "denied"){ showPermDenied(); return; }
+  pendingReminderToggle = false;
+  showPermIntro();
+});
+
+/* ===== 海报 ===== */
+function roundRectPath(g,x,y,w,h,r){
+  if (g.roundRect){ g.beginPath(); g.roundRect(x,y,w,h,r); return; }
+  g.beginPath(); g.moveTo(x+r,y); g.lineTo(x+w-r,y); g.quadraticCurveTo(x+w,y,x+w,y+r);
+  g.lineTo(x+w,y+h-r); g.quadraticCurveTo(x+w,y+h,x+w-r,y+h); g.lineTo(x+r,y+h);
+  g.quadraticCurveTo(x,y+h,x,y+h-r); g.lineTo(x,y+r); g.quadraticCurveTo(x,y,x+r,y); g.closePath();
+}
+function drawBrandIcon(g,cx,cy,r){
+  g.save();
+  var s = r*2, x0 = cx-r, y0 = cy-r;
+  // 圆角方块品牌底（与 brand-mark-fill.svg 一致）
+  roundRectPath(g, x0, y0, s, s, s*(220/1024));
+  g.fillStyle = "#2d7a6b"; g.fill();
+  // 浅色内环
+  g.beginPath(); g.arc(cx, cy, s*(280/1024), 0, Math.PI*2);
+  g.strokeStyle = "rgba(255,255,255,0.18)"; g.lineWidth = s*(6/1024); g.stroke();
+  // 环形点阵（6 个白色实心点）
+  var dotR = s*(54/1024), map = function(p){ return [ x0 + p[0]/1024*s, y0 + p[1]/1024*s ]; };
+  var pts = [[512,232],[731,337],[785,574],[634,764],[390,764],[239,574]];
+  g.fillStyle = "#ffffff";
+  pts.forEach(function(p){ var q = map(p); g.beginPath(); g.arc(q[0],q[1],dotR,0,Math.PI*2); g.fill(); });
+  // 镂空点（品牌色填充 + 白色描边）
+  var h = map([293,337]);
+  g.beginPath(); g.arc(h[0],h[1],dotR,0,Math.PI*2); g.fillStyle = "#2d7a6b"; g.fill();
+  g.strokeStyle = "#ffffff"; g.lineWidth = s*(14/1024); g.stroke();
+  g.restore();
+}
+function drawPoster(h){
+  var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  var W=750, H=1334, cv = document.createElement("canvas"); cv.width=W; cv.height=H;
+  var g = cv.getContext("2d");
+  var bgC = isDark?"#1c1b19":"#f1ede6", cardC = isDark?"#292725":"#ffffff", inkC = isDark?"#ebe8e2":"#2a2a2a";
+  g.fillStyle = bgC; g.fillRect(0,0,W,H);
+  var rg = g.createRadialGradient(W/2,260,40,W/2,260,620);
+  rg.addColorStop(0,"rgba("+C.brandRgb+",0.12)"); rg.addColorStop(1,"rgba("+C.brandRgb+",0)");
+  g.fillStyle = rg; g.fillRect(0,0,W,H);
+  var top=h.streak, maxv=h.best, tot=h.total;
+  g.textAlign = "center"; g.fillStyle = inkC;
+  g.font = "700 80px -apple-system,PingFang SC,sans-serif"; g.fillText(tr(h), W/2, 220);
+  g.save(); g.shadowColor = "rgba(0,0,0,0.14)"; g.shadowBlur = 40; g.shadowOffsetY = 14;
+  g.fillStyle = cardC; roundRectPath(g,70,320,W-140,640,44); g.fill(); g.restore();
+  var nums = [{v:top,l:t().currentStreak},{v:maxv,l:t().longest},{v:tot,l:t().total}];
+  nums.forEach(function(n,i){
+    var cx = 70 + (W-140)*(i+0.5)/3;
+    g.fillStyle = C.brand; g.font = "700 96px -apple-system,PingFang SC,sans-serif"; g.fillText(String(n.v), cx, 620);
+    g.fillStyle = "#8a8a85"; g.font = "500 28px -apple-system,PingFang SC,sans-serif"; g.fillText(n.l, cx, 680);
+    if (i<2){ g.fillStyle = isDark?"rgba(255,255,255,0.08)":"rgba(0,0,0,0.08)"; g.fillRect(cx+(W-140)/6-1, 570, 2, 110); }
+  });
+  g.fillStyle = inkC; g.font = "600 34px -apple-system,PingFang SC,sans-serif";
+  g.fillText(tr(h.desc)||"—", W/2, 800);
+  g.fillStyle = C.brand; g.font = "700 44px -apple-system,PingFang SC,sans-serif";
+  g.fillText(isZh()?"第 "+top+" 天":"Day "+top, W/2, 880);
+  var brandText = t().brand;
+  g.font = "700 46px -apple-system,PingFang SC,sans-serif";
+  var btw = g.measureText(brandText).width, iconR=22, gap=16;
+  var totalW = iconR*2+gap+btw, startX = W/2-totalW/2, iconCx = startX+iconR, brandCy = 1085;
+  drawBrandIcon(g, iconCx, brandCy, iconR);
+  g.fillStyle = inkC; g.textAlign = "left"; g.fillText(brandText, iconCx+iconR+gap, brandCy+16);
+  g.textAlign = "center"; g.fillStyle = "#8a8a85"; g.font = "500 28px -apple-system,PingFang SC,sans-serif";
+  g.fillText(t().slogan, W/2, 1160);
+  if (!isPro()){
+    g.globalAlpha = 0.4; g.fillStyle = "#8a8a85";
+    g.font = "500 22px -apple-system,PingFang SC,sans-serif"; g.fillText("Made with Seeora", W/2, H-44);
+    g.globalAlpha = 1;
+  }
+  return cv;
+}
+function dataURLtoBlob(url){
+  var arr = url.split(","), mime = arr[0].match(/:(.*?);/)[1], bstr = atob(arr[1]);
+  var u8 = new Uint8Array(bstr.length);
+  for (var i=0;i<bstr.length;i++) u8[i] = bstr.charCodeAt(i);
+  return new Blob([u8], { type:mime });
+}
+function openPoster(){
+  var h = HABITS[curIdx], cv = drawPoster(h);
+  document.getElementById("posterImg").src = cv.toDataURL("image/png");
+  document.getElementById("posterTitle").textContent = t().posterTitle;
+  document.getElementById("btnPosterSave").textContent = t().posterSave;
+  document.getElementById("btnPosterShare").textContent = t().posterShare;
+  showSheet("sheetPoster","maskPoster");
+}
+function savePoster(){
+  var h = HABITS[curIdx], cv = drawPoster(h);
+  var a = document.createElement("a"); a.href = cv.toDataURL("image/png");
+  a.download = "Seeora-"+tr(h)+".png"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast(t().posterSaved);
+}
+function sharePoster(){
+  var h = HABITS[curIdx], cv = drawPoster(h);
+  var blob = dataURLtoBlob(cv.toDataURL("image/png"));
+  var file = new File([blob], "Seeora-"+tr(h)+".png", { type:"image/png" });
+  if (navigator.canShare && navigator.canShare({ files:[file] })){
+    navigator.share({ files:[file], title:"Seeora" }).catch(function(err){ if (err && err.name!=="AbortError") savePoster(); });
+  } else savePoster();
+}
+
+/* ===== 弹层 & 提示 ===== */
+function showSheet(s,m){ document.getElementById(s).classList.add("on"); document.getElementById(m).classList.add("on"); }
+function hideSheet(s,m){
+  document.getElementById(s).classList.remove("on");
+  document.getElementById(m).classList.remove("on");
+  if (s === "sheetPay") setPaywallState("idle");
+}
+var toastTimer=null;
+function toast(msg){
+  var el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("on");
+  clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el.classList.remove("on"); }, 1800);
+}
+var floatTimer=null;
+function floatMsg(msg){
+  var el = document.getElementById("floatMsg");
+  el.textContent = msg; el.classList.add("on");
+  clearTimeout(floatTimer); floatTimer = setTimeout(function(){ el.classList.remove("on"); }, 3000);
+}
+
+/* ===== 导入导出 ===== */
+function exportData(){
+  if (!isPro()){ showPaywall("export"); return; }
+  var payload = { app:"Seeora", version:1, exportedAt:new Date().toISOString(),
+    habits:HABITS, mig:MIG, settings:{ lang:LANG, theme:THEME } };
+  var blob = new Blob([JSON.stringify(payload,null,2)], { type:"application/json" });
+  var url = URL.createObjectURL(blob); var a = document.createElement("a");
+  var d = new Date();
+  var stamp = d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
+  a.href = url; a.download = "seeora-backup-"+stamp+".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 500);
+  toast(t().exported);
+}
+function importData(){
+  var inp = document.getElementById("fileImport"); inp.value = ""; inp.click();
+}
+document.getElementById("fileImport").addEventListener("change", function(e){
+  var f = e.target.files && e.target.files[0]; if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var obj = JSON.parse(reader.result);
+      if (!obj || !Array.isArray(obj.habits)) throw new Error("bad");
+      if (!window.confirm(t().importConfirm)) return;
+      HABITS = obj.habits.map(function(h){
+        if (h.curve && typeof h.curve[0] === "number") h.curve = h.curve.map(function(v){ return { v:v, ok:1 }; });
+        return h;
+      });
+      MIG = Array.isArray(obj.mig) ? obj.mig : [];
+      if (obj.settings){
+        if (obj.settings.lang){ LANG = obj.settings.lang; saveLang(); }
+        if (obj.settings.theme){ THEME = obj.settings.theme; try{ localStorage.setItem("seeora_theme", THEME); }catch(_){} }
+      }
+      saveHabits(); saveMig(); applyTheme(); refreshColors();
+      renderAll(); updateThemeUI(); updateLangUI();
+      toast(t().imported);
+    }catch(err){ toast(t().importFail); }
+  };
+  reader.readAsText(f);
+});
+
+/* ===== 文档 ===== */
+function docContent(kind){
+  var zh = isZh();
+  if (kind === "faq"){
+    var items = zh ? [
+      ["数据存在哪里？","全部数据只保存在你的手机本地（localStorage / App 沙盒），我们不上传、不收集、不分析。换手机时用「导出数据」保存一份 JSON，再在新设备上「导入数据」即可。"],
+      ["免费版有什么限制？","免费版可创建 5 条习惯，可使用打卡、补签、休息日、连续统计、热力图等全部核心功能。成就卡带一个淡淡的 Seeora 水印。"],
+      ["Pro 是一次性买断吗？","是。$4.99 一次买断，永久使用，不订阅、不续费。前 7 天可免费体验全部 Pro 功能。"],
+      ["为什么不能超过 5 条习惯？","Seeora 希望帮用户专注在少数几个真正重要的习惯上。5 条足够覆盖大多数人的核心目标。如果你真的需要更多，Pro 版无上限。"],
+      ["漏签了会怎样？","连续会中断，但累计记录会保留。你可以在最近 7 天内补签，或者把那天标为「休息日」，连续不断。"],
+      ["提醒到点没弹怎么办？","请确认系统设置里 Seeora 的通知权限是开启状态。网页版在页面关闭后无法推送，App 版（Capacitor / 原生）由操作系统接管，更可靠。"],
+      ["怎么联系你们？","见「意见反馈」，或者发邮件到 hello@seeora.app。"]
+    ] : [
+      ["Where is my data stored?","All data is kept locally on your device (localStorage / app sandbox). We don't upload, collect, or analyze anything. Use Export to save a JSON copy; use Import to restore it on a new device."],
+      ["What's the free plan limit?","You can create up to 5 habits. Check-ins, backfill, rest days, streaks, and heatmaps are all unlimited. Free cards carry a faint Seeora watermark."],
+      ["Is Pro a one-time purchase?","Yes. $4.99 once, yours forever. No subscription, no auto-renewal. You can try everything free for 7 days first."],
+      ["Why 5 habits?","Seeora is designed for focus — a few habits that truly matter. 5 covers most people's core goals. Pro removes the cap."],
+      ["What happens if I miss a day?","Your streak breaks, but your total is preserved. You can backfill within the last 7 days, or mark that day as a rest day to keep the streak going."],
+      ["Reminders don't fire — why?","Check that Seeora has notification permission in system settings. In the web version, reminders can only fire while the page is open. In the packaged app (Capacitor / native), the OS handles scheduling, which is much more reliable."],
+      ["How do I reach you?","Use Send feedback, or email hello@seeora.app."]
+    ];
+    return { title: zh?"帮助与常见问题":"Help & FAQ", updated:"",
+      body: items.map(function(a){ return '<details class="faq"><summary>'+a[0]+'</summary><div class="faq-body">'+a[1]+'</div></details>'; }).join("") };
+  }
+  if (kind === "privacy"){
+    return {
+      title: zh?"隐私政策":"Privacy Policy",
+      updated: zh?"最后更新：2026-09-27":"Last updated: 2026-09-27",
+      body: zh ?
+        '<p class="doc-p">Seeora 的核心理念是「数据属于你」。我们没有账号系统，没有服务端数据库，没有第三方埋点。</p>'+
+        '<div class="doc-h">我们收集什么</div><p class="doc-p">什么都不收集。你的习惯、打卡记录、迁移数据、语言和外观偏好，全部存在你设备的本地存储里。</p>'+
+        '<div class="doc-h">通知</div><p class="doc-p">提醒功能使用系统级通知，通知内容只在你设备上生成和展示，我们无法读取。</p>'+
+        '<div class="doc-h">我们如何传输</div><p class="doc-p">App 不向任何服务器发送你的数据。数据只在两种情况离开设备：你在设置里主动「导出数据」，或者使用系统的分享功能。这两条路径都由你完全控制。</p>'+
+        '<div class="doc-h">第三方</div><p class="doc-p">App 内无广告、无分析 SDK、无社交登录。仅使用 Apple 提供的 App 内购买能力处理 Pro 购买，支付信息由 Apple 处理，我们不接触。</p>'+
+        '<div class="doc-h">删除数据</div><p class="doc-p">卸载 App 或清除浏览器数据即可删除全部内容。导出功能随时可用，让你带走一份完整备份。</p>'+
+        '<div class="doc-h">联系我们</div><p class="doc-p">有任何疑问：hello@seeora.app</p>' :
+        '<p class="doc-p">Seeora is built around one idea: your data belongs to you. No accounts, no servers, no third-party analytics.</p>'+
+        '<div class="doc-h">What we collect</div><p class="doc-p">Nothing. Your habits, check-ins, imported records, language, and appearance preference all live in your device\'s local storage.</p>'+
+        '<div class="doc-h">Notifications</div><p class="doc-p">Reminders use system-level notifications. Their content is generated and displayed only on your device — we cannot read it.</p>'+
+        '<div class="doc-h">How data moves</div><p class="doc-p">The app never sends your data to any server. It only leaves your device when you choose Export or use the system Share sheet.</p>'+
+        '<div class="doc-h">Third parties</div><p class="doc-p">No ads, no analytics SDKs, no social login. Apple\'s In-App Purchase handles Pro payments; Apple processes payment details, not us.</p>'+
+        '<div class="doc-h">Deleting your data</div><p class="doc-p">Uninstalling the app or clearing browser storage removes everything. Export is always available.</p>'+
+        '<div class="doc-h">Contact</div><p class="doc-p">Questions: hello@seeora.app</p>'
+    };
+  }
+  return {
+    title: zh?"用户协议":"Terms of Service",
+    updated: zh?"最后更新：2026-09-27":"Last updated: 2026-09-27",
+    body: zh ?
+      '<p class="doc-p">使用 Seeora 即表示你同意以下条款。条款力求简短易懂。</p>'+
+      '<div class="doc-h">许可</div><p class="doc-p">我们授予你一项个人、非独占、不可转让的许可，用于在你拥有的设备上使用 Seeora。</p>'+
+      '<div class="doc-h">Pro 与内购</div><p class="doc-p">Seeora Pro 为一次性内购，价格为 $4.99（或当地等价）。购买后永久有效，不可转让。购买由 Apple 处理，支持 Apple 的退款政策。</p>'+
+      '<div class="doc-h">你的内容</div><p class="doc-p">你在 Seeora 中创建的一切内容都属于你。我们不对其主张任何权利。</p>'+
+      '<div class="doc-h">免责</div><p class="doc-p">Seeora 是一个自我管理工具，不构成医疗、心理或专业建议。请自行判断使用。</p>'+
+      '<div class="doc-h">变更</div><p class="doc-p">我们可能会更新本协议，重大变更会在 App 内提示。</p>' :
+      '<p class="doc-p">By using Seeora you agree to the terms below.</p>'+
+      '<div class="doc-h">License</div><p class="doc-p">We grant you a personal, non-exclusive, non-transferable license to use Seeora on devices you own.</p>'+
+      '<div class="doc-h">Pro & In-App Purchase</div><p class="doc-p">Seeora Pro is a one-time purchase at $4.99 (or local equivalent). Purchases are handled by Apple and subject to Apple\'s refund policy.</p>'+
+      '<div class="doc-h">Your content</div><p class="doc-p">Everything you create in Seeora belongs to you.</p>'+
+      '<div class="doc-h">Disclaimer</div><p class="doc-p">Seeora is a self-management tool, not medical, psychological, or professional advice.</p>'+
+      '<div class="doc-h">Changes</div><p class="doc-p">We may update these terms. Material changes will be surfaced in the app.</p>'
+  };
+}
+function openDoc(kind){
+  var d = docContent(kind);
+  document.getElementById("docBody").innerHTML =
+    '<h2 class="doc-title">'+d.title+'</h2>'+(d.updated?'<p class="doc-updated">'+d.updated+'</p>':'')+d.body;
+  showSheet("sheetDoc","maskDoc");
+}
+document.getElementById("btnDocClose").addEventListener("click", function(){ hideSheet("sheetDoc","maskDoc"); });
+document.getElementById("btnDocClose2").addEventListener("click", function(){ hideSheet("sheetDoc","maskDoc"); });
+document.getElementById("maskDoc").addEventListener("click", function(){ hideSheet("sheetDoc","maskDoc"); });
+
+/* ===== 语言/外观 UI ===== */
+function updateLangUI(){
+  var el = document.getElementById("langVal"); if (el) el.textContent = LANG==="zh"?"中文":"English";
+  var cz = document.getElementById("checkZh"), ce = document.getElementById("checkEn");
+  if (cz) cz.textContent = LANG==="zh"?"✓":""; if (ce) ce.textContent = LANG==="en"?"✓":"";
+}
+document.getElementById("rowLang").addEventListener("click", function(){ showSheet("sheetLang","maskLang"); });
+document.getElementById("btnLangClose").addEventListener("click", function(){ hideSheet("sheetLang","maskLang"); });
+document.getElementById("maskLang").addEventListener("click", function(){ hideSheet("sheetLang","maskLang"); });
+document.getElementById("sheetLang").addEventListener("click", function(e){
+  var row = e.target.closest("[data-lang-val]"); if (!row) return;
+  setLang(row.getAttribute("data-lang-val")); hideSheet("sheetLang","maskLang");
+});
+document.getElementById("rowTheme").addEventListener("click", function(){ showSheet("sheetTheme","maskTheme"); updateThemeUI(); });
+document.getElementById("btnThemeClose").addEventListener("click", function(){ hideSheet("sheetTheme","maskTheme"); });
+document.getElementById("maskTheme").addEventListener("click", function(){ hideSheet("sheetTheme","maskTheme"); });
+document.getElementById("sheetTheme").addEventListener("click", function(e){
+  var row = e.target.closest("[data-theme-val]"); if (!row) return;
+  setTheme(row.getAttribute("data-theme-val")); hideSheet("sheetTheme","maskTheme");
+});
+
+/* ===== 全部渲染 ===== */
+function renderAll(){
+  var T = t();
+  ["brandHome","brandDetail","brandHonors"].forEach(function(id){ document.getElementById(id).textContent = T.brand; });
+  ["sloganHome","sloganDetail","sloganHonors"].forEach(function(id){ document.getElementById(id).textContent = T.slogan; });
+  document.getElementById("titleToday").textContent = T.today;
+  document.getElementById("titleHonors").textContent = T.honorsTitle;
+  document.getElementById("labHabits").textContent = T.tabHabits;
+  document.getElementById("labHonors").textContent = T.tabHonors;
+  document.getElementById("addLab").textContent = T.add;
+  document.getElementById("setTitle").textContent = T.settings;
+  document.getElementById("btnSetClose").textContent = T.close;
+  document.getElementById("proEntryT").textContent = T.pro;
+  (function(){
+    var m = proMode();
+    var s = m==="permanent" ? T.proSubPro : m==="trial" ? T.proSubTrial.replace("{n}", trialDaysLeft()) : T.proSubFree;
+    document.getElementById("proEntrySub").textContent = s;
+  })();
+  document.getElementById("grpGeneral").textContent = T.grpGeneral;
+  document.getElementById("grpNotif").textContent = T.grpNotif;
+  document.getElementById("grpData").textContent = T.grpData;
+  document.getElementById("grpAbout").textContent = T.grpAbout;
+  document.getElementById("langLab").textContent = T.langLab;
+  document.getElementById("themeLab").textContent = T.themeLab;
+  document.getElementById("exportLab").textContent = T.dataExport;
+  document.getElementById("exportSub").textContent = T.dataExportSub;
+  document.getElementById("importLab").textContent = T.dataImport;
+  document.getElementById("importSub").textContent = T.dataImportSub;
+  document.getElementById("feedbackLab").textContent = T.feedbackLab;
+  document.getElementById("faqLab").textContent = T.faqLab;
+  document.getElementById("privacyLab").textContent = T.privacyLab;
+  document.getElementById("termsLab").textContent = T.termsLab;
+  document.getElementById("landingLab").textContent = T.landingLab;
+  document.getElementById("versionLab").textContent = T.versionLab;
+  document.getElementById("themeTitle").textContent = T.themeTitle;
+  document.getElementById("themeOptSystem").textContent = T.themeSystem;
+  document.getElementById("themeOptLight").textContent = T.themeLight;
+  document.getElementById("themeOptDark").textContent = T.themeDark;
+  document.getElementById("btnThemeClose").textContent = T.close;
+  document.getElementById("langTitle").textContent = T.langLab;
+  document.getElementById("btnLangClose").textContent = T.close;
+  document.getElementById("btnDocClose").textContent = T.close;
+  updateThemeUI(); updateLangUI(); updateNotifUI();
+  document.getElementById("payTitle").textContent = T.payTitle;
+  document.getElementById("paySub").textContent = T.paySub;
+  document.getElementById("b1t").textContent = T.b1t; document.getElementById("b1s").textContent = T.b1s;
+  document.getElementById("b2t").textContent = T.b2t; document.getElementById("b2s").textContent = T.b2s;
+  document.getElementById("b3t").textContent = T.b3t; document.getElementById("b3s").textContent = T.b3s;
+  document.getElementById("b4t").textContent = T.b4t; document.getElementById("b4s").textContent = T.b4s;
+  document.getElementById("btnTrial").textContent = T.btnTrial;
+  document.getElementById("btnBuy").textContent = T.btnBuy;
+  document.getElementById("btnRestore").textContent = T.restore;
+  document.getElementById("payFine").textContent = T.payFine;
+  document.getElementById("addTitle").textContent = T.addTitle;
+  document.getElementById("fNameLab").textContent = T.nameLab;
+  document.getElementById("fDescLab").textContent = T.descLab;
+  document.getElementById("fRemLab").textContent = T.fRemLab;
+  document.getElementById("fRemSub").textContent = T.fRemSub;
+  document.getElementById("fAddTimeLab").textContent = T.fAddTimeLab;
+  document.getElementById("fFreqLab").textContent = T.freqLab;
+  document.getElementById("fGoalLab").textContent = T.goalLab;
+  document.getElementById("btnAddCancel").textContent = T.cancel;
+  document.getElementById("btnAddSave").textContent = T.save;
+  document.getElementById("inpName").placeholder = isZh()?"如：阅读":"e.g. Read";
+  document.getElementById("inpDesc").placeholder = isZh()?"一句话说明为什么坚持它":"Why it matters";
+  var segF = document.getElementById("segFreq").children, segG = document.getElementById("segGoal").children;
+  [1,2,3,7].forEach(function(v,i){ segF[i].textContent = isZh()?("每 "+v+" 天"):(v+"d"); });
+  [1,2,3,8].forEach(function(v,i){ segG[i].textContent = String(v); });
+  document.getElementById("guideText").textContent = T.guide;
+  document.getElementById("guideOk").textContent = T.guideOk;
+  (function(){
+    var m = proMode();
+    document.getElementById("proCardT").textContent = m==="free" ? (isZh()?"升级 Seeora Pro":"Upgrade to Seeora Pro") : T.pro;
+    document.getElementById("proCardS").textContent = m==="permanent" ? T.proSubPro
+      : m==="trial" ? T.proSubTrial.replace("{n}", trialDaysLeft())
+      : (isZh()?"无限习惯 · 无水印分享 · 数据导出":"Unlimited habits · Watermark-free · Data export");
+    document.getElementById("proCardA").textContent = m==="free" ? (isZh()?"了解更多 →":"Learn more →") : "✓";
+  })();
+
+  renderList(); renderDetail(); renderUsage(); renderHonors();
+
+  // 启动画面本地化标语（若启动画面仍在）
+  var _ss = document.querySelector("#splash .sp-slogan");
+  if (_ss) _ss.textContent = T.slogan;
+
+  var seenIntro = false;
+  try{ seenIntro = !!localStorage.getItem("seeora_intro"); }catch(e){}
+  if (!seenIntro){
+    var fc = document.querySelector("#list .card");
+    if (fc){
+      fc.classList.add("hint");
+      try{ localStorage.setItem("seeora_intro","1"); }catch(e){}
+      setTimeout(function(){ fc.classList.remove("hint"); }, 4200);
+    }
+  }
+}
+
+/* ===== 打卡：首页 ===== */
+document.getElementById("list").addEventListener("click", function(e){
+  var btn = e.target.closest ? e.target.closest(".check") : null; if (!btn) return;
+  e.stopPropagation();
+  var i = +btn.getAttribute("data-i"), h = HABITS[i];
+  var nowDone = h.week[6]!==1; h.week[6] = nowDone?1:0;
+  if (nowDone){
+    h.streak += 1; if (h.streak > h.best) h.best = h.streak;
+    btn.classList.add("on","breathe"); setTimeout(function(){ btn.classList.remove("breathe"); }, 1120);
+  } else { h.streak = Math.max(0, h.streak-1); btn.classList.remove("on"); }
+  var card = btn.parentElement;
+  card.querySelector(".h-sub").textContent = t().habitSub(h.streak, h.freqDays);
+  card.querySelector(".mini").innerHTML = miniDots(h.week);
+  saveHabits(); renderDetail(); renderUsage(); renderHonors();
+});
+document.getElementById("list").addEventListener("click", function(e){
+  var card = e.target.closest ? e.target.closest(".card") : null; if (!card) return;
+  if (e.target.closest(".check")) return;
+  curIdx = +card.getAttribute("data-idx"); animatedArcs = {};
+  document.getElementById("view-detail").classList.add("on"); renderDetail();
+});
+document.getElementById("list").addEventListener("keydown", function(e){
+  if (e.key!=="Enter" && e.key!==" ") return;
+  var card = e.target.closest ? e.target.closest(".card") : null; if (!card) return;
+  if (e.target.closest(".check")) return;
+  e.preventDefault(); card.click();
+});
+document.getElementById("btnBack").addEventListener("click", function(){
+  document.getElementById("view-detail").classList.remove("on"); renderList();
+});
+document.getElementById("honorList").addEventListener("click", function(e){
+  var it = e.target.closest ? e.target.closest(".honor-item") : null; if (!it) return;
+  curIdx = +it.getAttribute("data-idx"); animatedArcs = {};
+  document.getElementById("view-detail").classList.add("on"); renderDetail();
+});
+
+/* ===== 打卡：详情 ===== */
+document.getElementById("btnCheck").addEventListener("click", function(){
+  var h = HABITS[curIdx], prev = h.week[6];
+  if (prev === 2){
+    h.week[6] = 1; h.streak += 1;
+    if (h.streak > h.best){
+      h.best = h.streak;
+      var gl = document.getElementById("ringGlow");
+      gl.classList.remove("play"); void gl.offsetWidth; gl.classList.add("play");
+      floatMsg(t().newBest + h.best + " " + t().days);
+    }
+    toast(t().checkIn);
+  } else if (prev === 1){ h.week[6] = 0; h.streak = Math.max(0, h.streak-1); }
+  else {
+    h.week[6] = 1; h.streak += 1;
+    if (h.streak > h.best){
+      h.best = h.streak;
+      var gl2 = document.getElementById("ringGlow");
+      gl2.classList.remove("play"); void gl2.offsetWidth; gl2.classList.add("play");
+      floatMsg(t().newBest + h.best + " " + t().days);
+    }
+    var full = h.week.every(function(x){ return x===1; });
+    if (full){
+      var svg = document.querySelector("#ring svg");
+      if (svg){ svg.classList.remove("ring-breathe"); void svg.offsetWidth; svg.classList.add("ring-breathe"); }
+    }
+  }
+  animatedArcs = {}; saveHabits();
+  renderDetail(); renderList(); renderUsage(); renderHonors();
+});
+
+/* ===== 休息日 ===== */
+function toggleRest(){
+  var h = HABITS[curIdx];
+  if (h.week[6]===2) h.week[6]=0; else h.week[6]=2;
+  saveHabits(); renderDetail(); renderList();
+  toast(h.week[6]===2 ? t().restOn : t().restOff);
+}
+document.getElementById("tickRest").addEventListener("click", toggleRest);
+document.getElementById("tickRest").addEventListener("keydown", function(e){
+  if (e.key==="Enter" || e.key===" "){ e.preventDefault(); toggleRest(); }
+});
+
+/* ===== 补签 ===== */
+document.getElementById("mkGrid").addEventListener("click", function(e){
+  var cell = e.target.closest ? e.target.closest(".mk") : null; if (!cell) return;
+  var idx = +cell.getAttribute("data-idx"), h = HABITS[curIdx];
+  var mark = h.week[idx]===1 ? 0 : 1;
+  h.week[idx] = mark; h.total = Math.max(0, h.total + (mark?1:-1));
+  saveHabits(); renderDetail(); renderList(); renderUsage();
+  toast(mark ? (isZh()?"已标记":"Marked") : (isZh()?"已清除":"Cleared"));
+});
+
+/* ===== 分享 ===== */
+document.getElementById("btnShare").addEventListener("click", openPoster);
+document.getElementById("btnPosterClose").addEventListener("click", function(){ hideSheet("sheetPoster","maskPoster"); });
+document.getElementById("btnPosterSave").addEventListener("click", function(){
+  if (!isPro()){ hideSheet("sheetPoster","maskPoster"); showPaywall("share"); return; }
+  savePoster();
+});
+document.getElementById("btnPosterShare").addEventListener("click", function(){
+  if (!isPro()){ hideSheet("sheetPoster","maskPoster"); showPaywall("share"); return; }
+  sharePoster();
+});
+document.getElementById("maskPoster").addEventListener("click", function(){ hideSheet("sheetPoster","maskPoster"); });
+
+/* ===== 设置入口 ===== */
+function openSettings(){ document.getElementById("setTitle").textContent = t().settings; showSheet("sheetSet","maskSet"); }
+document.getElementById("btnSet").addEventListener("click", openSettings);
+document.getElementById("btnSet2").addEventListener("click", openSettings);
+document.getElementById("btnSet4").addEventListener("click", openSettings);
+document.getElementById("maskSet").addEventListener("click", function(){ hideSheet("sheetSet","maskSet"); });
+document.getElementById("btnSetClose").addEventListener("click", function(){ hideSheet("sheetSet","maskSet"); });
+document.getElementById("proEntry").addEventListener("click", function(){ showPaywall("honors"); });
+document.getElementById("proCard").addEventListener("click", function(){ showPaywall("honors"); });
+document.getElementById("rowExport").addEventListener("click", exportData);
+document.getElementById("rowImport").addEventListener("click", importData);
+document.getElementById("rowFeedback").addEventListener("click", function(){
+  var sub = encodeURIComponent(isZh()?"Seeora 反馈":"Seeora feedback");
+  window.location.href = "mailto:hello@seeora.app?subject="+sub;
+});
+document.getElementById("rowFaq").addEventListener("click", function(){ openDoc("faq"); });
+document.getElementById("rowPrivacy").addEventListener("click", function(){ openDoc("privacy"); });
+document.getElementById("rowTerms").addEventListener("click", function(){ openDoc("terms"); });
+document.getElementById("rowLanding").addEventListener("click", function(){ window.open("https://seeora.app","_blank","noopener"); });
+
+/* ===== 添加习惯 ===== */
+var addFreq = 1, addGoal = 1;
+
+document.getElementById("swAddRem").addEventListener("click", async function(){
+  var turningOn = !this.classList.contains("on");
+  if (!turningOn){
+    this.classList.remove("on");
+    document.getElementById("addTimeWrap").style.display = "none";
+    return;
+  }
+  var perm = notifPermission();
+  if (perm === "granted"){
+    this.classList.add("on");
+    document.getElementById("addTimeWrap").style.display = "block";
+    return;
+  }
+  if (perm === "denied"){ showPermDenied(); return; }
+  if (perm === "unsupported"){ toast(t().permUnsupported); return; }
+  pendingReminderToggle = true;
+  showPermIntro();
+});
+
+document.getElementById("btnAdd").addEventListener("click", function(){
+  addFreq = 1; addGoal = 1;
+  [1,2,3,7].forEach(function(v,i){
+    document.getElementById("segFreq").children[i].classList.toggle("on", v===1);
+    document.getElementById("segFreq").children[i].textContent = isZh()?("每 "+v+" 天"):(v+"d");
+  });
+  [1,2,3,8].forEach(function(v,i){
+    document.getElementById("segGoal").children[i].classList.toggle("on", v===1);
+    document.getElementById("segGoal").children[i].textContent = String(v);
+  });
+  document.getElementById("inpName").value = "";
+  document.getElementById("inpDesc").value = "";
+  document.getElementById("swAddRem").classList.remove("on");
+  document.getElementById("addTimeWrap").style.display = "none";
+  document.getElementById("inpAddTime").value = "20:00";
+  showSheet("sheetAdd","maskAdd");
+});
+document.getElementById("btnAddClose").addEventListener("click", function(){ hideSheet("sheetAdd","maskAdd"); });
+document.getElementById("btnAddCancel").addEventListener("click", function(){ hideSheet("sheetAdd","maskAdd"); });
+document.getElementById("maskAdd").addEventListener("click", function(){ hideSheet("sheetAdd","maskAdd"); });
+document.getElementById("segFreq").addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest("button") : null; if (!b) return;
+  Array.prototype.forEach.call(this.children, function(x){ x.classList.remove("on"); });
+  b.classList.add("on"); addFreq = +b.getAttribute("data-v");
+});
+document.getElementById("segGoal").addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest("button") : null; if (!b) return;
+  Array.prototype.forEach.call(this.children, function(x){ x.classList.remove("on"); });
+  b.classList.add("on"); addGoal = +b.getAttribute("data-v");
+});
+document.getElementById("btnAddSave").addEventListener("click", function(){
+  var name = document.getElementById("inpName").value.trim();
+  if (!name){ toast(isZh()?"请先填写习惯名称":"Please enter a name"); return; }
+  if (!isPro() && HABITS.length >= 5){ hideSheet("sheetAdd","maskAdd"); showPaywall("limit"); return; }
+
+  var remOn = document.getElementById("swAddRem").classList.contains("on");
+  var remTime = document.getElementById("inpAddTime").value || "20:00";
+
+  var newHabit = {
+    id:"h"+Date.now(), zh:name, en:name,
+    desc:{ zh:document.getElementById("inpDesc").value.trim()||name,
+           en:document.getElementById("inpDesc").value.trim()||name },
+    freqDays:addFreq, goal:addGoal, streak:0, best:0, total:0,
+    week:[0,0,0,0,0,0,0],
+    curve:(function(){ var a=[]; for (var i=0;i<21;i++) a.push({v:0,ok:0}); return a; })(),
+    reminder: { on: remOn, time: remTime }
+  };
+  HABITS.push(newHabit);
+  if (remOn) scheduleReminder(newHabit);
+
+  saveHabits(); hideSheet("sheetAdd","maskAdd");
+  renderList(); renderUsage(); renderHonors();
+});
+
+/* ===== Tab ===== */
+var TAB_VIEW = { tabHabits:"home", tabHonors:"honors" };
+function tab(id){
+  var view = TAB_VIEW[id];
+  ["home","honors"].forEach(function(v){ document.getElementById("view-"+v).classList.toggle("on", v===view); });
+  ["tabHabits","tabHonors"].forEach(function(x){ document.getElementById(x).classList.toggle("on", x===id); });
+  if (view==="honors") renderHonors();
+}
+document.getElementById("tabHabits").addEventListener("click", function(){ tab("tabHabits"); });
+document.getElementById("tabHonors").addEventListener("click", function(){ tab("tabHonors"); });
+
+/* ===== 启动 ===== */
+applyTheme(); refreshColors();
+var guideSeen = false;
+try{ guideSeen = !!localStorage.getItem("seeora_guide"); }catch(e){}
+if (!guideSeen){
+  var gb = document.getElementById("guideBox"); gb.style.display = "flex";
+  gb.addEventListener("click", function(){
+    try{ localStorage.setItem("seeora_guide","1"); }catch(e){}
+    gb.style.display = "none";
+  });
+}
+renderAll();
+</script>
+</body></html>
