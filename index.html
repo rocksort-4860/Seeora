@@ -3,8 +3,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Seeora · v8</title>
-<link rel="icon" type="image/svg+xml" href="assets/brand-mark-fill.svg">
-<link rel="apple-touch-icon" href="assets/brand-mark-fill.svg">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
 <style>
 :root{
   --brand:#2d7a6b;--brandRgb:45,122,107;--brand-deep:#245f54;
@@ -268,7 +268,7 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 </head>
 <body>
 <div id="splash" aria-hidden="true">
-  <img class="sp-logo" src="assets/brand-mark-line.svg" alt="Seeora">
+  <img class="sp-logo" src="assets/icon.png" alt="Seeora">
   <div class="sp-name">Seeora</div>
   <div class="sp-slogan"></div>
   <div class="sp-spin"></div>
@@ -291,7 +291,7 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 <section id="view-home" class="view on">
   <div class="brand">
     <div class="brand-row">
-      <img class="brand-icon" src="assets/brand-mark-fill.svg" alt="Seeora">
+      <img class="brand-icon" src="assets/icon.png" alt="Seeora">
       <span class="brand-name" id="brandHome"></span>
     </div>
     <div class="slogan" id="sloganHome"></div>
@@ -310,7 +310,7 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 <section id="view-detail" class="detail">
   <div class="brand">
     <div class="brand-row">
-      <img class="brand-icon" src="assets/brand-mark-fill.svg" alt="Seeora">
+      <img class="brand-icon" src="assets/icon.png" alt="Seeora">
       <span class="brand-name" id="brandDetail"></span>
     </div>
     <div class="slogan" id="sloganDetail"></div>
@@ -348,7 +348,7 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 <section id="view-honors" class="view">
   <div class="brand">
     <div class="brand-row">
-      <img class="brand-icon" src="assets/brand-mark-fill.svg" alt="Seeora">
+      <img class="brand-icon" src="assets/icon.png" alt="Seeora">
       <span class="brand-name" id="brandHonors"></span>
     </div>
     <div class="slogan" id="sloganHonors"></div>
@@ -410,7 +410,6 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
     <div class="set-row" id="rowFaq" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="faqLab"></div></div><span class="arrow">›</span></div>
     <div class="set-row" id="rowPrivacy" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="privacyLab"></div></div><span class="arrow">›</span></div>
     <div class="set-row" id="rowTerms" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="termsLab"></div></div><span class="arrow">›</span></div>
-    <div class="set-row" id="rowLanding" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="landingLab"></div></div><span class="arrow">↗</span></div>
     <div class="set-row" style="cursor:default"><div class="t1-wrap"><div class="t1" id="versionLab"></div></div><span class="val">v8.0</span></div>
   </div>
   <div class="sheet-actions" style="margin-top:16px"><button class="btn btn-ghost" id="btnSetClose"></button></div>
@@ -715,7 +714,7 @@ en:{
   dataImport:"Import data", dataImportSub:"Restore from a JSON file",
   feedbackLab:"Send feedback", faqLab:"Help & FAQ",
   privacyLab:"Privacy Policy", termsLab:"Terms of Service",
-  landingLab:"Visit website", versionLab:"Version",
+  versionLab:"Version",
   exported:"Data exported", imported:"Data imported", importFail:"Import failed: invalid file",
   importConfirm:"This will replace all current data. Continue?",
   payTitle:"Unlock Seeora Pro", paySub:"One-time purchase · yours forever",
@@ -792,7 +791,7 @@ zh:{
   dataImport:"导入数据", dataImportSub:"从 JSON 文件恢复",
   feedbackLab:"意见反馈", faqLab:"帮助与常见问题",
   privacyLab:"隐私政策", termsLab:"用户协议",
-  landingLab:"访问官网", versionLab:"版本",
+  versionLab:"版本",
   exported:"数据已导出", imported:"数据已导入", importFail:"导入失败：文件格式不对",
   importConfirm:"导入会覆盖现有全部数据，确定继续？",
   payTitle:"解锁 Seeora Pro", paySub:"一次性买断 · 永久使用",
@@ -1465,22 +1464,27 @@ function roundRectPath(g,x,y,w,h,r){
 }
 function drawBrandIcon(g,cx,cy,r){
   g.save();
-  var s = r*2, x0 = cx-r, y0 = cy-r;
-  // 圆角方块品牌底（与 brand-mark-fill.svg 一致）
-  roundRectPath(g, x0, y0, s, s, s*(220/1024));
-  g.fillStyle = "#2d7a6b"; g.fill();
-  // 浅色内环
-  g.beginPath(); g.arc(cx, cy, s*(280/1024), 0, Math.PI*2);
-  g.strokeStyle = "rgba(255,255,255,0.18)"; g.lineWidth = s*(6/1024); g.stroke();
-  // 环形点阵（6 个白色实心点）
-  var dotR = s*(54/1024), map = function(p){ return [ x0 + p[0]/1024*s, y0 + p[1]/1024*s ]; };
-  var pts = [[512,232],[731,337],[785,574],[634,764],[390,764],[239,574]];
-  g.fillStyle = "#ffffff";
-  pts.forEach(function(p){ var q = map(p); g.beginPath(); g.arc(q[0],q[1],dotR,0,Math.PI*2); g.fill(); });
-  // 镂空点（品牌色填充 + 白色描边）
-  var h = map([293,337]);
-  g.beginPath(); g.arc(h[0],h[1],dotR,0,Math.PI*2); g.fillStyle = "#2d7a6b"; g.fill();
-  g.strokeStyle = "#ffffff"; g.lineWidth = s*(14/1024); g.stroke();
+  var br = r*0.34;                 // 圆形半径
+  var gap = r*0.9;                 // 圆心间距
+  var cxs = [cx-gap, cx, cx+gap];
+  var col = "#287868";             // 品牌绿（三步进度标识）
+  g.strokeStyle = col; g.lineWidth = r*0.07; g.lineCap = "round";
+  // 连接线（圆1-圆2、圆2-圆3）
+  for (var i=0;i<2;i++){ g.beginPath(); g.moveTo(cxs[i]+br, cy); g.lineTo(cxs[i+1]-br, cy); g.stroke(); }
+  // 圆3：绿色描边 + 中心小圆点
+  g.beginPath(); g.arc(cxs[2], cy, br, 0, Math.PI*2); g.stroke();
+  g.fillStyle = col; g.beginPath(); g.arc(cxs[2], cy, br*0.28, 0, Math.PI*2); g.fill();
+  // 圆1、圆2：绿色填充 + 白色对勾
+  for (var i=0;i<2;i++){
+    var cx0 = cxs[i];
+    g.fillStyle = col; g.beginPath(); g.arc(cx0, cy, br, 0, Math.PI*2); g.fill();
+    g.strokeStyle = "#ffffff"; g.lineWidth = br*0.24; g.lineJoin = "round";
+    g.beginPath();
+    g.moveTo(cx0-br*0.42, cy+0.02*br);
+    g.lineTo(cx0-br*0.10, cy+0.34*br);
+    g.lineTo(cx0+br*0.48, cy-0.30*br);
+    g.stroke();
+  }
   g.restore();
 }
 function drawPoster(h){
@@ -1619,21 +1623,27 @@ function docContent(kind){
   var zh = isZh();
   if (kind === "faq"){
     var items = zh ? [
-      ["数据存在哪里？","全部数据只保存在你的手机本地（localStorage / App 沙盒），我们不上传、不收集、不分析。换手机时用「导出数据」保存一份 JSON，再在新设备上「导入数据」即可。"],
+      ["我的数据存在哪里？会丢失吗？","所有习惯与打卡数据只存在你自己的设备本地，不上传服务器。卸载应用或清除本地存储会删除数据。建议定期使用「导出数据」保存一份 JSON，再在新设备上「导入数据」即可。"],
       ["免费版有什么限制？","免费版可创建 5 条习惯，可使用打卡、补签、休息日、连续统计、热力图等全部核心功能。成就卡带一个淡淡的 Seeora 水印。"],
-      ["Pro 是一次性买断吗？","是。$4.99 一次买断，永久使用，不订阅、不续费。前 7 天可免费体验全部 Pro 功能。"],
+      ["7 天免费试用怎么算？会自动扣费吗？","试用期内你拥有专业版全部功能，无需绑定支付、不会自动扣费。7 天倒计时结束后自动回退免费版，如需继续使用专业版功能，再手动买断即可。"],
+      ["换手机 / 重装后，买断的专业版还在吗？","在 App Store 内，可通过应用内「恢复购买」找回专业版权益，无需重复付费。本地解锁标记丢失不影响你在苹果服务器侧的购买记录。"],
+      ["可以退款吗？","一次性买断通过 Apple App Store 结算，退款按 Apple 政策处理。如购买异常或对订单有疑问，可邮件 365504860@qq.com 说明。"],
       ["为什么不能超过 5 条习惯？","Seeora 希望帮用户专注在少数几个真正重要的习惯上。5 条足够覆盖大多数人的核心目标。如果你真的需要更多，Pro 版无上限。"],
       ["漏签了会怎样？","连续会中断，但累计记录会保留。你可以在最近 7 天内补签，或者把那天标为「休息日」，连续不断。"],
-      ["提醒到点没弹怎么办？","请确认系统设置里 Seeora 的通知权限是开启状态。网页版在页面关闭后无法推送，App 版（Capacitor / 原生）由操作系统接管，更可靠。"],
-      ["怎么联系你们？","见「意见反馈」，或者发邮件到 hello@seeora.app。"]
+      ["提醒到点没弹怎么办？","请确认系统设置里 Seeora 的通知权限是开启状态。网页版在页面关闭后无法推送，App 版（原生）由操作系统接管，更可靠。"],
+      ["你们会拿我的数据做广告吗？","不会。Seeora 无账号、无服务端、无第三方追踪与广告 SDK，你的数据从不离开设备。"],
+      ["怎么联系你们？","见「意见反馈」，或者发邮件到 365504860@qq.com。"]
     ] : [
-      ["Where is my data stored?","All data is kept locally on your device (localStorage / app sandbox). We don't upload, collect, or analyze anything. Use Export to save a JSON copy; use Import to restore it on a new device."],
+      ["Where is my data stored? Can it be lost?","All habit and check-in data is stored only on your own device and never uploaded to a server. Uninstalling the app or clearing local storage deletes the data. Back up regularly with Export (save a JSON copy) and restore it with Import on a new device."],
       ["What's the free plan limit?","You can create up to 5 habits. Check-ins, backfill, rest days, streaks, and heatmaps are all unlimited. Free cards carry a faint Seeora watermark."],
-      ["Is Pro a one-time purchase?","Yes. $4.99 once, yours forever. No subscription, no auto-renewal. You can try everything free for 7 days first."],
+      ["How does the 7-day free trial work? Will it auto-charge?","During the trial you have all Pro features, no payment method required, and no automatic charge. After the 7-day countdown ends, you revert to the free plan; to keep using Pro features, purchase the one-time unlock manually."],
+      ["After changing phones / reinstalling, is my Pro purchase still there?","In the App Store, you can find your Pro entitlement again via the restore purchases feature in the app — no need to pay twice. Losing a local unlock flag does not affect your purchase record on Apple's servers."],
+      ["Can I get a refund?","The one-time purchase is settled through the Apple App Store, and refunds follow Apple policy. If a purchase went wrong or you have questions about an order, email 365504860@qq.com."],
       ["Why 5 habits?","Seeora is designed for focus — a few habits that truly matter. 5 covers most people's core goals. Pro removes the cap."],
       ["What happens if I miss a day?","Your streak breaks, but your total is preserved. You can backfill within the last 7 days, or mark that day as a rest day to keep the streak going."],
-      ["Reminders don't fire — why?","Check that Seeora has notification permission in system settings. In the web version, reminders can only fire while the page is open. In the packaged app (Capacitor / native), the OS handles scheduling, which is much more reliable."],
-      ["How do I reach you?","Use Send feedback, or email hello@seeora.app."]
+      ["Reminders don't fire — why?","Check that Seeora has notification permission in system settings. In the web version, reminders can only fire while the page is open. In the packaged native app, the OS handles scheduling, which is much more reliable."],
+      ["Will you use my data for ads?","No. Seeora has no accounts, no backend, and no third-party tracking or ad SDKs; your data never leaves your device."],
+      ["How do I reach you?","Use Send feedback, or email 365504860@qq.com."]
     ];
     return { title: zh?"帮助与常见问题":"Help & FAQ", updated:"",
       body: items.map(function(a){ return '<details class="faq"><summary>'+a[0]+'</summary><div class="faq-body">'+a[1]+'</div></details>'; }).join("") };
@@ -1641,40 +1651,46 @@ function docContent(kind){
   if (kind === "privacy"){
     return {
       title: zh?"隐私政策":"Privacy Policy",
-      updated: zh?"最后更新：2026-09-27":"Last updated: 2026-09-27",
+      updated: zh?"生效日期：2026 年 10 月 1 日":"Effective date: October 1, 2026",
       body: zh ?
-        '<p class="doc-p">Seeora 的核心理念是「数据属于你」。我们没有账号系统，没有服务端数据库，没有第三方埋点。</p>'+
-        '<div class="doc-h">我们收集什么</div><p class="doc-p">什么都不收集。你的习惯、打卡记录、迁移数据、语言和外观偏好，全部存在你设备的本地存储里。</p>'+
-        '<div class="doc-h">通知</div><p class="doc-p">提醒功能使用系统级通知，通知内容只在你设备上生成和展示，我们无法读取。</p>'+
-        '<div class="doc-h">我们如何传输</div><p class="doc-p">App 不向任何服务器发送你的数据。数据只在两种情况离开设备：你在设置里主动「导出数据」，或者使用系统的分享功能。这两条路径都由你完全控制。</p>'+
-        '<div class="doc-h">第三方</div><p class="doc-p">App 内无广告、无分析 SDK、无社交登录。仅使用 Apple 提供的 App 内购买能力处理 Pro 购买，支付信息由 Apple 处理，我们不接触。</p>'+
-        '<div class="doc-h">删除数据</div><p class="doc-p">卸载 App 或清除浏览器数据即可删除全部内容。导出功能随时可用，让你带走一份完整备份。</p>'+
-        '<div class="doc-h">联系我们</div><p class="doc-p">有任何疑问：hello@seeora.app</p>' :
-        '<p class="doc-p">Seeora is built around one idea: your data belongs to you. No accounts, no servers, no third-party analytics.</p>'+
-        '<div class="doc-h">What we collect</div><p class="doc-p">Nothing. Your habits, check-ins, imported records, language, and appearance preference all live in your device\'s local storage.</p>'+
-        '<div class="doc-h">Notifications</div><p class="doc-p">Reminders use system-level notifications. Their content is generated and displayed only on your device — we cannot read it.</p>'+
-        '<div class="doc-h">How data moves</div><p class="doc-p">The app never sends your data to any server. It only leaves your device when you choose Export or use the system Share sheet.</p>'+
-        '<div class="doc-h">Third parties</div><p class="doc-p">No ads, no analytics SDKs, no social login. Apple\'s In-App Purchase handles Pro payments; Apple processes payment details, not us.</p>'+
-        '<div class="doc-h">Deleting your data</div><p class="doc-p">Uninstalling the app or clearing browser storage removes everything. Export is always available.</p>'+
-        '<div class="doc-h">Contact</div><p class="doc-p">Questions: hello@seeora.app</p>'
+        '<div class="doc-h">一句话总结：我们不收集你的数据</div><p class="doc-p">Seeora 没有账号系统、没有服务器、没有第三方追踪与广告 SDK。你记录的所有习惯、打卡、备注，都只存在你自己的设备本地。</p>'+
+        '<div class="doc-h">1. 我们收集的信息</div><p class="doc-p">我们不会主动收集任何个人信息。Seeora 完全在设备本地运行，不要求注册、不登录、不上传任何使用数据。你创建的习惯、打卡记录、连续天数、备注说明等，均仅存储于本机（浏览器 / 应用的本地存储）。我们服务端无副本、无后台、无分析埋点。</p>'+
+        '<div class="doc-h">2. 本地数据存储</div><p class="doc-p">所有应用数据通过设备本地存储保存。卸载应用或清除本地存储会删除这些数据，且我们无法为你恢复——因为数据从未离开你的设备。我们不设置任何追踪 Cookie，也不使用第三方广告或分析 SDK。</p>'+
+        '<div class="doc-h">3. 应用内购买（IAP）</div><p class="doc-p">Seeora 专业版为一次性买断，通过 Apple App Store（苹果应用商店）完成支付，并由 RevenueCat（内购封装层）处理购买凭证。支付由 Apple 处理，付款相关的账户与交易信息由 Apple 按其隐私政策管理，我们不接收你的付款卡号等支付凭据；RevenueCat 会按苹果回传处理与「已购权益」相关的必要记录，以支撑「恢复购买」功能。我们自身不存储你的购买账户或支付信息。</p>'+
+        '<div class="doc-h">4. 我们不会做的事</div><p class="doc-p">不会出售、出租或共享你的个人数据给第三方；不会向第三方发送广告或行为追踪；不会在未经你同意的情况下上传你的任何内容。</p>'+
+        '<div class="doc-h">5. 儿童隐私</div><p class="doc-p">Seeora 不面向 13 岁以下儿童设计，我们也不主动收集任何年龄用户的个人信息。如家长发现儿童误使用了本应用，可通过卸载或清除本地存储删除相关内容。</p>'+
+        '<div class="doc-h">6. 你的权利与联系方式</div><p class="doc-p">由于我们不持有你的任何云端个人数据，你无需申请「数据导出 / 删除」——数据本就只属于你的设备。如对隐私政策有疑问，或就应用内购买相关事宜需要联系，请邮件至：365504860@qq.com</p>'+
+        '<div class="doc-h">7. 政策变更</div><p class="doc-p">若本政策更新，我们会在应用内或官网页面发布最新版本，并以「生效日期」标注。持续使用即视为接受更新后的政策。</p>' :
+        '<div class="doc-h">In short: we don\'t collect your data</div><p class="doc-p">Seeora has no accounts, no servers, and no third-party tracking or ad SDKs. Every habit, check-in, and note you record lives only on your own device.</p>'+
+        '<div class="doc-h">1. Information we collect</div><p class="doc-p">We do not proactively collect any personal information. Seeora runs entirely on your device — no registration, no login, and no usage data uploaded. Your habits, check-ins, streaks, and notes are stored only in local storage on your machine. We keep no copies on any server, no backend, and no analytics.</p>'+
+        '<div class="doc-h">2. Local data storage</div><p class="doc-p">All app data is saved using device-local storage. Uninstalling the app or clearing local storage deletes this data, and we cannot restore it — because it never leaves your device. We do not set any tracking cookies or use third-party ad or analytics SDKs.</p>'+
+        '<div class="doc-h">3. In-app purchases (IAP)</div><p class="doc-p">Seeora Pro is a one-time purchase completed through the Apple App Store, with RevenueCat handling purchase receipts as a wrapper. Payment is handled by Apple; account and transaction details are managed by Apple under its privacy policy. We do not receive your payment card number or other payment credentials. RevenueCat processes the records necessary to support restore purchases as returned by Apple. We do not store your purchase account or payment information.</p>'+
+        '<div class="doc-h">4. What we do not do</div><p class="doc-p">We do not sell, rent, or share your personal data with third parties. We do not send ads or behavioral tracking to third parties. We do not upload any of your content without your consent.</p>'+
+        '<div class="doc-h">5. Children\'s privacy</div><p class="doc-p">Seeora is not designed for children under 13, and we do not proactively collect personal information from users of any age.</p>'+
+        '<div class="doc-h">6. Your rights and how to contact us</div><p class="doc-p">Because we hold no cloud data about you, there is no need to request data export or deletion — your data already belongs solely to your device. Questions about this policy or in-app purchases: 365504860@qq.com</p>'+
+        '<div class="doc-h">7. Changes to this policy</div><p class="doc-p">If this policy is updated, we will publish the latest version in the app or on this page, marked with an effective date. Continued use is deemed acceptance of the updated policy.</p>'
     };
   }
   return {
     title: zh?"用户协议":"Terms of Service",
-    updated: zh?"最后更新：2026-09-27":"Last updated: 2026-09-27",
+    updated: zh?"生效日期：2026 年 10 月 1 日":"Effective date: October 1, 2026",
     body: zh ?
-      '<p class="doc-p">使用 Seeora 即表示你同意以下条款。条款力求简短易懂。</p>'+
-      '<div class="doc-h">许可</div><p class="doc-p">我们授予你一项个人、非独占、不可转让的许可，用于在你拥有的设备上使用 Seeora。</p>'+
-      '<div class="doc-h">Pro 与内购</div><p class="doc-p">Seeora Pro 为一次性内购，价格为 $4.99（或当地等价）。购买后永久有效，不可转让。购买由 Apple 处理，支持 Apple 的退款政策。</p>'+
-      '<div class="doc-h">你的内容</div><p class="doc-p">你在 Seeora 中创建的一切内容都属于你。我们不对其主张任何权利。</p>'+
-      '<div class="doc-h">免责</div><p class="doc-p">Seeora 是一个自我管理工具，不构成医疗、心理或专业建议。请自行判断使用。</p>'+
-      '<div class="doc-h">变更</div><p class="doc-p">我们可能会更新本协议，重大变更会在 App 内提示。</p>' :
-      '<p class="doc-p">By using Seeora you agree to the terms below.</p>'+
-      '<div class="doc-h">License</div><p class="doc-p">We grant you a personal, non-exclusive, non-transferable license to use Seeora on devices you own.</p>'+
-      '<div class="doc-h">Pro & In-App Purchase</div><p class="doc-p">Seeora Pro is a one-time purchase at $4.99 (or local equivalent). Purchases are handled by Apple and subject to Apple\'s refund policy.</p>'+
-      '<div class="doc-h">Your content</div><p class="doc-p">Everything you create in Seeora belongs to you.</p>'+
-      '<div class="doc-h">Disclaimer</div><p class="doc-p">Seeora is a self-management tool, not medical, psychological, or professional advice.</p>'+
-      '<div class="doc-h">Changes</div><p class="doc-p">We may update these terms. Material changes will be surfaced in the app.</p>'
+      '<div class="doc-h">1. 接受条款</div><p class="doc-p">欢迎使用 Seeora（以下简称「本应用」）。本应用由个人开发者 张新华 提供。你下载、访问或使用本应用，即表示你同意受本条款约束。若不同意，请勿使用。</p>'+
+      '<div class="doc-h">2. 使用许可</div><p class="doc-p">我们授予你一项个人的、非独占的、不可转让的、可撤销的许可，按本条款使用本应用。免费版供个人日常习惯管理使用；专业版为一次性买断，解锁相应功能。</p>'+
+      '<div class="doc-h">3. 你的责任</div><p class="doc-p">你应对自己在本应用中录入的内容负责，并保证不录入违法、侵权或有害信息。本应用数据仅存于你的设备本地，清除本地存储或卸载应用可能导致数据不可恢复，请自行做好备份（专业版支持数据导出）。</p>'+
+      '<div class="doc-h">4. 应用内购买</div><p class="doc-p">专业版通过 Apple App Store 完成一次性买断，价格为 $4.99（或当地等价），价格、税费以 App Store 结算页为准。依据 Apple 政策，已完成的数字商品购买通常不予退款；如发生购买异常，请通过 App Store 或本应用「恢复购买」功能处理，亦可邮件联系 365504860@qq.com。</p>'+
+      '<div class="doc-h">5. 知识产权</div><p class="doc-p">本应用的名称、标识、界面与代码等知识产权归开发者所有。你不得对本应用进行反向工程、反编译、再分发或用于商业转售，除非获得书面授权。</p>'+
+      '<div class="doc-h">6. 免责声明（按当地法律允许的最大范围）</div><p class="doc-p">本应用按「现状」提供，不对其可用性、准确性或适用性作任何明示或暗示担保，也不构成医疗、心理或专业建议。因使用或无法使用本应用（含本地数据丢失）造成的任何损失，开发者不承担责任，法律强制规定除外。</p>'+
+      '<div class="doc-h">7. 条款变更</div><p class="doc-p">我们可能不时更新本条款，更新后以页面「生效日期」为准。持续使用即视为接受更新后的条款。</p>'+
+      '<div class="doc-h">8. 联系</div><p class="doc-p">有关本条款的疑问，请邮件至 365504860@qq.com。</p>' :
+      '<div class="doc-h">1. Acceptance of these terms</div><p class="doc-p">Welcome to Seeora (the "App"). The App is provided by individual developer Zhang Xinhua. By downloading, accessing, or using the App, you agree to be bound by these terms. If you do not agree, do not use the App.</p>'+
+      '<div class="doc-h">2. License to use</div><p class="doc-p">We grant you a personal, non-exclusive, non-transferable, revocable license to use the App under these terms. The free plan is for personal habit tracking; Pro is a one-time purchase that unlocks additional features.</p>'+
+      '<div class="doc-h">3. Your responsibilities</div><p class="doc-p">You are responsible for the content you enter in the App and warrant that it is lawful and non-infringing. All app data is stored locally on your device; clearing local storage or uninstalling may make data unrecoverable — please back up regularly (Pro supports data export).</p>'+
+      '<div class="doc-h">4. In-app purchases</div><p class="doc-p">Pro is a one-time purchase completed through the Apple App Store at $4.99 (or local equivalent); prices and taxes are as shown on the App Store checkout page. Under Apple policy, consummated digital product purchases are generally non-refundable; if a purchase goes wrong, handle it through the App Store or the App\'s "restore purchases" feature, or email 365504860@qq.com.</p>'+
+      '<div class="doc-h">5. Intellectual property</div><p class="doc-p">The name, logo, interface, and code of the App are owned by the developer. You may not reverse engineer, decompile, redistribute, or commercially resell the App without written authorization.</p>'+
+      '<div class="doc-h">6. Disclaimer (to the maximum extent permitted by applicable law)</div><p class="doc-p">The App is provided "as is" without warranties of any kind, and is not medical, psychological, or professional advice. To the extent permitted by law, the developer is not liable for any loss arising from use of or inability to use the App (including local data loss).</p>'+
+      '<div class="doc-h">7. Changes to these terms</div><p class="doc-p">We may update these terms from time to time; the effective date on the page governs. Continued use is deemed acceptance of the updated terms.</p>'+
+      '<div class="doc-h">8. Contact</div><p class="doc-p">For questions about these terms, email us at 365504860@qq.com.</p>'
   };
 }
 function openDoc(kind){
@@ -1740,7 +1756,6 @@ function renderAll(){
   document.getElementById("faqLab").textContent = T.faqLab;
   document.getElementById("privacyLab").textContent = T.privacyLab;
   document.getElementById("termsLab").textContent = T.termsLab;
-  document.getElementById("landingLab").textContent = T.landingLab;
   document.getElementById("versionLab").textContent = T.versionLab;
   document.getElementById("themeTitle").textContent = T.themeTitle;
   document.getElementById("themeOptSystem").textContent = T.themeSystem;
@@ -1920,12 +1935,11 @@ document.getElementById("rowExport").addEventListener("click", exportData);
 document.getElementById("rowImport").addEventListener("click", importData);
 document.getElementById("rowFeedback").addEventListener("click", function(){
   var sub = encodeURIComponent(isZh()?"Seeora 反馈":"Seeora feedback");
-  window.location.href = "mailto:hello@seeora.app?subject="+sub;
+  window.location.href = "mailto:365504860@qq.com?subject="+sub;
 });
 document.getElementById("rowFaq").addEventListener("click", function(){ openDoc("faq"); });
 document.getElementById("rowPrivacy").addEventListener("click", function(){ openDoc("privacy"); });
 document.getElementById("rowTerms").addEventListener("click", function(){ openDoc("terms"); });
-document.getElementById("rowLanding").addEventListener("click", function(){ window.open("https://seeora.app","_blank","noopener"); });
 
 /* ===== 添加习惯 ===== */
 var addFreq = 1, addGoal = 1;
