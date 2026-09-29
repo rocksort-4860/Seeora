@@ -1,5 +1,5 @@
 /**
- * Pro 买断 / 支付 / 门禁（Streakora）：单商品「终身买断」
+ * Pro 买断 / 支付 / 门禁（Seeora）：单商品「终身买断」
  * 从 store/app.tsx 拆出；行为对齐 RockSort 范式。价格一律动态（见 @/lib/iap）。
  */
 import { useCallback } from "react";

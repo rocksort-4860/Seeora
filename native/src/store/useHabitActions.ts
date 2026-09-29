@@ -1,5 +1,5 @@
 /**
- * 习惯 / 荣誉 / 打卡行为（Streakora）
+ * 习惯 / 荣誉 / 打卡行为（Seeora）
  * 从 store/app.tsx 拆出；行为对齐 RockSort 范式（勾选打卡 / 添加编辑 / 删除 / 补录 / 导入导出）
  */
 import { useCallback } from "react";
@@ -299,7 +299,7 @@ export function useHabitActions(d: HabitActionsDeps) {
   }, [habits, honors, dict, lang, showToast, persist, snapshotNow, pendingDel, setConfirmVisible, setHabits, setHonors]);
 
   /* ===================== 导入备份（JSON） ===================== */
-  // 解析 Streakora 备份 JSON；合并 habits/honors（按 id 覆盖）；破坏或非 JSON → 抛错
+  // 解析 Seeora 备份 JSON；合并 habits/honors（按 id 覆盖）；破坏或非 JSON → 抛错
   const importBackup = useCallback((raw: string): number => {
     let obj: unknown;
     try {

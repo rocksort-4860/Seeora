@@ -76,7 +76,7 @@ export async function scheduleTaskReminder(
     } as DailyTriggerInput;
     await mod.scheduleNotificationAsync({
       identifier: taskId,
-      content: { title: "Streakora", body: text },
+      content: { title: "Seeora", body: text },
       trigger,
     });
   } catch {

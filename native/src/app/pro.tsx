@@ -1,5 +1,5 @@
 /**
- * Pro 买断页（Streakora）：modal 路由 /pro
+ * Pro 买断页（Seeora）：modal 路由 /pro
  * 由 usePro.openPro / gatePro 经 nav.push("/pro") 调起；关闭调用 closePro()
  * 价格动态读取（见 @/lib/iap），买断按钮展开 Pay Sheet（payVisible）
  */

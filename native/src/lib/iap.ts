@@ -1,5 +1,5 @@
 /**
- * 内购封装（Streakora）：RevenueCat 对接 —— 单商品「终身买断」
+ * 内购封装（Seeora）：RevenueCat 对接 —— 单商品「终身买断」
  * 红线：绝不在模块顶层或 AppProvider 初始化时 import react-native-purchases / 不调用 Purchases.configure。
  *       仅在 Pro/Pay 弹层真正打开（usePlanPrices(enabled=true)）时才动态 import + configure。
  * 价格硬规：代码中不出现任何具体价格；数值运行时从 App Store Connect 后台经 RevenueCat 动态读取。
@@ -11,7 +11,7 @@ import { Platform } from "react-native";
 // 唯一商品：一次性买断（价格挂在商品上，由苹果后台维护，改价无需改代码）
 export type PlanKey = "l";
 export const RC_PRODUCT_IDS: Record<PlanKey, string> = {
-  l: "streakora_pro_lifetime",
+  l: "seeora_pro_lifetime",
 };
 
 // 兼容官方推荐与简写两种环境变量名称
@@ -123,10 +123,11 @@ export async function purchasePlan(_plan: PlanKey): Promise<boolean> {
       ) || all[0];
     if (!hit) return false;
     const { customerInfo } = await rc.purchasePackage(hit);
-    const hasActiveEntitlement = Object.keys(customerInfo?.entitlements?.active || {}).length > 0;
+    const ent = customerInfo?.entitlements?.active || {};
+    const hasEntitlement = !!ent["seeora_pro"];
     const hasNonSubscription = Object.keys(customerInfo?.nonSubscriptionTransactions || {}).length > 0;
-    const hasAllPurchased = (customerInfo?.allPurchasedProductIdentifiers || []).length > 0;
-    return hasActiveEntitlement || hasNonSubscription || hasAllPurchased;
+    const hasAllPurchased = (customerInfo?.allPurchasedProductIdentifiers || []).includes("seeora_pro_lifetime");
+    return hasEntitlement || hasNonSubscription || hasAllPurchased;
   } catch {
     return false; // 用户取消 / 失败均视为未成功
   }
@@ -138,9 +139,10 @@ export async function restorePurchases(): Promise<boolean> {
   if (!rc) return false;
   try {
     const info = await rc.restorePurchases();
-    const hasActiveEntitlement = Object.keys(info?.entitlements?.active || {}).length > 0;
-    const hasAllPurchased = (info?.allPurchasedProductIdentifiers || []).length > 0;
-    return hasActiveEntitlement || hasAllPurchased;
+    const ent = info?.entitlements?.active || {};
+    const hasEntitlement = !!ent["seeora_pro"];
+    const hasAllPurchased = (info?.allPurchasedProductIdentifiers || []).includes("seeora_pro_lifetime");
+    return hasEntitlement || hasAllPurchased;
   } catch {
     return false;
   }

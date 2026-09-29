@@ -1,5 +1,5 @@
 /**
- * 根布局（Streakora）：纯本地 App，无登录
+ * 根布局（Seeora）：纯本地 App，无登录
  * 全局挂载：GestureHandler > AppProvider > ThemedStatusBar > 路由(Slot) > Toast/Confetti/Modal/Portal
  * 崩溃红线：Linking 兜底 + iap 懒加载 + 启动时绝不初始化原生模块
  */
@@ -16,11 +16,11 @@ import { ConfettiHost } from "@/components/Confetti";
 import { ModalHost } from "@/components/ModalHost";
 
 // ── 崩溃红线 #4：Linking 兜底 ──
-// 裸 scheme URL（streakora://... 无后续路径）在 expo-router 启动期会触发崩溃；中性化为 null
+// 裸 scheme URL（seeora://... 无后续路径）在 expo-router 启动期会触发崩溃；中性化为 null
 const _orig = Linking.getInitialURL;
 Linking.getInitialURL = async () => {
   const u = await _orig();
-  return u && u.startsWith("streakora://") && u.replace("streakora://", "").replace(/\/$/, "") === "" ? null : u;
+  return u && u.startsWith("seeora://") && u.replace("seeora://", "").replace(/\/$/, "") === "" ? null : u;
 };
 
 // ── 冷启动崩溃「二分诊断」开关（仅排查用；正常构建不设）──

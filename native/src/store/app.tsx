@@ -1,5 +1,5 @@
 /**
- * 全局数据层（Streakora）：纯本地，无账号、无后端、无云同步
+ * 全局数据层（Seeora）：纯本地，无账号、无后端、无云同步
  * React Context + useState 承载全部状态；每次变更后持久化 sd.local 快照
  * 拆为 app.tsx（Context + 状态 + 派生算法 + 装配）/ usePersist.ts / usePro.ts / useHabitActions.ts
  */

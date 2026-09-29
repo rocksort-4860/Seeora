@@ -1,5 +1,5 @@
 /**
- * 持久化与首载（Streakora）：sd.local 快照写入 + 首载 hydration
+ * 持久化与首载（Seeora）：sd.local 快照写入 + 首载 hydration
  * 从 store/app.tsx 拆出；行为对齐 RockSort 范式
  */
 import { useCallback, useEffect } from "react";

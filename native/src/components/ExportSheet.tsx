@@ -35,7 +35,7 @@ export function ExportSheet() {
 
   const doExport = async (format: "csv" | "json") => {
     try {
-      const name = format === "csv" ? `streakora-${todayStr()}.csv` : `streakora-${todayStr()}.json`;
+      const name = format === "csv" ? `seeora-${todayStr()}.csv` : `seeora-${todayStr()}.json`;
       const content = format === "csv" ? buildHabitCsv(habits) : exportJson();
       const file = new File(Paths.cache, name);
       const uri = file.uri;

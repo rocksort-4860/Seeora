@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, type Theme } from '@react-navigation/native';
 
-// Colors mirror global.css variables exactly (Streakora 靛紫 + 真实深色)
+// Colors mirror global.css variables exactly (Seeora 靛紫 + 真实深色)
 export const THEME = {
   light: {
     background: 'hsl(240 33% 99%)',

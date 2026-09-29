@@ -1,5 +1,5 @@
 ﻿/**
- * Share 分享成就卡页（Streakora）：modal 路由 /share
+ * Share 分享成就卡页（Seeora）：modal 路由 /share
  *  - 单个习惯成就卡 /share?habit=<id>：螺旋圆环 + 横向累计曲线 + 最长连续 + 累计周期 + 备选文案 + 底部签名
  *  - 全站成就总卡 /share（无 habit 参数）：累计天数
  *  - 所有素材本机生成，不上传；无关联 App / 社交 / 评论
@@ -61,7 +61,7 @@ export default function ShareScreen() {
 
   const buildMessage = () => {
     const days = `${d.bestStreak} ${best} · ${d.cycles} ${cycles}`;
-    const footer = lang === "zh" ? "Streakora · 记录坚持，允许休息，所有坚持永不止步" : "Streakora · Track habits. Rest is allowed. Every day stays.";
+    const footer = lang === "zh" ? "Seeora · 记录坚持，允许休息，所有坚持永不止步" : "Seeora · Track habits. Rest is allowed. Every day stays.";
     let lines: string[];
     if (habit) {
       lines = lang === "zh"
@@ -69,8 +69,8 @@ export default function ShareScreen() {
         : [headTitle, quote, days, sign.trim(), note.trim(), footer];
     } else {
       lines = lang === "zh"
-        ? [headTitle, `已在 Streakora 累计坚持 ${total} 天`, note.trim(), footer]
-        : [headTitle, `Keep it up for ${total} days on Streakora`, note.trim(), footer];
+        ? [headTitle, `已在 Seeora 累计坚持 ${total} 天`, note.trim(), footer]
+        : [headTitle, `Keep it up for ${total} days on Seeora`, note.trim(), footer];
     }
     return lines.filter(Boolean).join("\n");
   };
@@ -81,7 +81,7 @@ export default function ShareScreen() {
   };
   const onShare = async () => {
     try {
-      await Share.share({ message: buildMessage(), title: "Streakora" });
+      await Share.share({ message: buildMessage(), title: "Seeora" });
     } catch {
       /* 用户取消分享，忽略 */
     }
@@ -108,7 +108,7 @@ export default function ShareScreen() {
         {/* 成就卡：白面 + 全系统唯一投影（规范里“落在台面上的产品”） */}
         <View className="mt-2 items-center rounded-lg px-6 py-6" style={{ backgroundColor: c.surface, ...productShadow }}>
           <Text className="text-[12px] uppercase tracking-wide" style={{ color: c.ink4 }}>
-            Streakora
+            Seeora
           </Text>
           <Text className="mt-1 text-center text-[24px] font-semibold" style={{ color: c.ink }}>
             {headTitle}

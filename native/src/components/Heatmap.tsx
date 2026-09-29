@@ -1,5 +1,5 @@
 /**
- * Heatmap 打卡热力图：仅 Streakora 内真实打卡（导入天数不计入），按日期密度渐变
+ * Heatmap 打卡热力图：仅 Seeora 内真实打卡（导入天数不计入），按日期密度渐变
  * 最近 119 天（17 周 × 7 天）的网格；同日多习惯打卡则更亮
  */
 import React, { useMemo } from "react";

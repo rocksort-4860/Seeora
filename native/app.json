@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Streakora",
-    "slug": "streakora",
-    "scheme": "streakora",
+    "name": "Seeora",
+    "slug": "seeora",
+    "scheme": "seeora",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "buildNumber": "1",
-      "bundleIdentifier": "com.streakora.app",
+      "bundleIdentifier": "com.seeora.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIFileSharingEnabled": true,
@@ -22,15 +22,12 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#5B5BD6"
+        "backgroundColor": "#2d7a6b"
       },
       "predictiveBackGestureEnabled": false,
       "versionCode": 1,
-      "package": "com.streakora.app",
+      "package": "com.seeora.app",
       "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.INTERNET"
       ]
     },
@@ -46,14 +43,14 @@
       [
         "expo-notifications",
         {
-          "color": "#5B5BD6"
+          "color": "#2d7a6b"
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "允许 Streakora 访问相册，用于为分享卡片添加图片 / Allow Streakora to access your photos to attach images to your share card.",
-          "cameraPermission": "允许 Streakora 使用相机拍摄分享图片 / Allow Streakora to use the camera to take photos for sharing."
+          "photosPermission": "允许 Seeora 访问相册，用于为分享卡片添加图片 / Allow Seeora to access your photos to attach images to your share card.",
+          "cameraPermission": "允许 Seeora 使用相机拍摄分享图片 / Allow Seeora to use the camera to take photos for sharing."
         }
       ],
       "expo-file-system",
@@ -66,7 +63,7 @@
           "image": "./assets/splash.png",
           "imageWidth": 1242,
           "resizeMode": "contain",
-          "backgroundColor": "#5B5BD6"
+          "backgroundColor": "#2d7a6b"
         }
       ],
       [
@@ -106,6 +103,6 @@
         "projectId": "00000000-0000-0000-0000-000000000000"
       }
     },
-    "owner": "streakora"
+    "owner": "seeora"
   }
 }

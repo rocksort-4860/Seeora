@@ -1,5 +1,5 @@
 /**
- * Streakora 核心逻辑单测（环节⑤审计）
+ * Seeora 核心逻辑单测（环节⑤审计）
  * 覆盖：断签不清零 / 导入隔离 / 排行榜 / 徽章 / 热力图
  * 运行：node node_modules/jest/bin/jest.js src/lib/__tests__/habitLogic.test.ts
  */
