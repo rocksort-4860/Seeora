@@ -19,6 +19,10 @@ export const SK = {
   ringHint: "sd.ringHint",
 } as const;
 
+/** 本地 7 天免费试用（仅计时，与苹果 / RevenueCat 无关） */
+export const TRIAL_DAYS = 7;
+export const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
+
 export async function sget<T>(key: string, def: T): Promise<T> {
   try {
     const v = await AsyncStorage.getItem(key);

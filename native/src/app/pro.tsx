@@ -15,7 +15,7 @@ import { Icon } from "@/components/ui/icon";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function ProScreen() {
-  const { dict: d, colors: c, pro, closePro, openPay, closePay, payVisible, payDone, payRestore } = useApp();
+  const { dict: d, colors: c, purchased, trialActive, trialDaysLeft, closePro, openPay, closePay, payVisible, payDone, payRestore } = useApp();
   const insets = useSafeAreaInsets();
   const { prices, ready } = usePlanPrices(payVisible);
   const price = priceLabel(prices, "l", ready, d.proLoading);
@@ -59,15 +59,23 @@ export default function ProScreen() {
 
         <T className="mt-4 text-sm leading-6" style={{ color: c.ink3 }}>{d.buyoutBody}</T>
 
-        {pro ? (
+        {purchased ? (
           <View className="mt-5 flex-row items-center justify-center gap-2 rounded-xl py-4" style={{ backgroundColor: c.surface }}>
             <Icon as={Check} color={c.success} size={18} />
             <T className="text-base font-semibold" style={{ color: c.success }}>{d.proOwned}</T>
           </View>
         ) : (
-          <Button className="mt-5 h-12" style={{ backgroundColor: c.accent }} onPress={openPay}>
-            <Text className="text-base font-bold" style={{ color: "#fff" }}>{d.proBuy}</Text>
-          </Button>
+          <>
+            {trialActive && (
+              <View className="mt-5 flex-row items-center justify-center gap-2 rounded-xl py-3" style={{ backgroundColor: c.surface }}>
+                <Icon as={Gem} color={c.accent} size={16} />
+                <T className="text-sm font-medium" style={{ color: c.ink }}>{d.proTrialLeft.replace("{n}", String(trialDaysLeft))}</T>
+              </View>
+            )}
+            <Button className={trialActive ? "mt-3 h-12" : "mt-5 h-12"} style={{ backgroundColor: c.accent }} onPress={openPay}>
+              <Text className="text-base font-bold" style={{ color: "#fff" }}>{d.proBuy}</Text>
+            </Button>
+          </>
         )}
       </ScrollView>
 

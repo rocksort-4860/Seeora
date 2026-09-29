@@ -90,15 +90,15 @@ localStorage.setItem("seeora_lang", "zh");
 
 ## 线上地址（已部署）
 
-站点：**https://seeora.app/**
+站点：**https://rocksort-4860.github.io/Streakora/**
 
 | 页面 | 线上 URL | App Store Connect 用途 |
 |---|---|---|
-| 应用页 / 首页 | `https://seeora.app/` | — |
-| 隐私政策 | `https://seeora.app/privacy.html` | **Privacy Policy URL（必填）** |
-| 使用条款 | `https://seeora.app/terms.html` | 自定义 EULA（如用） |
-| 支持与联系 | `https://seeora.app/support.html` | **Support URL（必填）** |
-| 营销落地页 | `https://seeora.app/landing.html` | Marketing URL（可选） |
+| 应用页 / 首页 | `https://rocksort-4860.github.io/Streakora/` | — |
+| 隐私政策 | `https://rocksort-4860.github.io/Streakora/privacy.html` | **Privacy Policy URL（必填）** |
+| 使用条款 | `https://rocksort-4860.github.io/Streakora/terms.html` | 自定义 EULA（如用） |
+| 支持与联系 | `https://rocksort-4860.github.io/Streakora/support.html` | **Support URL（必填）** |
+| 营销落地页 | `https://rocksort-4860.github.io/Streakora` | Marketing URL（可选） |
 
 **对外身份口径（已确认）**
 - 开发者：个人开发者 **张新华 / Zhang Xinhua**（非公司主体）

@@ -4,7 +4,7 @@
  */
 import { useCallback, useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { sget, sset, SK } from "@/lib/storage";
+import { sget, sset, SK, TRIAL_MS } from "@/lib/storage";
 import type { Lang } from "@/lib/i18n";
 import type { Habit, Honor, SettingsState, ThemeMode } from "@/store/app";
 
@@ -52,7 +52,8 @@ export interface HydrationSetters {
   setHabits: Dispatch<SetStateAction<Habit[]>>;
   setHonors: Dispatch<SetStateAction<Honor[]>>;
   setSettings: Dispatch<SetStateAction<SettingsState>>;
-  setPro: Dispatch<SetStateAction<boolean>>;
+  setPurchased: Dispatch<SetStateAction<boolean>>;
+  setTrialUntil: Dispatch<SetStateAction<number | null>>;
   setHydrated: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -65,13 +66,14 @@ export function useHydration(d: HydrationSetters) {
       return;
     }
     (async () => {
-      const [lg, vi, ia, g, r, th] = await Promise.all([
+      const [lg, vi, ia, g, r, th, tuRaw] = await Promise.all([
         sget<Lang>(SK.lang, "en"),
         sget<boolean>(SK.visited, false),
         sget<string>(SK.installAt, ""),
         sget<Snapshot | null>(SK.local, null),
         sget<{ pro?: boolean } | null>(SK.receipt, null),
         sget<ThemeMode>(SK.theme, "system"),
+        sget<number | null>(SK.trialUntil, null),
       ]);
       const arr = (v: unknown): Habit[] =>
         Array.isArray(v) ? (v as Habit[]).filter((x) => x && typeof x === "object") : [];
@@ -85,6 +87,13 @@ export function useHydration(d: HydrationSetters) {
         ...defSettings,
         ...(snap && snap.settings && typeof snap.settings === "object" ? snap.settings : {}),
       } as SettingsState;
+      const isPurchased = !!(r && r.pro);
+      // 本地 7 天试用：首次打开（未买断且无试用记录）自动开启计时，仅本地、无关苹果
+      let trialUntil = tuRaw;
+      if (!isPurchased && trialUntil == null) {
+        trialUntil = Date.now() + TRIAL_MS;
+        void sset(SK.trialUntil, trialUntil);
+      }
       d.setLangState(lg === "zh" ? "zh" : "en");
       d.setThemeState(th === "light" || th === "dark" ? th : "system");
       d.setVisited(!!vi);
@@ -92,7 +101,8 @@ export function useHydration(d: HydrationSetters) {
       d.setHabits(arr(snap?.habits));
       d.setHonors(hrs(snap?.honors));
       d.setSettings(mergedSettings);
-      d.setPro(!!(r && r.pro)); // 从设备凭证恢复 Pro
+      d.setPurchased(isPurchased); // 从设备凭证恢复买断
+      d.setTrialUntil(trialUntil);
       d.setHydrated(true);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

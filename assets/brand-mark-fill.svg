@@ -1,6 +1,5 @@
 <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-  <!-- Seeora 品牌标（应用图标版）：奶油圆角底 + 三圆串联 ✓✓○ -->
-  <rect width="1024" height="1024" rx="220" fill="#FAF9F4"/>
+  <!-- Seeora 品牌标（透明底，三圆串联 ✓✓○） -->
   <g transform="translate(63.5,379.5)">
     <g stroke="#2d7a6b" stroke-width="25" stroke-linecap="round">
       <line x1="132" y1="132.5" x2="448" y2="132.5"/>

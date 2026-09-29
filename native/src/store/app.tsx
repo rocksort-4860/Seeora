@@ -110,7 +110,10 @@ interface AppCtx {
   setBadge: (v: boolean) => void;
   setDailyReminder: (v: boolean) => void;
 
-  pro: boolean;
+  pro: boolean;            // 有效 Pro：买断 或 试用未到期
+  purchased: boolean;      // 是否已买断终身版（原始凭证）
+  trialActive: boolean;    // 是否处于 7 天试用窗口内
+  trialDaysLeft: number;   // 试用剩余天数（0 = 已结束 / 未开始）
   openPro: () => void; closePro: () => void; openPay: () => void; closePay: () => void;
   payDone: () => Promise<void>; payRestore: () => Promise<void>; gatePro: (k: "dataExport" | "shareTitle") => boolean;
   payPlan: "l";
@@ -185,7 +188,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     weekStartOn: "mon", haptics: true, icloudSync: false, badge: false, dailyReminder: false,
   });
 
-  const [pro, setPro] = useState(false);
+  const [purchased, setPurchased] = useState(false);
+  const [trialUntil, setTrialUntil] = useState<number | null>(null);
+  // 有效 Pro = 已买断 或 本地 7 天试用未到期；试用仅为本地计时，与苹果 / RevenueCat 无关
+  const pro = purchased || (trialUntil != null && Date.now() < trialUntil);
+  const trialActive = trialUntil != null && Date.now() < trialUntil;
+  const trialDaysLeft = trialUntil == null
+    ? 0
+    : Math.max(0, Math.ceil((trialUntil - Date.now()) / 86400000));
 
   const [habitFormVisible, setHabitFormVisible] = useState(false);
   const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
@@ -242,7 +252,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const { persist, snapshotNow } = usePersist({ habits, honors, settings, installAt });
   useHydration({
     setLangState, setThemeState, setVisited, setInstallAt,
-    setHabits, setHonors, setSettings, setPro, setHydrated,
+    setHabits, setHonors, setSettings, setPurchased, setTrialUntil, setHydrated,
   });
 
   /* ===================== Pro ===================== */
@@ -253,7 +263,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
   const {
     payPlan, openPro, closePro, openPay, closePay, payDone, payRestore, gatePro,
-  } = usePro({ pro, setPro, lang, dict, showToast, setProVisible, setPayVisible, nav });
+  } = usePro({ pro, purchased, setPurchased, lang, dict, showToast, setProVisible, setPayVisible, nav });
 
   /* ===================== 习惯行为 ===================== */
   const {
@@ -383,7 +393,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     hydrated, lang, dict, t, fmt, setLang, theme, setTheme, dark, colors,
     visited, installAt, enterApp, openOnboarding,
     habits, honors, settings, setWeekStartOn, setHaptics, setIcloudSync, setBadge, setDailyReminder,
-    pro, openPro, closePro, openPay, closePay, payDone, payRestore, gatePro, payPlan,
+    pro, purchased, trialActive, trialDaysLeft, openPro, closePro, openPay, closePay, payDone, payRestore, gatePro, payPlan,
     habitFormVisible, editingHabitId, habitForm, honorFormVisible, editingHonorId, honorForm,
     backfillHabitId, proVisible, payVisible, shareVisible, exportVisible, confirmVisible, wipeVisible, celVisible,
     openHabitForm, closeHabitForm, setHabitForm, saveHabit,
@@ -400,7 +410,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     hydrated, lang, dict, t, fmt, setLang, theme, setTheme, dark, colors,
     visited, installAt, enterApp, openOnboarding,
     habits, honors, settings, setWeekStartOn, setHaptics, setIcloudSync, setBadge, setDailyReminder,
-    pro, openPro, closePro, openPay, closePay, payDone, payRestore, gatePro, payPlan,
+    pro, purchased, trialActive, trialDaysLeft, openPro, closePro, openPay, closePay, payDone, payRestore, gatePro, payPlan,
     habitFormVisible, editingHabitId, habitForm, honorFormVisible, editingHonorId, honorForm,
     backfillHabitId, proVisible, payVisible, shareVisible, exportVisible, confirmVisible, wipeVisible, celVisible,
     openHabitForm, closeHabitForm, setHabitForm, saveHabit,
