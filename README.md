@@ -16,12 +16,12 @@
 │   ├── brand-mark-line.svg  ← 描边徽标（启动画面）
 │   ├── style.css            ← 四个静态页共享样式
 │   └── lang.js              ← 静态页语言切换（en 默认 / zh）
-├── native/           ← 【iOS 工程落地处】从 0923 迁入的 Expo + RN 骨架
+├── native/           ← 【iOS 工程落地处】从 原工程 迁入的 Expo + RN 骨架
 │   └── README-迁移说明.md   ← 转 Seeora 必改配置清单（bundle id / 品牌色 / 权限…）
-├── 参考/             ← 迁移文档库 + 防崩溃三件套 + 0923 完整 git 历史包
+├── 参考/             ← 迁移文档库 + 防崩溃三件套 + 原工程完整 git 历史包
 ├── README.md
 ├── 上架准备清单.md    ← 上架前你要准备的账号 / 后台 / 素材清单
-└── 从0923迁移与删除清单.md
+└── 从原工程迁移与删除清单.md
 ```
 
 ## 运行
@@ -82,15 +82,15 @@ localStorage.setItem("seeora_lang", "zh");
 
 ## 线上地址（已部署）
 
-站点：**https://rocksort-4860.github.io/Streakora/**
+站点：**https://seeora.app/**
 
 | 页面 | 线上 URL | App Store Connect 用途 |
 |---|---|---|
-| 应用页 / 首页 | `https://rocksort-4860.github.io/Streakora/` | — |
-| 隐私政策 | `https://rocksort-4860.github.io/Streakora/privacy.html` | **Privacy Policy URL（必填）** |
-| 使用条款 | `https://rocksort-4860.github.io/Streakora/terms.html` | 自定义 EULA（如用） |
-| 支持与联系 | `https://rocksort-4860.github.io/Streakora/support.html` | **Support URL（必填）** |
-| 营销落地页 | `https://rocksort-4860.github.io/Streakora/landing.html` | Marketing URL（可选） |
+| 应用页 / 首页 | `https://seeora.app/` | — |
+| 隐私政策 | `https://seeora.app/privacy.html` | **Privacy Policy URL（必填）** |
+| 使用条款 | `https://seeora.app/terms.html` | 自定义 EULA（如用） |
+| 支持与联系 | `https://seeora.app/support.html` | **Support URL（必填）** |
+| 营销落地页 | `https://seeora.app/landing.html` | Marketing URL（可选） |
 
 **对外身份口径（已确认）**
 - 开发者：个人开发者 **张新华 / Zhang Xinhua**（非公司主体）

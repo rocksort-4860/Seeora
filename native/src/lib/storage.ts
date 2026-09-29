@@ -13,6 +13,8 @@ export const SK = {
   lang: "sd.lang",
   theme: "sd.theme",
   notif: "sd.notif",
+  /** 7 天免费试用截止时间戳（ms）；null = 未启动。仅本地计时，与苹果/RevenueCat 无关 */
+  trialUntil: "sd.trialUntil",
   /** v0.2 5.4：是否已在首次打开圆环视图时看过引导小字 */
   ringHint: "sd.ringHint",
 } as const;

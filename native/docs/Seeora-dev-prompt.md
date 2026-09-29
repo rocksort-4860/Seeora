@@ -1,14 +1,14 @@
-# Streakora 新项目开发提示词（适用：秒哒 / 通用 AI 编码 Agent）
+# Seeora 新项目开发提示词（适用：秒哒 / 通用 AI 编码 Agent）
 
-> 本提示词用于从零搭建 Streakora 的全新可运行工程。**视觉与功能完整复刻现有 Streakora 设计语言与交互（依据现有 `index.html` 原型）**。功能段以下方「功能规格」为唯一权威，Agent 不得自行替换为其他产品形态（如任务清单 / 四象限）。
+> 本提示词用于从零搭建 Seeora 的全新可运行工程。**视觉与功能完整复刻现有 Seeora 设计语言与交互（依据现有 `index.html` 原型）**。功能段以下方「功能规格」为唯一权威，Agent 不得自行替换为其他产品形态（如任务清单 / 四象限）。
 
 ---
 
 ## 一、角色与总目标
 
-你是一名资深 React Native / Expo 工程师。任务：用一套**全新、干净的技术栈基线**从零实现 Streakora，彻底规避历史遗留问题（原生依赖版本错配、启动期原生模块崩溃、metro 依赖缺失、Xcode / EAS build 编译失败等）。
+你是一名资深 React Native / Expo 工程师。任务：用一套**全新、干净的技术栈基线**从零实现 Seeora，彻底规避历史遗留问题（原生依赖版本错配、启动期原生模块崩溃、metro 依赖缺失、Xcode / EAS build 编译失败等）。
 
-- Streakora 是一款 **iOS 原生习惯打卡 App**，核心模型是「**按周统计、断签不清零、无压力**」——彻底抛弃 streak 断签=归零=放弃的完美主义焦虑。
+- Seeora 是一款 **iOS 原生习惯打卡 App**，核心模型是「**按周统计、断签不清零、无压力**」——彻底抛弃 streak 断签=归零=放弃的完美主义焦虑。
 - 交付一个**本地 `npx expo start` 能跑、EAS 云端 build 能过**的完整工程。
 - 不写任何"未来再补"的占位；所有约束必须落地到 `package.json` / `eas.json` / `.npmrc` / `pnpm-workspace.yaml` / `app.config` 等真实文件。
 
@@ -16,7 +16,7 @@
 
 ## 二、产品定义与范围
 
-**产品本质**：Streakora 解决的是「习惯打卡 App 让人因一次断签而放弃」的痛点。竞品痛点：Streaks（断签归零 / 12 习惯上限）、Productive（投入后弹付费）、Habitify（必须注册）、Coach.me（不能改 7 天前）。Streakora 的突破点：**断签不清零（按周统计，周一归零重新开始）、≥5 天即算本周达标、次周留存友好、无账号 / 无广告 / 无订阅 / 无内购（一次性买断）**。
+**产品本质**：Seeora 解决的是「习惯打卡 App 让人因一次断签而放弃」的痛点。竞品痛点：Streaks（断签归零 / 12 习惯上限）、Productive（投入后弹付费）、Habitify（必须注册）、Coach.me（不能改 7 天前）。Seeora 的突破点：**断签不清零（按周统计，周一归零重新开始）、≥5 天即算本周达标、次周留存友好、无账号 / 无广告 / 无订阅 / 无内购（一次性买断）**。
 
 **硬性范围（功能段，Agent 不得自行删减或替换）**：
 - 今日打卡（Today）：习惯列表 + 右侧圆形按钮两步打卡（打开 App + 点圆钮），无习惯上限。
@@ -26,15 +26,15 @@
 
 ---
 
-## 三、视觉规范（复刻现有 Streakora 设计语言）
+## 三、视觉规范（复刻现有 Seeora 设计语言）
 
-完整复刻现有 Streakora 的视觉系统，不可自行发挥风格：
+完整复刻现有 Seeora 的视觉系统，不可自行发挥风格：
 
-- **品牌**：🎯 `Streakora` + 标语（如「无压力，不归零 / No streaks. No guilt.」）。
+- **品牌**：🎯 `Seeora` + 标语（如「无压力，不归零 / No streaks. No guilt.」）。
 - **Apple HIG**：系统字体（SF Pro / iOS 系统字）、充足留白、圆角卡片（rounded-2xl）、极轻阴影、语义化颜色。
 - **浅色 / 深色**：通过主题 Context + `useColorScheme` 实现，颜色走设计 token，深浅两套。
 - **中英双语**：内置 `lib/i18n`，提供 `T(key, ...args)` 函数 + `zh` / `en` 词典；默认中文，设置页可切换。所有界面文案走 i18n，禁止硬编码字符串。
-- **底部三 Tab 导航**：History（左）/ Today（中）/ Settings（右）；冷启动默认落在 **Today**。每页顶部仅保留 🎯 `Streakora` 名称 + 图标 + 标语（**不得出现与底部 Tab 重名的大标题**）。
+- **底部三 Tab 导航**：History（左）/ Today（中）/ Settings（右）；冷启动默认落在 **Today**。每页顶部仅保留 🎯 `Seeora` 名称 + 图标 + 标语（**不得出现与底部 Tab 重名的大标题**）。
 - **空状态引导**：列表为空 / 无习惯时显示**灰度虚线占位引导行 / 引导卡**（虚线圆 + 灰色「添加习惯」+ 7 点示例），点击即添加。
 - **条目样式**：左侧序号、右侧圆形完成按钮；小标题（习惯 / 排行榜 / 本周 / 热力图 / 荣誉室 同级）用 **21px / 800 / 深色** 突出。
 - **引导流程**：首次启动 3 张引导卡（No streaks no guilt / Bring it along fix the past / Pay once use forever），支持左右滑动浏览，提供跳过与完成按钮，可重看。
@@ -60,7 +60,7 @@
 - 本周达标时显示 toast（如「不错——{习惯} 本周已达标 ✓」）；顶部 chips 显示「本周 X/7」「还差 N 天达标」。
 
 ### 4.3 History（历史 / 左 Tab）
-- 顶部**累计坚持天数**卡片（本 App 真实打卡 + 习惯内迁移历史拆分展示：{导入} · {Streakora 内}）。
+- 顶部**累计坚持天数**卡片（本 App 真实打卡 + 习惯内迁移历史拆分展示：{导入} · {Seeora 内}）。
 - **排行榜（Leaderboard）**：每个习惯的坚持天数，可按「坚持天数 / 名称 / 创建时间」排序；按时间段分段徽章（一年以上 / 半年以上 / 三个月以上 / 一月以上 / 一月内）。
 - **本周网格**（7 格）+ **近 8 周**视图。
 - **热力图**：仅真实打卡，导入历史单独隔离；Less→More 渐变。
@@ -124,7 +124,7 @@
 
 8. **splash 图用 `expo-splash-screen` 插件托管**：在 `app.json` / `app.config` 的 `plugins` 中配置 `asset` + `backgroundColor`；JS 端**不要手动调用** `preventAutoHideAsync` / `hideAsync`（本项目无需要延后的异步初始化）。
 
-9. **Linking 兜底**：`_layout.tsx` 顶部覆盖 `getInitialURL` / `getLinkingURL`（Expo Router 的 `Linking` 配置），把裸 scheme URL（如 `streakora://`）中性化为 `null`，避免冷启动因无法解析的 deep link 卡白屏。
+9. **Linking 兜底**：`_layout.tsx` 顶部覆盖 `getInitialURL` / `getLinkingURL`（Expo Router 的 `Linking` 配置），把裸 scheme URL（如 `seeora://`）中性化为 `null`，避免冷启动因无法解析的 deep link 卡白屏。
 
 ---
 
@@ -166,7 +166,7 @@ packages:
 ### `package.json`（关键依赖，其余对齐 Expo SDK 55 官方锁定版本）
 ```json
 {
-  "name": "streakora",
+  "name": "seeora",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
@@ -221,12 +221,12 @@ packages:
 ```js
 export default {
   expo: {
-    name: "Streakora",
-    slug: "streakora",
-    scheme: "streakora",
+    name: "Seeora",
+    slug: "seeora",
+    scheme: "seeora",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
-    ios: { bundleIdentifier: "com.streakora.app", supportsTablet: true },
+    ios: { bundleIdentifier: "com.seeora.app", supportsTablet: true },
     plugins: [
       [
         "expo-splash-screen",
@@ -291,7 +291,7 @@ export default {
 - 禁止 JS 手动 `preventAutoHideAsync` / `hideAsync`。
 - 禁止硬编码任何价格。
 - 禁止在页面顶部出现与底部 Tab 重名的大标题。
-- 禁止把 Streakora 实现成任务清单 / 四象限形态（必须按周统计的习惯打卡模型）。
+- 禁止把 Seeora 实现成任务清单 / 四象限形态（必须按周统计的习惯打卡模型）。
 
 ---
 
@@ -309,4 +309,4 @@ export default {
 
 - **社交互动体系**：不支持好友排行榜、点赞、打卡评论、习惯社区。
 - **云端强制账号体系**：不提供第三方社交登录 / 手机号注册，坚持纯本地 + 私有 iCloud 方案。
-- **任务清单与复杂看板**：不引入四象限、甘特图、番茄钟计时、多级任务分解等任务管理形态（Streakora 是习惯打卡，不是任务管理）。
+- **任务清单与复杂看板**：不引入四象限、甘特图、番茄钟计时、多级任务分解等任务管理形态（Seeora 是习惯打卡，不是任务管理）。

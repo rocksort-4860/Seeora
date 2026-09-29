@@ -559,13 +559,13 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 <script>
 /* ============================================================
    Seeora v8
-   打包上线时的关键纪律（对应 RockSort 上架前踩过的坑）：
+   打包上线时的关键纪律（对应 Seeora 上架前踩过的坑）：
    1. IAP 原生模块用动态 import，失败返 null 不崩溃
    2. getOfferings() 必须有 8 秒超时，超时进 failed 态
    3. 失败时绝不显示"加载中"，要有可见原因 + 重试按钮
    4. purchasePackage / restorePurchases 全包 try/catch
    5. Product ID / Entitlement ID 与 ASC、RC 后台一字不差
-   6. 绝不与 RockSort 的任何 ID 重叠
+   6. 绝不与 Seeora 的任何 ID 重叠
    ============================================================ */
 
 /* ===== 品牌常量（会跟随主题刷新） ===== */

@@ -1,6 +1,6 @@
 /**
  * 日期工具（Seeora）：全部使用本地时区，禁止 toISOString 直接当日期用
- * 复用 RockSort 范式，并新增周统计辅助（weekStart / currentWeekDates / countWeek）
+ * 复用 Seeora 范式，并新增周统计辅助（weekStart / currentWeekDates / countWeek）
  */
 
 export const pad = (n: number): string => (n < 10 ? "0" + n : "" + n);

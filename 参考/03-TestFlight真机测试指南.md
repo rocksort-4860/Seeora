@@ -1,4 +1,4 @@
-# RockSort 手机测试指南（TestFlight）
+# Seeora 手机测试指南（TestFlight）
 
 > 你已确认：Apple Developer Program 已开通、选择 TestFlight 测试、在 iPhone 上测试。
 > 打包在 **EAS 云端**完成，你只需一台能联网的电脑（Mac 或 Windows）运行打包命令。
@@ -14,23 +14,23 @@
 ### 2. 创建 App Store Connect 应用记录
 - 打开 https://appstoreconnect.apple.com
 - 「我的 App」→ 新建 App
-- 名称：`RockSort`，主语言：英文（或简体中文）
-- **Bundle ID**：`com.rocksort.app`（必须与工程一致）
-- SKU：随意，如 `rocksort`
+- 名称：`Seeora`，主语言：英文（或简体中文）
+- **Bundle ID**：`com.seeora.app`（必须与工程一致）
+- SKU：随意，如 `seeora`
 
 ### 3. 创建内购商品（用于真实内购测试）
 在 App Store Connect → 你的 App → 「App 内购买项目」中创建 3 个商品：
 | 商品 ID | 类型 | 参考价 |
 |---|---|---|
-| `rocksort_pro_monthly` | 自动续期订阅 | $3.99 |
-| `rocksort_pro_yearly` | 自动续期订阅（与月付同订阅组） | $29.99 |
-| `rocksort_pro_lifetime` | 非消耗型 | $79.99 |
+| `seeora_pro_monthly` | 自动续期订阅 | $3.99 |
+| `seeora_pro_yearly` | 自动续期订阅（与月付同订阅组） | $29.99 |
+| `seeora_pro_lifetime` | 非消耗型 | $79.99 |
 
 > 月付与年付需放入**同一个订阅组**。配置好后再到 RevenueCat 关联。
 
 ### 4. 创建 RevenueCat 项目（可选，首次测试可跳过）
 - 打开 https://app.revenuecat.com 注册
-- 新建项目 → 添加 iOS App（Bundle ID 填 `com.rocksort.app`）
+- 新建项目 → 添加 iOS App（Bundle ID 填 `com.seeora.app`）
 - 复制 `appl_` 开头的 **公开 SDK Key**
 - 把 Key 填入工程根目录的 `.env` 文件：`EXPO_PUBLIC_RC_IOS_KEY=appl_xxxxx`
 - 在 RevenueCat 配置 App Store Connect 的 Shared Secret
@@ -66,8 +66,8 @@
 1. 在 iPhone 上打开 **App Store**，搜索安装 **TestFlight**（Apple 官方 App）
 2. 打开 https://appstoreconnect.apple.com → 你的 App → **TestFlight** 标签
 3. 构建成功后会出现版本，点「添加测试员」→ 填入你的 Apple ID 邮箱
-4. 你会收到邮件邀请 → 点链接 → TestFlight 自动打开 → 安装 RockSort
-5. 打开 RockSort 开始测试
+4. 你会收到邮件邀请 → 点链接 → TestFlight 自动打开 → 安装 Seeora
+5. 打开 Seeora 开始测试
 
 ---
 

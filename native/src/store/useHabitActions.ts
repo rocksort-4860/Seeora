@@ -1,6 +1,6 @@
 /**
  * 习惯 / 荣誉 / 打卡行为（Seeora）
- * 从 store/app.tsx 拆出；行为对齐 RockSort 范式（勾选打卡 / 添加编辑 / 删除 / 补录 / 导入导出）
+ * 从 store/app.tsx 拆出；行为对齐 Seeora 范式（勾选打卡 / 添加编辑 / 删除 / 补录 / 导入导出）
  */
 import { useCallback } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";

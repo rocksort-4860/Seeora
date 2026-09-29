@@ -1,5 +1,5 @@
 /**
- * 习惯逻辑纯函数（Streakora）：断签不清零 / 导入隔离 / 排行榜 / 徽章 / 热力图
+ * 习惯逻辑纯函数（Seeora）：断签不清零 / 导入隔离 / 排行榜 / 徽章 / 热力图
  * 不依赖任何 React / Native 模块，可单测（node 环境）
  * 复用 @/lib/dates 的 currentWeekDates / countWeek / parseDate / fmtDate
  */
@@ -27,7 +27,7 @@ export interface HabitLike {
 
 /* ===================== 累计 / 导入 ===================== */
 
-/** Streakora 内真实打卡天数（仅 checkIns，不含导入） */
+/** Seeora 内真实打卡天数（仅 checkIns，不含导入） */
 export function realDays(h: HabitLike): number {
   return Object.keys(h.checkIns).length;
 }
@@ -101,7 +101,7 @@ export function heatOn(habits: HabitLike[], n = 119, now: Date = new Date()): bo
 
 /* ==================================================================
  * ===================== v0.2：周期节点 / 休息日 / 补签 =====================
- * 规则来源：《Streakora 产品设计文档 v0.2》
+ * 规则来源：《Seeora 产品设计文档 v0.2》
  *   3.1 休息日（事前/当日，历史不可补设，可覆盖为打卡）
  *   3.2 补签（过去 7 天内，只能生成打卡，不可标休息日）
  *   3.3 连续（漏 1 不断；连续漏 2 暂停但不归零；恢复从暂停点继续）

@@ -1,4 +1,4 @@
-# Streakora — iOS 习惯打卡 App（Expo 工程）
+# Seeora — iOS 习惯打卡 App（Expo 工程）
 
 > 按周统计 · 断签不清零 · 无压力。一次性买断（$4.99 终身），无账号、无订阅、无广告、纯本地优先。
 > 默认语言 **英文（en）**，优先上架海外 App Store；设置内可切中文。
@@ -19,22 +19,22 @@
 | React / TypeScript | 19.2.0 / 5.9.2 |
 | 包管理 | pnpm 9.15.9（`.npmrc` 已设 `node-linker=hoisted` + `ignore-workspace-root-check=true`） |
 
-本工程由 RockSort 可运行基线（D:\Desktop\918）复制而来，配置层（app.json / eas.json / .npmrc / package.json 等）已含全部防崩溃设置，**请勿改动**。
+本工程由 Seeora 可运行基线（D:\Desktop\原工程）复制而来，配置层（app.json / eas.json / .npmrc / package.json 等）已含全部防崩溃设置，**请勿改动**。
 
 ---
 
 ## 2. 目录结构
 
 ```
-streakora/
-├── app.json                 # Expo 配置（bundle id com.streakora.app、权限文案、splash、防崩溃插件）
+seeora/
+├── app.json                 # Expo 配置（bundle id com.seeora.app、权限文案、splash、防崩溃插件）
 ├── eas.json                 # EAS 云构建 / 提交 TestFlight 配置
 ├── .npmrc                   # node-linker=hoisted 等
 ├── pnpm-workspace.yaml      # metro-core/cache 钉 0.83.7 + 其他 override
 ├── package.json             # 依赖（与基线一致）
 ├── babel.config.js / metro.config.js / tsconfig.json / tailwind.config.js
 ├── plugins/                 # 防崩溃三件套：crashReason / turboModuleFix / withFmtConstevalFix
-├── assets/                  # icon / splash / adaptive-icon / favicon（请替换为 Streakora 周环标识）
+├── assets/                  # icon / splash / adaptive-icon / favicon（请替换为 Seeora 周环标识）
 └── src/
     ├── app/
     │   ├── _layout.tsx       # 根布局：GestureHandler + AppProvider + Tabs + Linking 兜底 + 崩溃诊断开关
@@ -53,7 +53,7 @@ streakora/
 ## 3. 本地预览（可视化开发，无需每次打 TestFlight）
 
 ```bash
-cd streakora
+cd seeora
 npx pnpm@9.15.9 install        # 首次或改依赖后；全局无 pnpm 时用 npx 这条
 npx expo start                  # 或 pnpm start
 ```
@@ -85,7 +85,7 @@ npx eas build --platform ios --profile production
 npx eas submit --platform ios --profile production
 ```
 - 提交前在 `eas.json` 的 `submit.production.ios.appleId` 填入你的 Apple ID（当前为占位符）。
-- App Store Connect 后台建**一个**内购商品 `streakora_pro_lifetime`（买断，价格 $4.99，在苹果后台设，代码零硬编码）。
+- App Store Connect 后台建**一个**内购商品 `seeora_pro_lifetime`（买断，价格 $4.99，在苹果后台设，代码零硬编码）。
 - `.env` 填真实 `EXPO_PUBLIC_RC_IOS_KEY`（RevenueCat iOS key）。**切勿在 `.env` 写 `EXPO_PUBLIC_DIAG`**（会变成诊断包）。
 - 云端诊断构建：`eas build --env EXPO_PUBLIC_DIAG=1 --env EXPO_PUBLIC_DIAG_STAGE=0`；发版前删掉这两个 env。
 
@@ -96,7 +96,7 @@ npx eas submit --platform ios --profile production
 1. **reanimated 4.2.1 + worklets 0.7.4 严格锁定**，升级会 Xcode 编译失败。
 2. **RevenueCat 启动期绝不 import / configure**：`src/lib/iap.ts` 用动态 `import()` 懒加载，仅 Pay 弹层打开时才初始化。
 3. **expo-notifications 不在启动期请求权限**；仅用户首次设置习惯提醒时才请求。
-4. **Linking 兜底**：`_layout.tsx` 顶部覆盖 `Linking.getInitialURL`，把裸 `streakora://` 中性化为 `null`。
+4. **Linking 兜底**：`_layout.tsx` 顶部覆盖 `Linking.getInitialURL`，把裸 `seeora://` 中性化为 `null`。
 5. **三个插件**（app.json 已挂）：`crashReason` / `turboModuleFix` / `withFmtConstevalFix` —— 解决 iOS 26 启动 SIGABRT。
 6. `autolinking.ios.buildFromSource` 含 reanimated/worklets；`expo-build-properties` 开 `buildReactNativeFromSource: true`。
 7. push 配置选 **No**（未生成 APNs 密钥）。
@@ -121,6 +121,6 @@ npx pnpm@9.15.9 test
 
 ## 9. 资源替换清单（上架前）
 
-- `assets/icon.png`（1024²）、`assets/splash.png`、`assets/adaptive-icon.png`、`assets/favicon.png`：替换为 Streakora 周环标识（设计源见 `Streakora-appicon.svg`）。
+- `assets/icon.png`（1024²）、`assets/splash.png`、`assets/adaptive-icon.png`、`assets/favicon.png`：替换为 Seeora 周环标识（设计源见 `Seeora-appicon.svg`）。
 - `app.json` 的 `extra.eas.projectId`：运行 `eas init` 后自动填充真实值（当前为占位符）。
 - `eas.json` 的 `appleId`、`.env` 的 RevenueCat key：替换为你的真实值。
