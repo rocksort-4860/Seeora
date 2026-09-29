@@ -30,6 +30,19 @@ export function demoIapEnabled(): boolean {
   return process.env.EXPO_PUBLIC_DEMO_IAP === "1";
 }
 
+/** 网络 / StoreKit 调用硬超时：避免 getOfferings 等网络请求永久挂起，导致购买页一直转圈（苹果拒审项）。 */
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("iap-timeout")), ms);
+    p.then(
+      (v) => { clearTimeout(timer); resolve(v); },
+      (e) => { clearTimeout(timer); reject(e); }
+    );
+  });
+}
+
+const IAP_TIMEOUT_MS = 8000;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let Purchases: any = null;
 let purchasesLoaded = false;
@@ -69,7 +82,7 @@ export function usePlanPrices(enabled: boolean = false, nonce: number = 0): { pr
       const rc = await getPurchases();
       if (!rc) return; // 演示态：无价格源，展示位保持占位符
       try {
-        const off = await rc.getOfferings();
+        const off = await withTimeout(rc.getOfferings(), IAP_TIMEOUT_MS);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const all: any[] = off.current?.availablePackages || [];
         const targetId = RC_PRODUCT_IDS.l;
@@ -87,7 +100,8 @@ export function usePlanPrices(enabled: boolean = false, nonce: number = 0): { pr
           setReady(typeof s === "string" && s ? true : false);
         }
       } catch {
-        // 读取失败：保持占位符，由 UI 决定禁用或占位展示
+        // 超时或读取失败：停止 loading，价格位回落占位符，由 UI 决定下一步
+        if (on) setReady(true);
       }
     })();
     return () => {
@@ -108,7 +122,7 @@ export async function purchasePlan(_plan: PlanKey): Promise<boolean> {
   const rc = await getPurchases();
   if (!rc) return demoIapEnabled();
   try {
-    const pkgs = await rc.getOfferings();
+    const pkgs = await withTimeout(rc.getOfferings(), IAP_TIMEOUT_MS);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const all: any[] = pkgs.current?.availablePackages || [];
     const targetId = RC_PRODUCT_IDS.l;
@@ -138,7 +152,7 @@ export async function restorePurchases(): Promise<boolean> {
   const rc = await getPurchases();
   if (!rc) return false;
   try {
-    const info = await rc.restorePurchases();
+    const info = await withTimeout(rc.restorePurchases(), IAP_TIMEOUT_MS);
     const ent = info?.entitlements?.active || {};
     const hasEntitlement = !!ent["seeora_pro"];
     const hasAllPurchased = (info?.allPurchasedProductIdentifiers || []).includes("seeora_pro_lifetime");
