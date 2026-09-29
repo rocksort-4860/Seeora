@@ -22,7 +22,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#2d7a6b"
+        "backgroundColor": "#FAF9F4"
       },
       "predictiveBackGestureEnabled": false,
       "versionCode": 1,
@@ -63,7 +63,7 @@
           "image": "./assets/splash.png",
           "imageWidth": 1242,
           "resizeMode": "contain",
-          "backgroundColor": "#2d7a6b"
+          "backgroundColor": "#FAF9F4"
         }
       ],
       [

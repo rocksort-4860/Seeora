@@ -1,10 +1,15 @@
-<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="512" cy="512" r="280" fill="none" stroke="#2d7a6b" stroke-width="14" opacity="0.25"/>
-  <circle cx="512" cy="232" r="54" fill="#2d7a6b"/>
-  <circle cx="731" cy="337" r="54" fill="#2d7a6b"/>
-  <circle cx="785" cy="574" r="54" fill="#2d7a6b"/>
-  <circle cx="634" cy="764" r="54" fill="#2d7a6b"/>
-  <circle cx="390" cy="764" r="54" fill="#2d7a6b"/>
-  <circle cx="239" cy="574" r="54" fill="#2d7a6b"/>
-  <circle cx="293" cy="337" r="54" fill="none" stroke="#2d7a6b" stroke-width="14"/>
+<svg viewBox="0 0 897 265" xmlns="http://www.w3.org/2000/svg">
+  <!-- Seeora 品牌标（描边版/透明底）：三圆串联 ✓✓○ -->
+  <g stroke="#2d7a6b" stroke-width="25" stroke-linecap="round">
+    <line x1="132" y1="132.5" x2="448" y2="132.5"/>
+    <line x1="448" y1="132.5" x2="640" y2="132.5"/>
+  </g>
+  <circle cx="132" cy="132.5" r="132" fill="#2d7a6b"/>
+  <circle cx="448" cy="132.5" r="132" fill="#2d7a6b"/>
+  <circle cx="764" cy="132.5" r="119.5" fill="none" stroke="#2d7a6b" stroke-width="25"/>
+  <ellipse cx="764" cy="132.5" rx="28.5" ry="11.5" fill="#2d7a6b"/>
+  <g stroke="#ffffff" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <polyline points="85,122 118,186 200,84"/>
+    <polyline points="401,122 434,186 516,84"/>
+  </g>
 </svg>

@@ -36,7 +36,7 @@ a:hover{text-decoration:underline}
   display:flex;align-items:center;justify-content:space-between;
 }
 .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:var(--ink)}
-.logo img{width:26px;height:26px}
+.logo img{height:26px;width:auto}
 .links{display:flex;gap:22px;font-size:14px;color:var(--ink-2)}
 .links a{color:var(--ink-2)}
 .links a:hover{color:var(--brand);text-decoration:none}

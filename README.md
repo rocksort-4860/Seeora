@@ -12,8 +12,12 @@
 ├── terms.html        ← 使用条款（中英双语）
 ├── support.html      ← 支持与联系（中英双语）
 ├── assets/
-│   ├── brand-mark-fill.svg  ← 实心徽标（favicon / 页头）
-│   ├── brand-mark-line.svg  ← 描边徽标（启动画面）
+│   ├── brand-mark-fill.svg  ← 品牌标·应用图标版（奶油圆角底，favicon / 页头）
+│   ├── brand-mark-line.svg  ← 品牌标·透明底版（启动画面）
+│   ├── mark-transparent.png ← 品牌标透明底 PNG 母版（897×265，供复用）
+│   ├── icon-1024.png        ← App 图标母版（1024×1024 奶油底满幅）
+│   ├── apple-touch-icon.png ← iOS 添加到主屏图标（180×180）
+│   ├── favicon.png / icon.png
 │   ├── style.css            ← 四个静态页共享样式
 │   └── lang.js              ← 静态页语言切换（en 默认 / zh）
 ├── native/           ← 【iOS 工程落地处】从 原工程 迁入的 Expo + RN 骨架
@@ -76,9 +80,13 @@ localStorage.setItem("seeora_lang", "zh");
 
 ## 品牌图标与启动画面
 
-- `assets/brand-mark-fill.svg`：实心徽标，用作网站 favicon（`index.html` 内 `<link rel="icon" type="image/svg+xml">` 指向它），同时作为 `apple-touch-icon` 兜底。
-- `assets/brand-mark-line.svg`：描边徽标，显示在应用**启动画面（splash）**中央。
-- 启动画面 `#splash`：打开页面时全屏淡入，居中显示描边徽标 + 应用名 "Seeora" + 本地化标语（见 `t().slogan`）+ 加载圈；`window.load` 后约 600ms 淡出并移除 DOM（另有 3 秒兜底，防止卡死）。无论深浅色主题，启动画面均为浅色品牌底，保证描边徽标清晰可读。
+- 品牌标为「三圆串联 ✓✓○」横版标（品牌绿 `#2d7a6b` + 奶油底 `#FAF9F4`）：
+  - `assets/icon-1024.png`：母版（设计源图）。`assets/mark-transparent.png`：从母版抠出的透明底 PNG。
+  - `assets/brand-mark-fill.svg`：矢量·应用图标版（奶油圆角底 + 品牌标），用作网站 favicon；`apple-touch-icon` 用 `assets/apple-touch-icon.png`（180×180，iOS 不支持 SVG 图标）。
+  - `assets/brand-mark-line.svg`：矢量·透明底版，显示在应用**启动画面（splash）**中央。
+- 启动画面 `#splash`：打开页面时全屏淡入，居中显示品牌标（宽 `min(300px,64vw)`，适配横版）+ 应用名 "Seeora" + 本地化标语（见 `t().slogan`）+ 加载圈；`window.load` 后约 600ms 淡出并移除 DOM（另有 3 秒兜底，防止卡死）。无论深浅色主题，启动画面均为浅色品牌底，保证品牌标清晰可读。
+- 分享卡片上的品牌角标由 `drawBrandIcon()` 用 Canvas 按同一几何实时绘制（与 SVG 同源）。
+- 原生工程 `native/assets/`：`icon.png`（=icon-1024）/ `adaptive-icon.png`（透明前景，标占 60%）/ `splash.png`（透明底，标占 55%）/ `favicon.png`；`native/app.json` 中 splash 与 adaptiveIcon 背景色为奶油色 `#FAF9F4`。
 
 ## 线上地址（已部署）
 

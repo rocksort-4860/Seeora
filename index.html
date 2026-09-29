@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Seeora · v8</title>
 <link rel="icon" type="image/svg+xml" href="assets/brand-mark-fill.svg">
-<link rel="apple-touch-icon" href="assets/brand-mark-fill.svg">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <style>
 :root{
   --brand:#2d7a6b;--brandRgb:45,122,107;--brand-deep:#245f54;
@@ -40,7 +40,7 @@
 #splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:linear-gradient(160deg,#ffffff 0%,#e8f2ef 100%);transition:opacity .45s ease,visibility .45s ease}
 #splash.splash-hidden{opacity:0;visibility:hidden;pointer-events:none}
-#splash .sp-logo{width:96px;height:96px;display:block;animation:sp-pop .5s ease}
+#splash .sp-logo{width:min(300px,64vw);height:auto;display:block;animation:sp-pop .5s ease}
 #splash .sp-name{margin-top:18px;font-size:26px;font-weight:700;letter-spacing:.5px;color:var(--brand)}
 #splash .sp-slogan{margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:.2px}
 #splash .sp-spin{margin-top:26px;width:26px;height:26px;border-radius:50%;border:3px solid rgba(45,122,107,.18);border-top-color:var(--brand);animation:sp-spin .8s linear infinite}
@@ -54,7 +54,7 @@ body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"Pi
 .brand{padding:12px 16px 0;text-align:center}
 .brand-row{display:flex;align-items:center;justify-content:center;gap:8px}
 .brand-name{font-size:20px;font-weight:700;letter-spacing:.5px}
-.brand-icon{width:22px;height:22px;flex:none;display:block}
+.brand-icon{height:20px;width:auto;flex:none;display:block}
 .slogan{text-align:center;color:var(--muted);font-size:12px;padding:6px 20px 8px;letter-spacing:.2px}
 .head{display:flex;align-items:center;justify-content:space-between;padding:2px 16px 10px;position:relative}
 .head-title{font-size:24px;font-weight:700}
@@ -1465,21 +1465,27 @@ function roundRectPath(g,x,y,w,h,r){
 function drawBrandIcon(g,cx,cy,r){
   g.save();
   var s = r*2, x0 = cx-r, y0 = cy-r;
-  // 圆角方块品牌底（与 brand-mark-fill.svg 一致）
+  // 圆角方块奶油底（与 brand-mark-fill.svg / icon-1024.png 一致）
   roundRectPath(g, x0, y0, s, s, s*(220/1024));
-  g.fillStyle = "#2d7a6b"; g.fill();
-  // 浅色内环
-  g.beginPath(); g.arc(cx, cy, s*(280/1024), 0, Math.PI*2);
-  g.strokeStyle = "rgba(255,255,255,0.18)"; g.lineWidth = s*(6/1024); g.stroke();
-  // 环形点阵（6 个白色实心点）
-  var dotR = s*(54/1024), map = function(p){ return [ x0 + p[0]/1024*s, y0 + p[1]/1024*s ]; };
-  var pts = [[512,232],[731,337],[785,574],[634,764],[390,764],[239,574]];
-  g.fillStyle = "#ffffff";
-  pts.forEach(function(p){ var q = map(p); g.beginPath(); g.arc(q[0],q[1],dotR,0,Math.PI*2); g.fill(); });
-  // 镂空点（品牌色填充 + 白色描边）
-  var h = map([293,337]);
-  g.beginPath(); g.arc(h[0],h[1],dotR,0,Math.PI*2); g.fillStyle = "#2d7a6b"; g.fill();
-  g.strokeStyle = "#ffffff"; g.lineWidth = s*(14/1024); g.stroke();
+  g.fillStyle = "#FAF9F4"; g.fill();
+  // 三圆串联品牌标 ✓✓○（横版，占 87.6% 宽，垂直居中）
+  var u = s/1024;
+  g.translate(x0 + 63.5*u, y0 + 379.5*u);
+  g.lineCap = "round"; g.lineJoin = "round";
+  // 连接线
+  g.strokeStyle = "#2d7a6b"; g.lineWidth = 25*u;
+  g.beginPath(); g.moveTo(132*u,132.5*u); g.lineTo(448*u,132.5*u); g.lineTo(640*u,132.5*u); g.stroke();
+  // 两个实心圆
+  g.fillStyle = "#2d7a6b";
+  g.beginPath(); g.arc(132*u,132.5*u,132*u,0,Math.PI*2); g.fill();
+  g.beginPath(); g.arc(448*u,132.5*u,132*u,0,Math.PI*2); g.fill();
+  // 圆环 + 中央横杠
+  g.beginPath(); g.arc(764*u,132.5*u,119.5*u,0,Math.PI*2); g.stroke();
+  g.beginPath(); g.ellipse(764*u,132.5*u,28.5*u,11.5*u,0,0,Math.PI*2); g.fill();
+  // 白色对勾 ×2
+  g.strokeStyle = "#ffffff"; g.lineWidth = 32*u;
+  g.beginPath(); g.moveTo(85*u,122*u); g.lineTo(118*u,186*u); g.lineTo(200*u,84*u); g.stroke();
+  g.beginPath(); g.moveTo(401*u,122*u); g.lineTo(434*u,186*u); g.lineTo(516*u,84*u); g.stroke();
   g.restore();
 }
 function drawPoster(h){
