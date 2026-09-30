@@ -4,15 +4,53 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Terms of Service · Seeora</title>
-  <link rel="icon" type="image/png" href="assets/favicon.png" />
-  <link rel="stylesheet" href="assets/style.css" />
-  <script src="assets/lang.js" defer></script>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%232d7a6b'/><path d='M6.5 12.2 L10.2 16 L17.5 8.2' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+  <style>
+    html[data-lang="en"] .zh { display: none; }
+    html[data-lang="zh"] .en { display: none; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      max-width: 800px; margin: 0 auto; padding: 20px;
+      line-height: 1.6; background: #f1ede6; color: #2a2a2a;
+      transition: background-color .25s ease, color .25s ease;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { background: #1c1b19; color: #ebe8e2; }
+      a { color: #7fc0b0 !important; }
+      .lang-switch button { background: #4a9c8a !important; }
+    }
+    nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid rgba(0,0,0,.1); padding-bottom: 15px; }
+    @media (prefers-color-scheme: dark) { nav { border-bottom-color: rgba(255,255,255,.1); } }
+    .nav-right { display: flex; gap: 20px; align-items: center; }
+    .links a { margin-right: 15px; text-decoration: none; color: #2d7a6b; font-size: 14px; }
+    .links a:hover { text-decoration: underline; }
+    .lang-switch button { background: #2d7a6b; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 6px; font-size: 13px; margin-left: 5px; }
+    .lang-switch button:hover { opacity: 0.85; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; }
+    .logo svg { height: 28px; }
+    h1 { font-size: 28px; margin-top: 30px; margin-bottom: 5px; }
+    h2 { font-size: 18px; margin-top: 30px; margin-bottom: 10px; }
+    p, li { font-size: 15px; margin-bottom: 10px; }
+    ul { padding-left: 20px; margin-bottom: 15px; }
+    a { color: #2d7a6b; }
+    .updated { font-size: 13px; color: #8a8a85; margin-bottom: 30px; }
+  </style>
 </head>
 <body>
-  <header class="site-header">
-    <nav class="nav">
+  <header>
+    <nav>
       <span class="logo">
-        <img src="assets/icon.png" alt="Seeora" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80">
+          <line x1="70" y1="40" x2="90" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
+          <line x1="150" y1="40" x2="170" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="40" cy="40" r="30" fill="#2d7a6b"/>
+          <path d="M25 40 L35 50 L55 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="120" cy="40" r="30" fill="#2d7a6b"/>
+          <path d="M105 40 L115 50 L135 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="200" cy="40" r="30" fill="none" stroke="#2d7a6b" stroke-width="8"/>
+          <ellipse cx="200" cy="40" rx="12" ry="4" fill="#2d7a6b"/>
+        </svg>
         Seeora
       </span>
       <span class="nav-right">
@@ -34,11 +72,11 @@
     </nav>
   </header>
 
-  <main class="wrap content page">
+  <main>
     <h1 class="en">Terms of Service</h1>
     <h1 class="zh">使用条款</h1>
-    <p class="updated en">Effective date: October 1, 2026</p>
-    <p class="updated zh">生效日期：2026 年 10 月 1 日</p>
+    <p class="updated en">Effective date: September 29, 2026</p>
+    <p class="updated zh">生效日期：2026 年 9 月 29 日</p>
 
     <h2 class="en">1. Acceptance of these terms</h2>
     <h2 class="zh">1. 接受条款</h2>
@@ -61,8 +99,8 @@
 
     <h2 class="en">4. In-app purchases</h2>
     <h2 class="zh">4. 应用内购买</h2>
-    <p class="en">Pro is a one-time purchase completed through the Apple App Store. Prices and taxes are as shown on the App Store checkout page. Under Apple policy, consummated digital product purchases are generally non-refundable; if a purchase goes wrong, handle it through the App Store or the App's "restore purchases" feature, or email <a href="mailto:365504860@qq.com">365504860@qq.com</a>.</p>
-    <p class="zh">专业版通过 Apple App Store 完成一次性买断。价格、税费以 App Store 结算页为准。依据 Apple 政策，已 consummated 的数字商品购买通常不予退款；如发生购买异常，请通过 App Store 或本应用"恢复购买"功能处理，亦可邮件联系 <a href="mailto:365504860@qq.com">365504860@qq.com</a>。</p>
+    <p class="en">Pro is a one-time purchase completed through the Apple App Store. Prices and taxes are as shown on the App Store checkout page. Under Apple policy, completed digital product purchases are generally non-refundable; if a purchase goes wrong, handle it through the App Store or the App's "restore purchases" feature, or email <a href="mailto:365504860@qq.com">365504860@qq.com</a>.</p>
+    <p class="zh">专业版通过 Apple App Store 完成一次性买断。价格、税费以 App Store 结算页为准。依据 Apple 政策，已完成的数字商品购买通常不予退款；如发生购买异常，请通过 App Store 或本应用"恢复购买"功能处理，亦可邮件联系 <a href="mailto:365504860@qq.com">365504860@qq.com</a>。</p>
 
     <h2 class="en">5. Intellectual property</h2>
     <h2 class="zh">5. 知识产权</h2>
@@ -85,18 +123,35 @@
     <p class="zh">有关本条款的疑问，请邮件至 <a href="mailto:365504860@qq.com">365504860@qq.com</a>。</p>
   </main>
 
-  <footer class="site-footer">
-    <div class="wrap">
-      <span>Seeora</span>
-      <a href="landing.html" class="en">Home</a>
-      <a href="landing.html" class="zh">首页</a>
-      <a href="privacy.html" class="en">Privacy Policy</a>
-      <a href="privacy.html" class="zh">隐私政策</a>
-      <a href="support.html" class="en">Support &amp; Contact</a>
-      <a href="support.html" class="zh">支持与联系</a>
-      <span class="copy en">© 2026 Seeora · Zhang Xinhua</span>
-      <span class="copy zh">© 2026 Seeora · 张新华</span>
-    </div>
+  <footer style="margin-top:50px; border-top:1px solid rgba(0,0,0,.1); padding-top:20px; font-size:14px; display:flex; flex-wrap:wrap; gap:15px;">
+    <span style="font-weight:bold;">Seeora</span>
+    <a href="landing.html" class="en" style="color:#2d7a6b; text-decoration:none;">Home</a>
+    <a href="landing.html" class="zh" style="color:#2d7a6b; text-decoration:none;">首页</a>
+    <a href="privacy.html" class="en" style="color:#2d7a6b; text-decoration:none;">Privacy Policy</a>
+    <a href="privacy.html" class="zh" style="color:#2d7a6b; text-decoration:none;">隐私政策</a>
+    <a href="support.html" class="en" style="color:#2d7a6b; text-decoration:none;">Support &amp; Contact</a>
+    <a href="support.html" class="zh" style="color:#2d7a6b; text-decoration:none;">支持与联系</a>
+    <span class="copy en" style="margin-left:auto; color:#8a8a85;">© 2026 Seeora · Zhang Xinhua</span>
+    <span class="copy zh" style="margin-left:auto; color:#8a8a85;">© 2026 Seeora · 张新华</span>
   </footer>
+
+  <script>
+    function setLang(lang) {
+      document.documentElement.setAttribute('data-lang', lang);
+      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+      try { localStorage.setItem('seeora_lang', lang); } catch(e) {}
+      document.title = lang === 'zh' ? '使用条款 · Seeora' : 'Terms of Service · Seeora';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      var saved = 'en';
+      try { saved = localStorage.getItem('seeora_lang') || 'en'; } catch(e) {}
+      setLang(saved);
+      document.querySelectorAll('.lang-switch button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          setLang(this.getAttribute('data-lang'));
+        });
+      });
+    });
+  </script>
 </body>
 </html>
