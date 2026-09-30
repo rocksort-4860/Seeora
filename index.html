@@ -1462,15 +1462,11 @@ function roundRectPath(g,x,y,w,h,r){
   g.lineTo(x+w,y+h-r); g.quadraticCurveTo(x+w,y+h,x+w-r,y+h); g.lineTo(x+r,y+h);
   g.quadraticCurveTo(x,y+h,x,y+h-r); g.lineTo(x,y+r); g.quadraticCurveTo(x,y,x+r,y); g.closePath();
 }
-function drawBrandIcon(g,cx,cy,r){
+function drawBrandIcon(g,cx,cy,w){
   g.save();
-  var s = r*2, x0 = cx-r, y0 = cy-r;
-  // 圆角方块奶油底（与 brand-mark-fill.svg / icon-1024.png 一致）
-  roundRectPath(g, x0, y0, s, s, s*(220/1024));
-  g.fillStyle = "#FAF9F4"; g.fill();
-  // 三圆串联品牌标 ✓✓○（横版，占 87.6% 宽，垂直居中）
-  var u = s/1024;
-  g.translate(x0 + 63.5*u, y0 + 379.5*u);
+  // 透明底三圆串联品牌标 ✓✓○：宽 w、真实比例 896:265，中心 (cx,cy)
+  var u = w/896, h = 265*u;
+  g.translate(cx - w/2, cy - h/2);
   g.lineCap = "round"; g.lineJoin = "round";
   // 连接线
   g.strokeStyle = "#2d7a6b"; g.lineWidth = 25*u;
@@ -1515,10 +1511,10 @@ function drawPoster(h){
   g.fillText(isZh()?"第 "+top+" 天":"Day "+top, W/2, 880);
   var brandText = t().brand;
   g.font = "700 46px -apple-system,PingFang SC,sans-serif";
-  var btw = g.measureText(brandText).width, iconR=22, gap=16;
-  var totalW = iconR*2+gap+btw, startX = W/2-totalW/2, iconCx = startX+iconR, brandCy = 1085;
-  drawBrandIcon(g, iconCx, brandCy, iconR);
-  g.fillStyle = inkC; g.textAlign = "left"; g.fillText(brandText, iconCx+iconR+gap, brandCy+16);
+  var btw = g.measureText(brandText).width, iconW=60, gap=16;
+  var totalW = iconW+gap+btw, startX = W/2-totalW/2, iconCx = startX+iconW/2, brandCy = 1085;
+  drawBrandIcon(g, iconCx, brandCy, iconW);
+  g.fillStyle = inkC; g.textAlign = "left"; g.fillText(brandText, startX+iconW+gap, brandCy+16);
   g.textAlign = "center"; g.fillStyle = "#8a8a85"; g.font = "500 28px -apple-system,PingFang SC,sans-serif";
   g.fillText(t().slogan, W/2, 1160);
   if (!isPro()){
