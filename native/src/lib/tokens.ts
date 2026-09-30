@@ -2,7 +2,7 @@
  * 设计令牌（Seeora）—— 全部样式的唯一来源
  *
  * 本文件已切换为《desing.md》（Apple 设计规范）口径：
- *   - 「唯一强调色 #0066cc」是铁律：所有可点击元素只用它，功能语义（打卡/休息/无记录）
+ *   - 「唯一强调色 #2d7a6b（品牌绿）」是铁律：所有可点击元素只用它，功能语义（打卡/休息/无记录）
  *     改由「面色 + 中性灰」区分，不引入第二个强调色。
  *   - 字重阶梯只有 300 / 400 / 600 / 700（500 刻意空缺）。
  *   - 全系统仅一处投影，且只给落在台面上的产品图（成就卡图形），不给卡片/按钮/文字。
@@ -27,17 +27,17 @@ export const lightColors = {
   ink2: appleColors.inkMuted80, // 二级文字 #333333
   ink3: appleColors.inkMuted80, // 三级文字
   ink4: appleColors.inkMuted48, // 占位符 / 禁用 #7a7a7a
-  accent: appleColors.primary, // 唯一强调色 #0066cc（图形填充 / 选中态）
+  accent: appleColors.primary, // 唯一强调色 #2d7a6b（品牌绿，图形填充 / 选中态）
   accentInk: appleColors.primary, // 按钮底色
   accentText: appleColors.primary, // 强调色文字（白底对比 ≥4.5:1）
   accentWash: appleColors.canvasParchment, // 强调色浅底
   accentLine: appleColors.primary, // 强调色描边
   /* —— 规范中性色承担功能语义 —— */
-  done: appleColors.primary, // 打卡 = 行动色 #0066cc
+  done: appleColors.primary, // 打卡 = 行动色 #2d7a6b（品牌绿）
   rest: "#d2d2d7", // 计划休息 = 中性灰片（不引入第二个强调色）
   blank: appleColors.dividerSoft, // 无记录 / 漏签 = 近乎不可见的底色
   halo: appleColors.primary, // 仪式第二层光晕：与行动色同族
-  focus: appleColors.primaryFocus, // 聚焦环 #0071e3
+  focus: appleColors.primaryFocus, // 聚焦环 #1f5e52（深一档绿）
   inkInverse: appleColors.onPrimary, // 深底胶囊上的文字
   heroGlass: "rgba(245, 245, 247, 0.8)", // 吸顶毛玻璃（规范 frostedBar 落地）
   /* —— 保留但不参与界面语义（规范禁止第二个强调色，仅作为导出数据的旧字段兼容）—— */
@@ -68,7 +68,7 @@ export const darkColors: Record<keyof typeof lightColors, string> = {
   accent: appleColorsDark.primary,
   accentInk: appleColorsDark.primary,
   accentText: appleColorsDark.primary,
-  accentWash: "rgba(41,151,255,0.14)",
+  accentWash: "rgba(45,122,107,0.16)",
   accentLine: appleColorsDark.primary,
   done: appleColorsDark.primary,
   rest: "#4a4a50",

@@ -7,7 +7,7 @@
  *   - 功能与交互逻辑仍以《Seeora产品设计文档 v0.2》为准（两套文档各司其职）
  *
  * 规范铁律（严格遵守，不得推翻）：
- *   1. 唯一强调色 Action Blue #0066cc —— 所有可点击元素只用它，禁止第二个强调色。
+ *   1. 唯一强调色 品牌绿 #2d7a6b —— 所有可点击元素只用它，禁止第二个强调色。
  *   2. 正文 17px / 400 / 行高 1.47；字重阶梯只有 300 / 400 / 600 / 700（500 刻意空缺）。
  *   3. 展示级字号必须负字距（-0.28 ~ -0.374px），即「Apple tight」招牌节奏。
  *   4. 全系统只有一处投影，且只给「落在台面上的产品图」，绝不给卡片/按钮/文字。
@@ -21,11 +21,11 @@
 
 export const appleColors = {
   /** 唯一强调色：所有交互（链接、主按钮、选中、打卡节点） */
-  primary: "#0066cc",
-  /** 聚焦环 */
-  primaryFocus: "#0071e3",
-  /** 暗底上的链接色（Action Blue 在深块上会消失） */
-  primaryOnDark: "#2997ff",
+  primary: "#2d7a6b",
+  /** 聚焦环：深一档绿，按压/聚焦更明显 */
+  primaryFocus: "#1f5e52",
+  /** 暗底上的链接色（品牌绿在深块上会消失，改用亮绿） */
+  primaryOnDark: "#4fb3a1",
 
   /** 主画面：纯白 */
   canvas: "#ffffff",
@@ -63,9 +63,9 @@ export const appleColors = {
 
 /** 深色模式：规范明示「暗色 counterparts 未赋值」，此处按规范暗块语义补齐，仅做微步进迁移 */
 export const appleColorsDark: Record<keyof typeof appleColors, string> = {
-  primary: "#2997ff",
-  primaryFocus: "#0071e3",
-  primaryOnDark: "#2997ff",
+  primary: "#4fb3a1",
+  primaryFocus: "#1f5e52",
+  primaryOnDark: "#4fb3a1",
   canvas: "#272729",
   canvasParchment: "#1d1d1f",
   surfacePearl: "#2a2a2c",
