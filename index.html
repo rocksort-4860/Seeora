@@ -3,8 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Seeora · v8</title>
-<link rel="icon" type="image/png" href="assets/favicon.png">
-<link rel="apple-touch-icon" href="assets/favicon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%232d7a6b'/><path d='M6.5 12.2 L10.2 16 L17.5 8.2' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <style>
 :root{
   --brand:#2d7a6b;--brandRgb:45,122,107;--brand-deep:#245f54;
@@ -40,7 +39,7 @@
 #splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:linear-gradient(160deg,#ffffff 0%,#e8f2ef 100%);transition:opacity .45s ease,visibility .45s ease}
 #splash.splash-hidden{opacity:0;visibility:hidden;pointer-events:none}
-#splash .sp-logo{width:96px;height:96px;display:block;animation:sp-pop .5s ease}
+#splash .sp-logo{width:min(300px,64vw);height:auto;display:block;animation:sp-pop .5s ease}
 #splash .sp-name{margin-top:18px;font-size:26px;font-weight:700;letter-spacing:.5px;color:var(--brand)}
 #splash .sp-slogan{margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:.2px}
 #splash .sp-spin{margin-top:26px;width:26px;height:26px;border-radius:50%;border:3px solid rgba(45,122,107,.18);border-top-color:var(--brand);animation:sp-spin .8s linear infinite}
@@ -54,7 +53,7 @@ body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"Pi
 .brand{padding:12px 16px 0;text-align:center}
 .brand-row{display:flex;align-items:center;justify-content:center;gap:8px}
 .brand-name{font-size:20px;font-weight:700;letter-spacing:.5px}
-.brand-icon{width:22px;height:22px;flex:none;display:block}
+.brand-icon{height:22px;width:auto;flex:none;display:block}
 .slogan{text-align:center;color:var(--muted);font-size:12px;padding:6px 20px 8px;letter-spacing:.2px}
 .head{display:flex;align-items:center;justify-content:space-between;padding:2px 16px 10px;position:relative}
 .head-title{font-size:24px;font-weight:700}
@@ -268,7 +267,16 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 </head>
 <body>
 <div id="splash" aria-hidden="true">
-  <img class="sp-logo" src="assets/icon.png" alt="Seeora">
+  <svg class="sp-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" aria-label="Seeora">
+    <line x1="70" y1="40" x2="90" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
+    <line x1="150" y1="40" x2="170" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="40" cy="40" r="30" fill="#2d7a6b"/>
+    <path d="M25 40 L35 50 L55 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="120" cy="40" r="30" fill="#2d7a6b"/>
+    <path d="M105 40 L115 50 L135 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="200" cy="40" r="30" fill="none" stroke="#2d7a6b" stroke-width="8"/>
+    <ellipse cx="200" cy="40" rx="12" ry="4" fill="#2d7a6b"/>
+  </svg>
   <div class="sp-name">Seeora</div>
   <div class="sp-slogan"></div>
   <div class="sp-spin"></div>
@@ -291,7 +299,16 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 <section id="view-home" class="view on">
   <div class="brand">
     <div class="brand-row">
-      <img class="brand-icon" src="assets/icon.png" alt="Seeora">
+      <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" aria-label="Seeora">
+        <line x1="70" y1="40" x2="90" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
+        <line x1="150" y1="40" x2="170" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="40" cy="40" r="30" fill="#2d7a6b"/>
+        <path d="M25 40 L35 50 L55 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="120" cy="40" r="30" fill="#2d7a6b"/>
+        <path d="M105 40 L115 50 L135 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="200" cy="40" r="30" fill="none" stroke="#2d7a6b" stroke-width="8"/>
+        <ellipse cx="200" cy="40" rx="12" ry="4" fill="#2d7a6b"/>
+      </svg>
       <span class="brand-name" id="brandHome"></span>
     </div>
     <div class="slogan" id="sloganHome"></div>
@@ -310,7 +327,16 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 <section id="view-detail" class="detail">
   <div class="brand">
     <div class="brand-row">
-      <img class="brand-icon" src="assets/icon.png" alt="Seeora">
+      <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" aria-label="Seeora">
+        <line x1="70" y1="40" x2="90" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
+        <line x1="150" y1="40" x2="170" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="40" cy="40" r="30" fill="#2d7a6b"/>
+        <path d="M25 40 L35 50 L55 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="120" cy="40" r="30" fill="#2d7a6b"/>
+        <path d="M105 40 L115 50 L135 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="200" cy="40" r="30" fill="none" stroke="#2d7a6b" stroke-width="8"/>
+        <ellipse cx="200" cy="40" rx="12" ry="4" fill="#2d7a6b"/>
+      </svg>
       <span class="brand-name" id="brandDetail"></span>
     </div>
     <div class="slogan" id="sloganDetail"></div>
@@ -348,7 +374,16 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 <section id="view-honors" class="view">
   <div class="brand">
     <div class="brand-row">
-      <img class="brand-icon" src="assets/icon.png" alt="Seeora">
+      <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" aria-label="Seeora">
+        <line x1="70" y1="40" x2="90" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
+        <line x1="150" y1="40" x2="170" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="40" cy="40" r="30" fill="#2d7a6b"/>
+        <path d="M25 40 L35 50 L55 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="120" cy="40" r="30" fill="#2d7a6b"/>
+        <path d="M105 40 L115 50 L135 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="200" cy="40" r="30" fill="none" stroke="#2d7a6b" stroke-width="8"/>
+        <ellipse cx="200" cy="40" rx="12" ry="4" fill="#2d7a6b"/>
+      </svg>
       <span class="brand-name" id="brandHonors"></span>
     </div>
     <div class="slogan" id="sloganHonors"></div>
@@ -558,17 +593,9 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 
 <script>
 /* ============================================================
-   Seeora v8
-   打包上线时的关键纪律（对应 RockSort 上架前踩过的坑）：
-   1. IAP 原生模块用动态 import，失败返 null 不崩溃
-   2. getOfferings() 必须有 8 秒超时，超时进 failed 态
-   3. 失败时绝不显示"加载中"，要有可见原因 + 重试按钮
-   4. purchasePackage / restorePurchases 全包 try/catch
-   5. Product ID / Entitlement ID 与 ASC、RC 后台一字不差
-   6. 绝不与 RockSort 的任何 ID 重叠
+   Seeora v8 — 图标已内联，不再依赖 assets 文件夹
    ============================================================ */
 
-/* ===== 品牌常量（会跟随主题刷新） ===== */
 var C = { brand:"#2d7a6b", brandRgb:"45,122,107", rest:"#94a8a2",
   missFill:"rgba(0,0,0,0.04)", missStroke:"rgba(0,0,0,0.12)",
   ringGuide:"rgba(0,0,0,0.06)", ringTodayStroke:"#f1ede6",
@@ -583,7 +610,6 @@ function refreshColors(){
   C.axisText=g('--axisText'); C.heatEmpty=g('--heatEmpty');
 }
 
-/* ===== 通知 API 封装 ===== */
 var NOTIF_ICON = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#2d7a6b"/><path d="M6.5 12.2 L10.2 16 L17.5 8.2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 );
@@ -616,14 +642,10 @@ function fireNotification(title, body, tag){
     return true;
   } catch(e){ console.warn("[notify] failed:", e); return false; }
 }
-
-/* 提醒调度占位（真正上线时由 Capacitor / RN / 原生接管） */
 function scheduleReminder(habit){
   if (!habit || !habit.reminder || !habit.reminder.on) return;
   console.log("[schedule] (stub) daily at", habit.reminder.time, "for", habit.id);
 }
-
-/* 前台定时检查 */
 function checkReminders(){
   if (notifPermission() !== "granted") return;
   var now = new Date();
@@ -646,7 +668,6 @@ function checkReminders(){
 setInterval(checkReminders, 30000);
 document.addEventListener("visibilitychange", function(){ if (!document.hidden) checkReminders(); });
 
-/* ===== 主题 ===== */
 var THEME = "system";
 try{ THEME = localStorage.getItem("seeora_theme") || "system"; }catch(e){}
 function applyTheme(){
@@ -676,7 +697,6 @@ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", fun
     if (document.getElementById("view-detail").classList.contains("on")) renderDetail(); }
 });
 
-/* ===== 字典 ===== */
 var I18N = {
 en:{
   brand:"Seeora", slogan:"See yourself getting better.",
@@ -838,7 +858,6 @@ function mkCurve(vals, missIdx){
   return vals.map(function(v, i){ return { v:v, ok:(missIdx||[]).indexOf(i)<0?1:0 }; });
 }
 
-/* ===== 数据 ===== */
 var HABITS = [
   { id:"read", zh:"阅读", en:"Read", desc:{zh:"每天读一点，慢慢积累", en:"Read a little every day"},
     freqDays:1, goal:1, streak:12, best:28, total:74, week:[1,1,1,1,0,1,1],
@@ -886,9 +905,7 @@ var PRO = false;
 try{ PRO = localStorage.getItem("seeora_pro")==="1"; }catch(e){}
 var PRO_TRIAL_UNTIL = 0;
 try{ var _pt = parseInt(localStorage.getItem("seeora_pro_trial_until")||"0",10); PRO_TRIAL_UNTIL = _pt || 0; }catch(e){}
-// 清理已过期但未清除的试用标记，保持状态整洁
 try{ if (PRO_TRIAL_UNTIL && Date.now() >= PRO_TRIAL_UNTIL){ localStorage.removeItem("seeora_pro_trial_until"); PRO_TRIAL_UNTIL = 0; } }catch(e){}
-// 购买凭证：模拟 App Store 服务端记录（买断后持久化，与本地解锁标记分离，供「恢复购买」找回）
 var PRO_RECEIPT = null;
 try { var _rc = localStorage.getItem("seeora_receipt"); PRO_RECEIPT = _rc ? JSON.parse(_rc) : null; }catch(e){ PRO_RECEIPT = null; }
 function isPro(){
@@ -896,7 +913,7 @@ function isPro(){
   if (PRO_TRIAL_UNTIL && Date.now() < PRO_TRIAL_UNTIL) return true;
   return false;
 }
-function proMode(){ // "permanent" | "trial" | "free"
+function proMode(){
   if (PRO) return "permanent";
   if (PRO_TRIAL_UNTIL && Date.now() < PRO_TRIAL_UNTIL) return "trial";
   return "free";
@@ -907,17 +924,16 @@ function trialDaysLeft(){
 }
 function setPro(v){
   PRO = !!v;
-  if (PRO){ // 正式买断：清空试用标记 + 写入购买凭证
+  if (PRO){
     PRO_TRIAL_UNTIL = 0;
     try{ localStorage.removeItem("seeora_pro_trial_until"); }catch(e){}
     saveReceipt({ type:"lifetime", at: Date.now() });
   }
-  // 注意：setPro(false) 不清空凭证，保留供「恢复购买」找回（与真机重装后本地标记丢失、服务端凭证仍在一致）
   try{ localStorage.setItem("seeora_pro", PRO?"1":"0"); }catch(e){}
   renderAll();
 }
 function startTrial(days){
-  if (PRO) return; // 已买断不降级
+  if (PRO) return;
   PRO = false;
   PRO_TRIAL_UNTIL = Date.now() + (days||7)*86400000;
   try{
@@ -930,7 +946,6 @@ function saveReceipt(rec){
   PRO_RECEIPT = rec;
   try { if (rec) localStorage.setItem("seeora_receipt", JSON.stringify(rec)); else localStorage.removeItem("seeora_receipt"); }catch(e){}
 }
-// 模拟从商店恢复已购：读取服务端购买凭证，返回 lifetime 凭证或 null
 function restorePurchases(){
   return new Promise(function(resolve, reject){
     setTimeout(function(){
@@ -941,7 +956,6 @@ function restorePurchases(){
   });
 }
 
-/* ===== 7天迷你点 ===== */
 function miniDots(states){
   var W = 7*20-6, H = 16;
   var s = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
@@ -959,7 +973,6 @@ function miniDots(states){
   return s+"</svg>";
 }
 
-/* ===== 首页 ===== */
 function renderList(){
   var box = document.getElementById("list"), html = "";
   HABITS.forEach(function(h,i){
@@ -975,7 +988,6 @@ function renderList(){
   box.innerHTML = html;
 }
 
-/* ===== 圆环 ===== */
 var RING_R = 104, RING_N = 7, animatedArcs = {};
 function renderRing(h){
   var S = 280, Cc = S/2, pts = [];
@@ -1004,7 +1016,6 @@ function renderRing(h){
   return s+"</svg>";
 }
 
-/* ===== 曲线 ===== */
 function renderCurve(h){
   var W=320, H=150, pad={l:30,r:14,t:14,b:26};
   var d = h.curve, n = d.length; if (!n) return "";
@@ -1050,7 +1061,6 @@ function renderCurve(h){
   return s+"</svg>";
 }
 
-/* ===== 热力图 ===== */
 function heatData(h){
   var arr = [], rnd = function(i){ return ((i*9301+49297)%233280)/233280; };
   for (var w=0;w<12;w++) for (var d=0;d<7;d++){
@@ -1066,7 +1076,6 @@ function renderHeat(h){
   return html;
 }
 
-/* ===== 详情 ===== */
 var curIdx = 0;
 function renderDetail(){
   var h = HABITS[curIdx];
@@ -1100,7 +1109,6 @@ function renderDetail(){
   document.getElementById("shareLab").textContent = t().share;
 }
 
-/* ===== 使用数据 ===== */
 function renderUsage(){
   var totalChecks=0, maxLongest=0, weekDone=0, weekSlots=0;
   HABITS.forEach(function(h){
@@ -1116,7 +1124,6 @@ function renderUsage(){
     '<div><div class="usage-num">'+rate+'%</div><div class="usage-lab">'+t().usageWeek+'</div></div>';
 }
 
-/* ===== 荣誉室 ===== */
 var BADGES = [
   {em:"🌱",zh:"启程",en:"First step",need:1},{em:"🔥",zh:"坚持一周",en:"Week one",need:7},
   {em:"🌤",zh:"两周",en:"Two weeks",need:14},{em:"💪",zh:"三周",en:"Three weeks",need:21},
@@ -1151,7 +1158,6 @@ function renderHonors(){
   renderMig();
 }
 
-/* ===== 迁移 ===== */
 var MIG = [];
 try{ MIG = JSON.parse(localStorage.getItem("seeora_mig")||"[]"); }catch(e){ MIG=[]; }
 function saveMig(){ try{ localStorage.setItem("seeora_mig", JSON.stringify(MIG)); }catch(e){} }
@@ -1270,12 +1276,6 @@ document.getElementById("btnMigDel").addEventListener("click", function(){
 document.getElementById("btnMigCancel").addEventListener("click", function(){ hideSheet("sheetMig","maskMig"); });
 document.getElementById("maskMig").addEventListener("click", function(){ hideSheet("sheetMig","maskMig"); });
 
-/* ============================================================
-   付费墙 · 带完整状态机（防拒审）
-   - 8 秒超时
-   - 失败态 + 重试
-   - 所有 IAP 调用包 try/catch
-   ============================================================ */
 var DEFAULT_PRICE_TIMEOUT_MS = 8000;
 var payState = "idle";
 var payReason = null;
@@ -1290,7 +1290,6 @@ function fetchOfferings(){
   return new Promise(function(resolve, reject){
     var timer = setTimeout(function(){ reject(new Error("timeout")); }, DEFAULT_PRICE_TIMEOUT_MS);
     if (mode === "fail"){
-      // 挂起，让 8 秒超时触发
       return;
     }
     setTimeout(function(){
@@ -1358,7 +1357,6 @@ document.getElementById("maskPay").addEventListener("click", function(){ hideShe
 document.getElementById("btnTrial").addEventListener("click", function(){ startTrial(7); hideSheet("sheetPay","maskPay"); toast(t().trialStarted); });
 document.getElementById("btnBuy").addEventListener("click", function(){ setPro(true); hideSheet("sheetPay","maskPay"); toast(t().bought); });
 
-/* 恢复购买：模拟从商店读取已购记录并重新解锁 Pro */
 document.getElementById("btnRestore").addEventListener("click", async function(){
   var btn = this;
   var orig = btn.textContent;
@@ -1367,7 +1365,7 @@ document.getElementById("btnRestore").addEventListener("click", async function()
   try {
     var rec = await restorePurchases();
     if (rec){
-      setPro(true);                  // 重新写入本地解锁标记 + 刷新凭证时间戳
+      setPro(true);
       hideSheet("sheetPay","maskPay");
       toast(t().restored);
     } else {
@@ -1383,7 +1381,6 @@ document.getElementById("btnRestore").addEventListener("click", async function()
 document.getElementById("btnPayPrivacy").addEventListener("click", function(){ openDoc("privacy"); });
 document.getElementById("btnPayTerms").addEventListener("click", function(){ openDoc("terms"); });
 
-/* ===== 权限引导页 ===== */
 var pendingReminderToggle = false;
 
 function showPermIntro(){
@@ -1391,6 +1388,9 @@ function showPermIntro(){
   document.getElementById("permIcon").textContent = "🔔";
   document.getElementById("permTitle").textContent = T.permTitle;
   document.getElementById("permSub").textContent = T.permSub;
+  document.getElementById("permP1").style.display = "";
+  document.getElementById("permP2").style.display = "";
+  document.getElementById("permP3").style.display = "";
   document.getElementById("permP1").textContent = T.permP1;
   document.getElementById("permP2").textContent = T.permP2;
   document.getElementById("permP3").textContent = T.permP3;
@@ -1455,7 +1455,6 @@ document.getElementById("rowNotif").addEventListener("click", async function(){
   showPermIntro();
 });
 
-/* ===== 海报 ===== */
 function roundRectPath(g,x,y,w,h,r){
   if (g.roundRect){ g.beginPath(); g.roundRect(x,y,w,h,r); return; }
   g.beginPath(); g.moveTo(x+r,y); g.lineTo(x+w-r,y); g.quadraticCurveTo(x+w,y,x+w,y+r);
@@ -1464,27 +1463,22 @@ function roundRectPath(g,x,y,w,h,r){
 }
 function drawBrandIcon(g,cx,cy,r){
   g.save();
-  var br = r*0.34;                 // 圆形半径
-  var gap = r*0.9;                 // 圆心间距
-  var cxs = [cx-gap, cx, cx+gap];
-  var col = "#287868";             // 品牌绿（三步进度标识）
-  g.strokeStyle = col; g.lineWidth = r*0.07; g.lineCap = "round";
-  // 连接线（圆1-圆2、圆2-圆3）
-  for (var i=0;i<2;i++){ g.beginPath(); g.moveTo(cxs[i]+br, cy); g.lineTo(cxs[i+1]-br, cy); g.stroke(); }
-  // 圆3：绿色描边 + 中心小圆点
-  g.beginPath(); g.arc(cxs[2], cy, br, 0, Math.PI*2); g.stroke();
-  g.fillStyle = col; g.beginPath(); g.arc(cxs[2], cy, br*0.28, 0, Math.PI*2); g.fill();
-  // 圆1、圆2：绿色填充 + 白色对勾
-  for (var i=0;i<2;i++){
-    var cx0 = cxs[i];
-    g.fillStyle = col; g.beginPath(); g.arc(cx0, cy, br, 0, Math.PI*2); g.fill();
-    g.strokeStyle = "#ffffff"; g.lineWidth = br*0.24; g.lineJoin = "round";
-    g.beginPath();
-    g.moveTo(cx0-br*0.42, cy+0.02*br);
-    g.lineTo(cx0-br*0.10, cy+0.34*br);
-    g.lineTo(cx0+br*0.48, cy-0.30*br);
-    g.stroke();
-  }
+  var s = r*2, x0 = cx-r, y0 = cy-r;
+  roundRectPath(g, x0, y0, s, s, s*(220/1024));
+  g.fillStyle = "#FAF9F4"; g.fill();
+  var u = s/1024;
+  g.translate(x0 + 63.5*u, y0 + 379.5*u);
+  g.lineCap = "round"; g.lineJoin = "round";
+  g.strokeStyle = "#2d7a6b"; g.lineWidth = 25*u;
+  g.beginPath(); g.moveTo(132*u,132.5*u); g.lineTo(448*u,132.5*u); g.lineTo(640*u,132.5*u); g.stroke();
+  g.fillStyle = "#2d7a6b";
+  g.beginPath(); g.arc(132*u,132.5*u,132*u,0,Math.PI*2); g.fill();
+  g.beginPath(); g.arc(448*u,132.5*u,132*u,0,Math.PI*2); g.fill();
+  g.beginPath(); g.arc(764*u,132.5*u,119.5*u,0,Math.PI*2); g.stroke();
+  g.beginPath(); g.ellipse(764*u,132.5*u,28.5*u,11.5*u,0,0,Math.PI*2); g.fill();
+  g.strokeStyle = "#ffffff"; g.lineWidth = 32*u;
+  g.beginPath(); g.moveTo(85*u,122*u); g.lineTo(118*u,186*u); g.lineTo(200*u,84*u); g.stroke();
+  g.beginPath(); g.moveTo(401*u,122*u); g.lineTo(434*u,186*u); g.lineTo(516*u,84*u); g.stroke();
   g.restore();
 }
 function drawPoster(h){
@@ -1556,7 +1550,6 @@ function sharePoster(){
   } else savePoster();
 }
 
-/* ===== 弹层 & 提示 ===== */
 function showSheet(s,m){ document.getElementById(s).classList.add("on"); document.getElementById(m).classList.add("on"); }
 function hideSheet(s,m){
   document.getElementById(s).classList.remove("on");
@@ -1576,7 +1569,6 @@ function floatMsg(msg){
   clearTimeout(floatTimer); floatTimer = setTimeout(function(){ el.classList.remove("on"); }, 3000);
 }
 
-/* ===== 导入导出 ===== */
 function exportData(){
   if (!isPro()){ showPaywall("export"); return; }
   var payload = { app:"Seeora", version:1, exportedAt:new Date().toISOString(),
@@ -1618,7 +1610,6 @@ document.getElementById("fileImport").addEventListener("change", function(e){
   reader.readAsText(f);
 });
 
-/* ===== 文档 ===== */
 function docContent(kind){
   var zh = isZh();
   if (kind === "faq"){
@@ -1686,7 +1677,7 @@ function docContent(kind){
       '<div class="doc-h">1. Acceptance of these terms</div><p class="doc-p">Welcome to Seeora (the "App"). The App is provided by individual developer Zhang Xinhua. By downloading, accessing, or using the App, you agree to be bound by these terms. If you do not agree, do not use the App.</p>'+
       '<div class="doc-h">2. License to use</div><p class="doc-p">We grant you a personal, non-exclusive, non-transferable, revocable license to use the App under these terms. The free plan is for personal habit tracking; Pro is a one-time purchase that unlocks additional features.</p>'+
       '<div class="doc-h">3. Your responsibilities</div><p class="doc-p">You are responsible for the content you enter in the App and warrant that it is lawful and non-infringing. All app data is stored locally on your device; clearing local storage or uninstalling may make data unrecoverable — please back up regularly (Pro supports data export).</p>'+
-      '<div class="doc-h">4. In-app purchases</div><p class="doc-p">Pro is a one-time purchase completed through the Apple App Store at $4.99 (or local equivalent); prices and taxes are as shown on the App Store checkout page. Under Apple policy, consummated digital product purchases are generally non-refundable; if a purchase goes wrong, handle it through the App Store or the App\'s "restore purchases" feature, or email 365504860@qq.com.</p>'+
+      '<div class="doc-h">4. In-app purchases</div><p class="doc-p">Pro is a one-time purchase completed through the Apple App Store at $4.99 (or local equivalent); prices and taxes are as shown on the App Store checkout page. Under Apple policy, completed digital product purchases are generally non-refundable; if a purchase goes wrong, handle it through the App Store or the App\'s "restore purchases" feature, or email 365504860@qq.com.</p>'+
       '<div class="doc-h">5. Intellectual property</div><p class="doc-p">The name, logo, interface, and code of the App are owned by the developer. You may not reverse engineer, decompile, redistribute, or commercially resell the App without written authorization.</p>'+
       '<div class="doc-h">6. Disclaimer (to the maximum extent permitted by applicable law)</div><p class="doc-p">The App is provided "as is" without warranties of any kind, and is not medical, psychological, or professional advice. To the extent permitted by law, the developer is not liable for any loss arising from use of or inability to use the App (including local data loss).</p>'+
       '<div class="doc-h">7. Changes to these terms</div><p class="doc-p">We may update these terms from time to time; the effective date on the page governs. Continued use is deemed acceptance of the updated terms.</p>'+
@@ -1703,7 +1694,6 @@ document.getElementById("btnDocClose").addEventListener("click", function(){ hid
 document.getElementById("btnDocClose2").addEventListener("click", function(){ hideSheet("sheetDoc","maskDoc"); });
 document.getElementById("maskDoc").addEventListener("click", function(){ hideSheet("sheetDoc","maskDoc"); });
 
-/* ===== 语言/外观 UI ===== */
 function updateLangUI(){
   var el = document.getElementById("langVal"); if (el) el.textContent = LANG==="zh"?"中文":"English";
   var cz = document.getElementById("checkZh"), ce = document.getElementById("checkEn");
@@ -1724,7 +1714,6 @@ document.getElementById("sheetTheme").addEventListener("click", function(e){
   setTheme(row.getAttribute("data-theme-val")); hideSheet("sheetTheme","maskTheme");
 });
 
-/* ===== 全部渲染 ===== */
 function renderAll(){
   var T = t();
   ["brandHome","brandDetail","brandHonors"].forEach(function(id){ document.getElementById(id).textContent = T.brand; });
@@ -1804,7 +1793,6 @@ function renderAll(){
 
   renderList(); renderDetail(); renderUsage(); renderHonors();
 
-  // 启动画面本地化标语（若启动画面仍在）
   var _ss = document.querySelector("#splash .sp-slogan");
   if (_ss) _ss.textContent = T.slogan;
 
@@ -1820,7 +1808,6 @@ function renderAll(){
   }
 }
 
-/* ===== 打卡：首页 ===== */
 document.getElementById("list").addEventListener("click", function(e){
   var btn = e.target.closest ? e.target.closest(".check") : null; if (!btn) return;
   e.stopPropagation();
@@ -1856,7 +1843,6 @@ document.getElementById("honorList").addEventListener("click", function(e){
   document.getElementById("view-detail").classList.add("on"); renderDetail();
 });
 
-/* ===== 打卡：详情 ===== */
 document.getElementById("btnCheck").addEventListener("click", function(){
   var h = HABITS[curIdx], prev = h.week[6];
   if (prev === 2){
@@ -1887,7 +1873,6 @@ document.getElementById("btnCheck").addEventListener("click", function(){
   renderDetail(); renderList(); renderUsage(); renderHonors();
 });
 
-/* ===== 休息日 ===== */
 function toggleRest(){
   var h = HABITS[curIdx];
   if (h.week[6]===2) h.week[6]=0; else h.week[6]=2;
@@ -1899,7 +1884,6 @@ document.getElementById("tickRest").addEventListener("keydown", function(e){
   if (e.key==="Enter" || e.key===" "){ e.preventDefault(); toggleRest(); }
 });
 
-/* ===== 补签 ===== */
 document.getElementById("mkGrid").addEventListener("click", function(e){
   var cell = e.target.closest ? e.target.closest(".mk") : null; if (!cell) return;
   var idx = +cell.getAttribute("data-idx"), h = HABITS[curIdx];
@@ -1909,7 +1893,6 @@ document.getElementById("mkGrid").addEventListener("click", function(e){
   toast(mark ? (isZh()?"已标记":"Marked") : (isZh()?"已清除":"Cleared"));
 });
 
-/* ===== 分享 ===== */
 document.getElementById("btnShare").addEventListener("click", openPoster);
 document.getElementById("btnPosterClose").addEventListener("click", function(){ hideSheet("sheetPoster","maskPoster"); });
 document.getElementById("btnPosterSave").addEventListener("click", function(){
@@ -1922,7 +1905,6 @@ document.getElementById("btnPosterShare").addEventListener("click", function(){
 });
 document.getElementById("maskPoster").addEventListener("click", function(){ hideSheet("sheetPoster","maskPoster"); });
 
-/* ===== 设置入口 ===== */
 function openSettings(){ document.getElementById("setTitle").textContent = t().settings; showSheet("sheetSet","maskSet"); }
 document.getElementById("btnSet").addEventListener("click", openSettings);
 document.getElementById("btnSet2").addEventListener("click", openSettings);
@@ -1941,7 +1923,6 @@ document.getElementById("rowFaq").addEventListener("click", function(){ openDoc(
 document.getElementById("rowPrivacy").addEventListener("click", function(){ openDoc("privacy"); });
 document.getElementById("rowTerms").addEventListener("click", function(){ openDoc("terms"); });
 
-/* ===== 添加习惯 ===== */
 var addFreq = 1, addGoal = 1;
 
 document.getElementById("swAddRem").addEventListener("click", async function(){
@@ -2017,7 +1998,6 @@ document.getElementById("btnAddSave").addEventListener("click", function(){
   renderList(); renderUsage(); renderHonors();
 });
 
-/* ===== Tab ===== */
 var TAB_VIEW = { tabHabits:"home", tabHonors:"honors" };
 function tab(id){
   var view = TAB_VIEW[id];
@@ -2028,7 +2008,6 @@ function tab(id){
 document.getElementById("tabHabits").addEventListener("click", function(){ tab("tabHabits"); });
 document.getElementById("tabHonors").addEventListener("click", function(){ tab("tabHonors"); });
 
-/* ===== 启动 ===== */
 applyTheme(); refreshColors();
 var guideSeen = false;
 try{ guideSeen = !!localStorage.getItem("seeora_guide"); }catch(e){}
