@@ -32,8 +32,8 @@ export default function SettingsScreen() {
 
       <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {/* 通用 */}
-        <Section title={d.setGeneral}>
-          <Row label={d.setLang}>
+        <Section colors={c} title={d.setGeneral}>
+          <Row colors={c} label={d.setLang}>
             <Seg
               options={[{ value: "en", label: "EN" }, { value: "zh", label: "中" }]}
               value={lang}
@@ -41,7 +41,7 @@ export default function SettingsScreen() {
               colors={c}
             />
           </Row>
-          <Row label={d.setTheme}>
+          <Row colors={c} label={d.setTheme}>
             <Seg
               options={[{ value: "system", label: d.themeSystem }, { value: "light", label: d.themeLight }, { value: "dark", label: d.themeDark }]}
               value={theme}
@@ -53,21 +53,21 @@ export default function SettingsScreen() {
         </Section>
 
         {/* 通知：v0.2 九·3 明确不做「连续打卡提醒推送」，只保留应用角标 */}
-        <Section title={d.setNotif}>
-          <Row label={d.setBadge}>
+        <Section colors={c} title={d.setNotif}>
+          <Row colors={c} label={d.setBadge}>
             <Switch checked={settings.badge} onCheckedChange={setBadge} />
           </Row>
         </Section>
 
         {/* 设备偏好 */}
-        <Section title={d.setDevice}>
-          <Row label={d.setHaptics}>
+        <Section colors={c} title={d.setDevice}>
+          <Row colors={c} label={d.setHaptics}>
             <Switch checked={settings.haptics} onCheckedChange={setHaptics} />
           </Row>
-          <Row label={d.setIcloud}>
+          <Row colors={c} label={d.setIcloud}>
             <Switch checked={settings.icloudSync} onCheckedChange={setIcloudSync} />
           </Row>
-          <Row label={d.setWeekStart}>
+          <Row colors={c} label={d.setWeekStart}>
             <Seg
               options={[{ value: "mon", label: d.weekMon }, { value: "sun", label: d.weekSun }]}
               value={settings.weekStartOn}
@@ -78,22 +78,22 @@ export default function SettingsScreen() {
         </Section>
 
         {/* 扩展集成（占位） */}
-        <Section title={d.setExt}>
+        <Section colors={c} title={d.setExt}>
           <PlaceholderRow label={d.extHealth} sub={d.extHealthSub} colors={c} />
           <PlaceholderRow label={d.extSiri} sub={d.extSiriSub} colors={c} />
           <PlaceholderRow label={d.extWidget} sub={d.extWidgetSub} colors={c} last />
         </Section>
 
         {/* 数据安全 */}
-        <Section title={d.setData}>
+        <Section colors={c} title={d.setData}>
           <BuyoutCard onPress={openPro} />
           <PressableRow label={d.dataExport} onPress={openExport} colors={c} />
           <PressableRow label={d.dataWipe} onPress={openWipe} colors={c} danger />
         </Section>
 
         {/* 关于 */}
-        <Section title={d.about} last>
-          <Row label={d.version}>
+        <Section colors={c} title={d.about} last>
+          <Row colors={c} label={d.version}>
             <T className="text-sm font-medium" style={{ color: c.ink2 }}>{d.version.replace("{v}", VERSION)}</T>
           </Row>
           <PressableRow label={d.privacy} onPress={() => setPrivacyOpen((v) => !v)} colors={c} />
@@ -112,19 +112,21 @@ export default function SettingsScreen() {
 
 /* ===================== 局部小组件 ===================== */
 
-function Section({ title, children, last }: { title: string; children: React.ReactNode; last?: boolean }) {
+function Section({ title, children, last, colors: c }: { title: string; children: React.ReactNode; last?: boolean; colors: ReturnType<typeof useApp>["colors"] }) {
   return (
     <View className={cn("mt-5", last ? "" : "")}>
-      <T className="mb-2 px-1 text-sm font-bold uppercase tracking-wide" style={{ color: "#9AA0A8" }}>{title}</T>
+      {/* 分组头字色走专用 c.inkGroup：原先硬编码 #9AA0A8（2.5:1）绕过令牌；
+          用 ink4 只有 3.9:1 差 AA 一档，inkGroup 深浅两档都能过 4.5:1 */}
+      <T className="mb-2 px-1 text-sm font-bold uppercase tracking-wide" style={{ color: c.inkGroup }}>{title}</T>
       <Card className="gap-0 py-1">{children}</Card>
     </View>
   );
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Row({ label, children, colors: c }: { label: string; children: React.ReactNode; colors: ReturnType<typeof useApp>["colors"] }) {
   return (
     <View className="flex-row items-center justify-between px-4 py-3" style={{ borderBottomWidth: 1, borderColor: "transparent" }}>
-      <T className="text-base" style={{ color: "#1A1B21" }}>{label}</T>
+      <T className="text-base" style={{ color: c.ink }}>{label}</T>
       <View>{children}</View>
     </View>
   );

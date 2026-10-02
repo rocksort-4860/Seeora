@@ -26,7 +26,13 @@ export function ToastHost() {
       pointerEvents="none"
       style={[
         styles.toast,
-        { bottom: insets.bottom + 96, backgroundColor: toastMsg.ok ? c.accentInk : c.ink, opacity },
+        {
+          bottom: insets.bottom + 96,
+          // 深色模式下旧写法拿 c.ink 当底色、c.inkInverse 当文字，两个令牌语义同时在深色翻转，
+          // 结果白字压浅底 = 1.09:1（等于不可见）。胶囊底/字固定成深底浅底两档，不随主题翻转语义。
+          backgroundColor: toastMsg.ok ? c.accentInk : "#1d1d1f",
+          opacity,
+        },
       ]}
     >
       <Text style={styles.txt}>{toastMsg.msg}</Text>

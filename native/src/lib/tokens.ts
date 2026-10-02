@@ -27,6 +27,7 @@ export const lightColors = {
   ink2: appleColors.inkMuted80, // 二级文字 #333333
   ink3: appleColors.inkMuted80, // 三级文字
   ink4: appleColors.inkMuted48, // 占位符 / 禁用 #7a7a7a
+  inkGroup: "#6e6e73", // 分组头/小标题：比正文弱一档，同时对比度仍过 AA 4.5:1
   accent: appleColors.primary, // 唯一强调色 #2d7a6b（品牌绿，图形填充 / 选中态）
   accentInk: appleColors.primary, // 按钮底色
   accentText: appleColors.primary, // 强调色文字（白底对比 ≥4.5:1）
@@ -65,8 +66,11 @@ export const darkColors: Record<keyof typeof lightColors, string> = {
   ink2: "#c9c9ce",
   ink3: "#a1a1a6",
   ink4: "#7a7a7a",
-  accent: appleColorsDark.primary,
-  accentInk: appleColorsDark.primary,
+  inkGroup: "#8e8e93", // 分组头：深底上提亮一档，保证 AA 4.5:1（#7a7a7a 在深底只有 3.92:1）
+  accent: appleColorsDark.primary, // 深底上的图形/图标：保持亮绿，可读
+  // 实心块底色（按钮 / 胶囊 / 圆底，其上压白字白图标）必须用深一档绿：
+  // 亮绿 #4fb3a1 上压白字只有 2.53:1，不达 WCAG AA；#2d7a6b + 白字 = 5.11:1。
+  accentInk: appleColors.primary,
   accentText: appleColorsDark.primary,
   accentWash: "rgba(45,122,107,0.16)",
   accentLine: appleColorsDark.primary,

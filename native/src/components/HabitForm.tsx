@@ -39,15 +39,15 @@ export function HabitForm() {
 
         <ScrollView className="max-h-[60%]" showsVerticalScrollIndicator={false}>
           {/* 标题 */}
-          <Field label={d.fName}>
+          <Field colors={c} label={d.fName}>
             <Input value={habitForm.name} onChangeText={(t) => setHabitForm({ name: t })} placeholder={d.fNamePh} maxLength={40} />
           </Field>
           {/* 详情 */}
-          <Field label={d.fDetail}>
+          <Field colors={c} label={d.fDetail}>
             <Textarea value={habitForm.detail} onChangeText={(t) => setHabitForm({ detail: t })} placeholder={d.fDetailPh} />
           </Field>
           {/* emoji */}
-          <Field label={d.fEmoji}>
+          <Field colors={c} label={d.fEmoji}>
             <View className="flex-row flex-wrap gap-2">
               {EMOJIS.map((e) => (
                 <Pressable
@@ -62,7 +62,7 @@ export function HabitForm() {
             </View>
           </Field>
           {/* 主题色 */}
-          <Field label={d.fColor}>
+          <Field colors={c} label={d.fColor}>
             <View className="flex-row flex-wrap gap-2">
               {habitColors.map((col) => (
                 <Pressable
@@ -75,7 +75,7 @@ export function HabitForm() {
             </View>
           </Field>
           {/* v0.2 四：频率 N（一个节点代表 N 天，1~30）与窗口次数（1~20） */}
-          <Field label={d.fFreq}>
+          <Field colors={c} label={d.fFreq}>
             <View className="flex-row items-center gap-4">
               <StepBtn label="−" onPress={() => setHabitForm({ frequency: Math.max(1, habitForm.frequency - 1) })} colors={c} />
               <View className="items-center">
@@ -85,7 +85,7 @@ export function HabitForm() {
               <StepBtn label="+" onPress={() => setHabitForm({ frequency: Math.min(30, habitForm.frequency + 1) })} colors={c} />
             </View>
           </Field>
-          <Field label={d.fTimes}>
+          <Field colors={c} label={d.fTimes}>
             <View className="flex-row items-center gap-4">
               <StepBtn label="−" onPress={() => setHabitForm({ timesPerWindow: Math.max(1, habitForm.timesPerWindow - 1) })} colors={c} />
               <View className="items-center">
@@ -96,7 +96,7 @@ export function HabitForm() {
             </View>
           </Field>
           {/* 提醒 */}
-          <Field label={d.fReminder}>
+          <Field colors={c} label={d.fReminder}>
             <View className="flex-row items-center justify-between">
               <T className="text-sm" style={{ color: c.ink2 }}>{habitForm.reminderEnabled ? d.fReminderOn : d.fReminderOff}</T>
               <Switch checked={habitForm.reminderEnabled} onCheckedChange={(v) => setHabitForm({ reminderEnabled: v })} />
@@ -117,16 +117,16 @@ export function HabitForm() {
             <Icon as={CalendarClock} color={c.accent} size={15} />
             <T className="text-sm font-semibold" style={{ color: c.ink2 }}>{d.fMigrated}</T>
           </View>
-          <Field label={d.fMigratedDays}>
+          <Field colors={c} label={d.fMigratedDays}>
             <Input value={String(habitForm.migratedTotalDays)} onChangeText={(t) => setHabitForm({ migratedTotalDays: numOnly(t) })} keyboardType="number-pad" />
           </Field>
-          <Field label={d.fMigratedStreak}>
+          <Field colors={c} label={d.fMigratedStreak}>
             <Input value={String(habitForm.migratedCurrentStreak)} onChangeText={(t) => setHabitForm({ migratedCurrentStreak: numOnly(t) })} keyboardType="number-pad" />
           </Field>
-          <Field label={d.fMigratedStart}>
+          <Field colors={c} label={d.fMigratedStart}>
             <Input value={habitForm.migratedStartDate} onChangeText={(t) => setHabitForm({ migratedStartDate: t })} placeholder="YYYY-MM-DD" />
           </Field>
-          <Field label={d.fMigratedSource}>
+          <Field colors={c} label={d.fMigratedSource}>
             <Input value={habitForm.migratedSource} onChangeText={(t) => setHabitForm({ migratedSource: t })} placeholder="e.g. Apple Fitness" />
           </Field>
         </ScrollView>
@@ -148,7 +148,7 @@ export function HabitForm() {
               <Text className="text-sm font-medium" style={{ color: "#fff" }}>{d.delete}</Text>
             </Button>
           )}
-          <Button className="flex-1" style={{ backgroundColor: c.accent }} onPress={saveHabit}>
+          <Button className="flex-1" style={{ backgroundColor: c.accentInk }} onPress={saveHabit}>
             <Text className="text-base font-bold" style={{ color: "#fff" }}>{d.save}</Text>
           </Button>
         </DialogFooter>
@@ -157,10 +157,11 @@ export function HabitForm() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, colors: c }: { label: string; children: React.ReactNode; colors: ReturnType<typeof useApp>["colors"] }) {
   return (
     <View className="mt-3">
-      <T className="mb-1.5 text-sm font-medium" style={{ color: "#5B5E68" }}>{label}</T>
+      {/* 表单标签字色走 c.ink2：原先硬编码 #5B5E68 绕过设计令牌 */}
+      <T className="mb-1.5 text-sm font-medium" style={{ color: c.ink2 }}>{label}</T>
       {children}
     </View>
   );

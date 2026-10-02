@@ -82,7 +82,7 @@ export function usePlanPrices(enabled: boolean = false, nonce: number = 0): { pr
       const rc = await getPurchases();
       if (!rc) return; // 演示态：无价格源，展示位保持占位符
       try {
-        const off = await withTimeout(rc.getOfferings(), IAP_TIMEOUT_MS);
+        const off: any = await withTimeout(rc.getOfferings(), IAP_TIMEOUT_MS);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const all: any[] = off.current?.availablePackages || [];
         const targetId = RC_PRODUCT_IDS.l;
@@ -122,11 +122,13 @@ export async function purchasePlan(_plan: PlanKey): Promise<boolean> {
   const rc = await getPurchases();
   if (!rc) return demoIapEnabled();
   try {
-    const pkgs = await withTimeout(rc.getOfferings(), IAP_TIMEOUT_MS);
+    const pkgs: any = await withTimeout(rc.getOfferings(), IAP_TIMEOUT_MS);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const all: any[] = pkgs.current?.availablePackages || [];
     const targetId = RC_PRODUCT_IDS.l;
     const hit =
+      // 只认本 App 自己的商品 ID，绝不用 all[0] 兜底：
+      // 兜底会在后台误挂其它商品 / 新增套餐时，把钱花到用户没选的东西上（退款 + 拒审风险）。
       all.find(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (p: any) =>
@@ -134,7 +136,7 @@ export async function purchasePlan(_plan: PlanKey): Promise<boolean> {
           p.identifier === targetId ||
           p.packageType === "LIFETIME" ||
           p.identifier === "$rc_lifetime"
-      ) || all[0];
+      );
     if (!hit) return false;
     const { customerInfo } = await rc.purchasePackage(hit);
     const ent = customerInfo?.entitlements?.active || {};
@@ -147,17 +149,21 @@ export async function purchasePlan(_plan: PlanKey): Promise<boolean> {
   }
 }
 
-// 恢复购买：无 RC key → 演示态；有 key → restorePurchases
-export async function restorePurchases(): Promise<boolean> {
+/** 恢复购买结果（带原因，供 UI 给出准确提示，避免把「按钮文案」当错误提示弹） */
+export type RestoreResult = { ok: boolean; reason?: "none" | "error" | "timeout" };
+
+// 恢复购买：无 RC key → 直接失败（非演示态，防止伪造权益）
+export async function restorePurchases(): Promise<RestoreResult> {
   const rc = await getPurchases();
-  if (!rc) return false;
+  if (!rc) return { ok: false, reason: "error" };
   try {
-    const info = await withTimeout(rc.restorePurchases(), IAP_TIMEOUT_MS);
+    const info: any = await withTimeout(rc.restorePurchases(), IAP_TIMEOUT_MS);
     const ent = info?.entitlements?.active || {};
     const hasEntitlement = !!ent["seeora_pro"];
     const hasAllPurchased = (info?.allPurchasedProductIdentifiers || []).includes("seeora_pro_lifetime");
-    return hasEntitlement || hasAllPurchased;
-  } catch {
-    return false;
+    return { ok: hasEntitlement || hasAllPurchased }; // ok=false 且无 reason = 没找到可恢复的购买
+  } catch (e) {
+    const msg = e && typeof (e as Error).message === "string" ? (e as Error).message : "";
+    return { ok: false, reason: msg === "iap-timeout" ? "timeout" : "error" };
   }
 }

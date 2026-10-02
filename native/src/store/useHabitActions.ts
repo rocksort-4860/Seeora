@@ -216,7 +216,10 @@ export function useHabitActions(d: HabitActionsDeps) {
           : "Free version allows 5 habits. Go unlimited with a one-time purchase.");
         return;
       }
-      const nh: Habit = { id: uid(), createdAt: new Date().toISOString(), isArchived: false, checkIns: {}, ...base };
+      // C-04 变体修复：createdAt 用本地日期串，绝不用 toISOString()。
+      // toISOString 是 UTC，东八区 00:00–07:59 写入会落到「昨天」，
+      // habitStartDate() 取日期部分后，习惯起始日 / 已坚持天数会整体偏一天且不可回溯。
+      const nh: Habit = { id: uid(), createdAt: todayStr(), isArchived: false, checkIns: {}, ...base };
       const nl = [...habits, nh];
       setHabits(nl);
       persist(snapshotNow({ habits: nl }));

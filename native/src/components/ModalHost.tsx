@@ -71,7 +71,7 @@ function Backfill() {
                   <T className="text-base font-medium" style={{ color: c.ink }}>{lang === "zh" ? "周" + WK[dt.getDay()] : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dt.getDay()]}</T>
                   <T className="text-sm" style={{ color: c.ink3 }}>{date.slice(5)}</T>
                 </View>
-                <View className="h-7 w-7 items-center justify-center rounded-full" style={{ backgroundColor: checked ? c.accent : c.surface3 }}>
+                <View className="h-7 w-7 items-center justify-center rounded-full" style={{ backgroundColor: checked ? c.accentInk : c.surface3 }}>
                   {checked ? <Icon as={Check} color="#fff" size={16} /> : locked ? <Icon as={Lock} color={c.ink4} size={14} /> : null}
                 </View>
               </Pressable>
@@ -79,7 +79,7 @@ function Backfill() {
           })}
         </View>
         <DialogFooter>
-          <Button className="flex-1" style={{ backgroundColor: c.accent }} onPress={closeBackfill}>
+          <Button className="flex-1" style={{ backgroundColor: c.accentInk }} onPress={closeBackfill}>
             <Text className="text-base font-bold" style={{ color: "#fff" }}>{d.close}</Text>
           </Button>
         </DialogFooter>

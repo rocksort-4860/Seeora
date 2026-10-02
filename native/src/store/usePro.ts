@@ -45,7 +45,8 @@ export function usePro(d: ProDeps) {
   const payDone = useCallback(async () => {
     if (purchased) { showToast(dict.proOwned); return; }
     const ok = await purchasePlan(payPlan);
-    if (!ok) return;
+    // 审核必点项：任何失败路径都必须给可见反馈，绝不能静默 return（用户点「买断」没反应 = 风险 + 差评）
+    if (!ok) { showToast(dict.payBuyFail); return; }
     setPurchased(true);
     void sset(SK.receipt, { pro: true }); // 设备内购凭证缓存
     setPayVisible(false);
@@ -54,14 +55,17 @@ export function usePro(d: ProDeps) {
   }, [purchased, payPlan, dict, showToast, setPurchased, setPayVisible, setProVisible]);
 
   const payRestore = useCallback(async () => {
-    const restored = await restorePurchases();
-    if (restored) {
+    const res = await restorePurchases();
+    if (res.ok) {
       setPurchased(true);
       void sset(SK.receipt, { pro: true });
       showToast(lang === "zh" ? "已从本机恢复购买" : "Restored from this device", true);
-    } else {
-      showToast(dict.proRestore);
+      return;
     }
+    // 以前这里弹 dict.proRestore（「恢复购买」按钮文案），把按钮当错误提示是错的。
+    // 现在按原因分开：没买过 / 网络超时 / 其它错误，三套文案。
+    if (res.reason === "timeout" || res.reason === "error") showToast(dict.payRestoreFail);
+    else showToast(dict.payRestoreNone);
   }, [dict, lang, showToast, setPurchased]);
 
   // 付费门禁：导出备份 / 分享成就卡 为买断权益

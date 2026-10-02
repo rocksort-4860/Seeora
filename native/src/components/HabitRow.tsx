@@ -103,7 +103,7 @@ export function HabitRow({ habit }: { habit: Habit }) {
           onPress={onCheck}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel={done ? "undo" : "check"}
+          accessibilityLabel={done ? d.dUndoToday : d.dCheckToday}
           onLayout={(e) => {
             const a = e.nativeEvent.layout;
             layout.current = { x: a.x, y: a.y, w: a.width, h: a.height };

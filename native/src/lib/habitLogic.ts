@@ -113,11 +113,21 @@ export function heatOn(habits: HabitLike[], n = 119, now: Date = new Date()): bo
 /** 补签时间窗（天）：过去 7 天内自由补签/取消，超过 7 天禁止 */
 export const MAKEUP_WINDOW_DAYS = 7;
 
-/** 习惯起始日 YYYY-MM-DD（createdAt 的日期部分） */
+/**
+ * 习惯起始日 YYYY-MM-DD（createdAt 的「本地」日期部分）
+ *
+ * 修复（上架复核 C-04 变体）：createdAt 统一为 `new Date().toISOString()`（UTC），
+ * 东八区在 00:00–07:59 创建的习惯，若按 UTC 取前 10 字符会把起始日记成前一天，
+ * 导致「习惯第 1 天 / 已坚持天数」整体偏一天且不可回溯。
+ *
+ * 两条分支必须分开：
+ *   1) 纯 "YYYY-MM-DD" 串（老数据 / 经导入的 migratedStartDate）：直接切字符串。
+ *      绝不可走 new Date() —— ES5+ 对纯日期串按 **UTC 午夜** 解析，fmtDate 转本地后会倒退一天（同样的坑）。
+ *   2) 带时区 / 时间的 ISO 串：交给 new Date() 转本地，再用 fmtDate 取本地日期部分。
+ */
 export function habitStartDate(h: HabitLike, now: Date = new Date()): string {
   const raw = String(h.createdAt ?? "");
-  const m = raw.slice(0, 10);
-  if (/^\d{4}-\d{2}-\d{2}$/.test(m)) return m;
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
   const d = new Date(raw);
   if (!Number.isNaN(d.getTime())) return fmtDate(d);
   return fmtDate(now);

@@ -1,6 +1,6 @@
 {
-  "name": "expo-template",
-  "version": "1.0.49",
+  "name": "seeora",
+  "version": "1.0.0",
   "main": "expo-router/entry",
   "packageManager": "pnpm@9.15.9",
   "scripts": {

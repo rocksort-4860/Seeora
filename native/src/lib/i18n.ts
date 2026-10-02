@@ -70,6 +70,10 @@ export interface Dict {
   proRetry: string; proLoading: string; proOwned: string; payTitle: string; payStore: string;
   payUnavailable: string; buyoutTitle: string; buyoutBody: string;
   proTrialLeft: string; proTrialOver: string;
+  /* 支付反馈（审核必点：任何失败路径都必须有可见提示，不能静默） */
+  payBuyFail: string; payRestoreNone: string; payRestoreFail: string;
+  /* 习惯行当日打卡钮的 VoiceOver 标签（禁用裸英文 "check"/"undo"） */
+  dCheckToday: string; dUndoToday: string;
 
   // Share Card
   shareTitle: string; shareMainTitle: string; shareNote: string; shareSave: string; shareShare: string; shareCopied: string;
@@ -137,7 +141,7 @@ export const I18N: Record<Lang, Dict> = {
     about: "关于", version: "版本 {v}", privacy: "隐私政策", privacyText: "Seeora 不收集任何个人数据。所有习惯、打卡与迁移记录仅存储于你的本机（或你自己的私有 iCloud），永远不会上传到我们的服务器。无账号、无追踪、无广告。", localPromise: "数据仅存于本机 / 私有 iCloud，永远归你。",
     themeSystem: "跟随系统", themeLight: "浅色", themeDark: "深色",
 
-    proTitle: "永久买断", proLifetime: "Seeora 终身版", proPermanent: "一次付费，永久使用", proNoSub: "无订阅，无自动续费", proNoAccount: "无账号，无需注册", proDataYours: "数据归你，本地存储", proBuy: "买断永久使用", proRestore: "恢复购买", proRetry: "重试", proLoading: "价格加载中…", proOwned: "你已拥有永久版", payTitle: "买断 Seeora 终身版", payStore: "App Store", payUnavailable: "当前无法读取商品信息，请检查网络后重试。", buyoutTitle: "一次买断，永久属于你", buyoutBody: "支付后解锁全部数据权益：导出与导入备份、分享成就卡，以及未来所有功能更新。无订阅、无账号。", proTrialLeft: "免费试用中 · 剩 {n} 天", proTrialOver: "试用已结束，购买解锁永久版",
+    proTitle: "永久买断", proLifetime: "Seeora 终身版", proPermanent: "一次付费，永久使用", proNoSub: "无订阅，无自动续费", proNoAccount: "无账号，无需注册", proDataYours: "数据归你，本地存储", proBuy: "买断永久使用", proRestore: "恢复购买", proRetry: "重试", proLoading: "价格加载中…", proOwned: "你已拥有永久版", payTitle: "买断 Seeora 终身版", payStore: "App Store", payUnavailable: "当前无法读取商品信息，请检查网络后重试。", buyoutTitle: "一次买断，永久属于你", buyoutBody: "支付后解锁全部数据权益：导出与导入备份、分享成就卡，以及未来所有功能更新。无订阅、无账号。", proTrialLeft: "免费试用中 · 剩 {n} 天", proTrialOver: "试用已结束，购买解锁永久版", payBuyFail: "购买未完成。请检查网络或 App Store 付款设置后重试。", payRestoreNone: "本机没有找到可恢复的购买。如果用新设备登录，请先在同一 App Store 账号下购买。", payRestoreFail: "恢复购买失败，请检查网络连接后重试。", dCheckToday: "当日打卡", dUndoToday: "取消当日打卡",
 
     shareTitle: "分享成就", shareMainTitle: "自定义主标题", shareNote: "一句话备注（可选）", shareSave: "保存", shareShare: "分享", shareCopied: "已复制",
     quoteLabel: "备选文案", quote1: "越坚持，越成长", quote2: "越记录，越看见", quote3: "越沉淀，越发光", quote4: "越前行，越向好", signLabel: "底部签名（自定义一句话）",
@@ -199,7 +203,7 @@ export const I18N: Record<Lang, Dict> = {
     about: "About", version: "Version {v}", privacy: "Privacy Policy", privacyText: "Seeora collects no personal data. All habits, check-ins and migrated records live only on your device (or your private iCloud) and are never uploaded to our servers. No account, no tracking, no ads.", localPromise: "Data stays on your device / private iCloud. Always yours.",
     themeSystem: "System", themeLight: "Light", themeDark: "Dark",
 
-    proTitle: "Lifetime", proLifetime: "Seeora Lifetime", proPermanent: "Pay once, yours forever", proNoSub: "No subscription, no auto-renew", proNoAccount: "No account, no sign-up", proDataYours: "Your data, local only", proBuy: "Buy lifetime", proRestore: "Restore purchase", proRetry: "Retry", proLoading: "Loading price…", proOwned: "You own the lifetime edition", payTitle: "Buy Seeora Lifetime", payStore: "App Store", payUnavailable: "Couldn't load the product. Check your connection and retry.", buyoutTitle: "One buyout, forever yours", buyoutBody: "Unlock every data perk: export & import backups, share achievement cards, and all future updates. No subscription, no account.", proTrialLeft: "Free trial · {n} days left", proTrialOver: "Trial ended — buy to keep Pro",
+    proTitle: "Lifetime", proLifetime: "Seeora Lifetime", proPermanent: "Pay once, yours forever", proNoSub: "No subscription, no auto-renew", proNoAccount: "No account, no sign-up", proDataYours: "Your data, local only", proBuy: "Buy lifetime", proRestore: "Restore purchase", proRetry: "Retry", proLoading: "Loading price…", proOwned: "You own the lifetime edition", payTitle: "Buy Seeora Lifetime", payStore: "App Store", payUnavailable: "Couldn't load the product. Check your connection and retry.", buyoutTitle: "One buyout, forever yours", buyoutBody: "Unlock every data perk: export & import backups, share achievement cards, and all future updates. No subscription, no account.", proTrialLeft: "Free trial · {n} days left", proTrialOver: "Trial ended — buy to keep Pro", payBuyFail: "Purchase didn't go through. Check your connection or App Store payment settings and try again.", payRestoreNone: "No purchase to restore on this device. If you're on a new device, buy again with the same App Store account.", payRestoreFail: "Couldn't restore the purchase. Check your connection and try again.", dCheckToday: "Check in for today", dUndoToday: "Undo today's check-in",
 
     shareTitle: "Share achievement", shareMainTitle: "Custom title", shareNote: "One-line note (optional)", shareSave: "Save", shareShare: "Share", shareCopied: "Copied",
     quoteLabel: "Quote options", quote1: "The more you keep going, the more you grow", quote2: "The more you record, the more you see", quote3: "The more you settle, the brighter you shine", quote4: "The further you go, the better you feel", signLabel: "Signature line (custom)",

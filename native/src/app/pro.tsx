@@ -39,7 +39,7 @@ export default function ProScreen() {
 
       <ScrollView className="flex-1 px-5" contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         <View className="mt-2 items-center py-4">
-          <View className="h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: c.accent }}>
+          <View className="h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: c.accentInk }}>
             <Icon as={Gem} color="#fff" size={30} />
           </View>
           <Text className="mt-3 text-[24px] font-extrabold" style={{ color: c.ink }}>{d.proLifetime}</Text>
@@ -72,7 +72,7 @@ export default function ProScreen() {
                 <T className="text-sm font-medium" style={{ color: c.ink }}>{d.proTrialLeft.replace("{n}", String(trialDaysLeft))}</T>
               </View>
             )}
-            <Button className={trialActive ? "mt-3 h-12" : "mt-5 h-12"} style={{ backgroundColor: c.accent }} onPress={openPay}>
+            <Button className={trialActive ? "mt-3 h-12" : "mt-5 h-12"} style={{ backgroundColor: c.accentInk }} onPress={openPay}>
               <Text className="text-base font-bold" style={{ color: "#fff" }}>{d.proBuy}</Text>
             </Button>
           </>
@@ -87,10 +87,13 @@ export default function ProScreen() {
             <T className="mt-1 text-sm" style={{ color: c.ink3 }}>{d.payStore}</T>
           </DialogHeader>
           <View className="items-center py-3">
-            <Text className="text-[40px] font-extrabold tabular-nums" style={{ color: c.accent }}>{price}</Text>
+            {/* 价格是「文字」不是「块底色」：深色模式必须用 accentText（亮绿），
+                用 accentInk（深绿）压在近黑背景上会掉到 3.2:1 不达 AA。
+                numberOfLines 兜底，避免后台改价后长文本溢出弹层。 */}
+            <Text className="text-[40px] font-extrabold tabular-nums" style={{ color: c.accentText }} numberOfLines={1} adjustsFontSizeToFit>{price}</Text>
           </View>
           <DialogFooter className="gap-2 flex-col">
-            <Button className="h-12 w-full" style={{ backgroundColor: c.accent }} onPress={() => { void payDone(); }}>
+            <Button className="h-12 w-full" style={{ backgroundColor: c.accentInk }} onPress={() => { void payDone(); }}>
               <Text className="text-base font-bold" style={{ color: "#fff" }}>{d.proBuy}</Text>
             </Button>
             <Button variant="outline" className="h-11 w-full" onPress={() => { void payRestore(); }}>
