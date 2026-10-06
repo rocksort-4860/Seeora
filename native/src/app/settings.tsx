@@ -86,7 +86,9 @@ export default function SettingsScreen() {
 
         {/* 数据安全 */}
         <Section colors={c} title={d.setData}>
-          <BuyoutCard onPress={openPro} />
+          {/* ★ 不能写成 onPress={openPro}：openPro 现在接收 reason 参数，
+              按钮会把点击事件对象当 reason 传进去（URL 变成 ?from=[object Object]） */}
+          <BuyoutCard onPress={() => openPro()} />
           <PressableRow label={d.dataExport} onPress={openExport} colors={c} />
           <PressableRow label={d.dataWipe} onPress={openWipe} colors={c} danger />
         </Section>

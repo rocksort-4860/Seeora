@@ -4,23 +4,24 @@
  * 拆为 app.tsx（Context + 状态 + 派生算法 + 装配）/ usePersist.ts / usePro.ts / useHabitActions.ts
  */
 import React, {
-  createContext, useCallback, useContext, useMemo, useRef, useState,
+  createContext, useCallback, useContext, useEffect, useMemo, useRef, useState,
 } from "react";
-import { useColorScheme } from "react-native";
+import { AppState, useColorScheme } from "react-native";
 import { useRouter } from "expo-router";
-import { sget, sset, SK } from "@/lib/storage";
+import type { Href } from "expo-router";
+import { sget, sset, SK, TRIAL_MS } from "@/lib/storage";
+import { FREE_HABIT_LIMIT } from "@/lib/limits";
 import { fmt as fmtTpl, getDict, I18N, type Dict, type Lang } from "@/lib/i18n";
-import { lightColors, darkColors, type Colors } from "@/lib/tokens";
+import { lightColors, darkColors, habitColors, type Colors } from "@/lib/tokens";
 import { todayStr } from "@/lib/dates";
 import {
-  allImported, allTotal, heatOn, leaderboard, realDateSet, streakBadge,
   currentStreak, bestStreakOf, recentNodes, curveSeries, miniWeek,
   canRestOn, canMakeupOn, nodeStateAt, nodeIndexAt, freqOf,
-  type Badge, type HabitLike, type LeaderSort, type NodeView, type CurvePoint, type NodeState,
+  type HabitLike, type NodeView, type CurvePoint, type NodeState,
 } from "@/lib/habitLogic";
 import { setAppBadge } from "@/lib/notify";
 import { useHydration, usePersist, type Snapshot } from "@/store/usePersist";
-import { usePro } from "@/store/usePro";
+import { usePro, type PayRestoreResult, type ProReason } from "@/store/usePro";
 import { useHabitActions } from "@/store/useHabitActions";
 
 /* ===================== 类型（数据模型） ===================== */
@@ -93,14 +94,13 @@ interface AppCtx {
   lang: Lang;
   dict: Dict;
   t: (k: keyof Dict) => string;
-  fmt: (s: string, o: Record<string, string | number>) => string;
   setLang: (l: Lang) => void;
   theme: ThemeMode;
   setTheme: (m: ThemeMode) => void;
   dark: boolean;
   colors: Colors;
 
-  visited: boolean; installAt: string;
+  visited: boolean;
   enterApp: () => void; openOnboarding: () => void;
 
   habits: Habit[]; honors: Honor[]; settings: SettingsState;
@@ -108,21 +108,29 @@ interface AppCtx {
   setHaptics: (v: boolean) => void;
   setIcloudSync: (v: boolean) => void;
   setBadge: (v: boolean) => void;
-  setDailyReminder: (v: boolean) => void;
 
   pro: boolean;            // 有效 Pro：买断 或 试用未到期
   purchased: boolean;      // 是否已买断终身版（原始凭证）
   trialActive: boolean;    // 是否处于 7 天试用窗口内
   trialDaysLeft: number;   // 试用剩余天数（0 = 已结束 / 未开始）
-  openPro: () => void; closePro: () => void; openPay: () => void; closePay: () => void;
-  payDone: () => Promise<void>; payRestore: () => Promise<void>; gatePro: (k: "dataExport" | "shareTitle") => boolean;
-  payPlan: "l";
+  /** 试用截止时间戳；null = **从未领取**（≠ 已结束，两者在 /pro 页的文案与入口不同） */
+  trialUntil: number | null;
+  /** 手动领取 7 天试用（幂等：已买断或已领取过则无操作） */
+  startTrial: () => void;
+  /** 免费版「冻结」的习惯 id 集合：试用结束且未买断时，超出上限的部分（数据保留、不可操作） */
+  frozenIds: Set<string>;
+  /** reason 仅在 /pro 页用于说明「为什么被带到这里」（如 habitLimit = 免费版习惯数达上限） */
+  openPro: (reason?: ProReason) => void; closePro: () => void; openPay: () => void; closePay: () => void;
+  /** 返回 null = 成功/已买断；非空字符串 = 失败原因的本地化文案（供弹层内联渲染） */
+  payDone: () => Promise<string | null>;
+  /** 返回 outcome 供弹层分级渲染（none = 没买过属正常态，不该涂红） */
+  payRestore: () => Promise<PayRestoreResult>;
 
   habitFormVisible: boolean; editingHabitId: string | null; habitForm: HabitFormState;
   honorFormVisible: boolean; editingHonorId: string | null; honorForm: HonorFormState;
   backfillHabitId: string | null;
-  proVisible: boolean; payVisible: boolean; shareVisible: boolean; exportVisible: boolean;
-  confirmVisible: boolean; wipeVisible: boolean; celVisible: boolean;
+  payVisible: boolean; exportVisible: boolean;
+  wipeVisible: boolean;
 
   openHabitForm: (h: Habit | null) => void; closeHabitForm: () => void;
   setHabitForm: (f: Partial<HabitFormState>) => void; saveHabit: () => void;
@@ -138,11 +146,16 @@ interface AppCtx {
   /** v0.2 八：成就卡片按习惯生成；不传则沿用全站总览卡 */
   openShare: (habitId?: string) => void; closeShare: () => void;
   openExport: () => void; closeExport: () => void;
-  askDelete: (kind: "habit" | "honor", id: string) => void; closeConfirm: () => void; doDelete: () => void;
+  /** 删除习惯：由 HabitForm 内联二次确认后直接调用（不再有独立的确认弹层） */
+  deleteHabitNow: (id: string) => void;
   openWipe: () => void; closeWipe: () => void; doWipe: () => void;
 
-  showToast: (msg: string, ok?: boolean) => void;
-  fireBurst: (x?: number, y?: number) => void;
+  /** ms：可选展示时长（失败类长文案需要比默认 2200ms 更久，否则一闪而过等于没提示） */
+  showToast: (msg: string, ok?: boolean, ms?: number) => void;
+  /** 全部习惯完成今日目标 → 顶部彩纸撒花（设计文档 §M7）。
+   *  ★ 此前这里是 `const [celVisible] = useState(false)`（**没有 setter**，恒为 false），
+   *    于是 Confetti.tsx 里那段 60 片彩纸的代码从来没跑过 = 死功能。现已接上真实触发。 */
+  confettiNonce: number;
   toastMsg: ToastMsg | null;
   burst: BurstReq | null;
 
@@ -158,12 +171,6 @@ interface AppCtx {
   freqOf: (h: HabitLike) => number;
   canRestOf: (h: HabitLike, date: string) => boolean;
   canMakeupOf: (h: HabitLike, date: string) => boolean;
-  allTotalOf: (h: HabitLike) => number;
-  allImportedOf: (h: HabitLike) => number;
-  leaderboardOf: (sort: LeaderSort) => Habit[];
-  badgeOf: (totalDays: number) => Badge | null;
-  heatDates: boolean[];
-  realSet: Set<string>;
   importedTotalAll: () => number;
 
   exportJson: () => string;
@@ -197,10 +204,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ? 0
     : Math.max(0, Math.ceil((trialUntil - Date.now()) / 86400000));
 
+  /* ===================== 试用到期边界（台账 P2） =====================
+   * pro / trialActive / trialDaysLeft 都是**渲染期**用 Date.now() 算的，frozenIds 又是 useMemo。
+   * 若用户停在某个页面跨过到期时刻，本次渲染的 pro 仍是 true → 「到期后的第一次操作」
+   * 会被放行（本该被冻结的习惯漏过一次写操作）。
+   * 修法：① 在到期那一刻安排一次重渲染；② App 回到前台时补一次
+   * （覆盖「改系统时间」「长时间后台被挂起，定时器不触发」两种情况）。
+   * 两者都是纯 JS 定时/订阅，不触碰任何原生模块，不影响冷启动红线。 */
+  const [, setTrialTick] = useState(0);
+  useEffect(() => {
+    if (trialUntil == null || trialUntil <= Date.now()) return;
+    const t = setTimeout(() => setTrialTick((n) => n + 1), trialUntil - Date.now() + 1000);
+    return () => clearTimeout(t);
+  }, [trialUntil]);
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (s) => {
+      if (s === "active") setTrialTick((n) => n + 1);
+    });
+    return () => sub.remove();
+  }, []);
+
+  /* 手动领取 7 天试用（★ 替代原「装完首次启动自动开启」，见 usePersist.ts）。
+   * 幂等：已买断 / 已领取过（无论进行中还是已结束）都不再重置 ——
+   * 否则用户可反复点按钮把结束的试用续上，等于永久免费。
+   * ★ 必须落盘：trialUntil 只在 hydration 时从存储读一次，不写盘则杀进程即丢失。 */
+  const startTrial = useCallback(() => {
+    if (purchased || trialUntil != null) return;
+    const until = Date.now() + TRIAL_MS;
+    void sset(SK.trialUntil, until);
+    setTrialUntil(until);
+  }, [purchased, trialUntil]);
+
+  /* 免费版超限习惯「冻结」集合（试用结束且未买断时非空）。
+   * 规则：按创建时间升序保留最早的 FREE_HABIT_LIMIT 个可用，其余冻结。
+   *  · 为什么按 createdAt 而不是数组下标：导入备份按 id 合并会重排数组，
+   *    用下标会让「升级/降级后哪个习惯能用」变得不可预期（今天能用、明天不能用）。
+   *  · createdAt 同日的（一天建多条）用数组原索引做稳定排序，结果确定。
+   *  · 删除靠前的习惯会让后面的自动解冻 —— 与「免费版最多 N 个」的直觉一致。 */
+  const frozenIds = useMemo(() => {
+    if (pro) return new Set<string>();
+    const ordered = habits
+      .map((h, i) => ({ id: h.id, at: h.createdAt || "", i }))
+      .sort((a, b) => a.at.localeCompare(b.at) || a.i - b.i);
+    return new Set(ordered.slice(FREE_HABIT_LIMIT).map((x) => x.id));
+  }, [habits, pro]);
+
   const [habitFormVisible, setHabitFormVisible] = useState(false);
   const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
   const [habitForm, setHabitFormState] = useState<HabitFormState>({
-    name: "", nameZh: "", detail: "", emoji: "🔥", color: "#5B5BD6",
+    /* ★ 默认色必须取自 habitColors 调色板（此前写死 "#5B5BD6" 是调色板外的紫色：
+     *   新建习惯时 8 个色块**全无选中态**，用户以为颜色没生效；
+     *   且那个紫还违反「全系统唯一强调色 #2d7a6b」的规范。 */
+    name: "", nameZh: "", detail: "", emoji: "🔥", color: habitColors[0],
     reminderEnabled: false, reminderTime: "20:00",
     frequency: 1, timesPerWindow: 1,
     migratedTotalDays: 0, migratedCurrentStreak: 0, migratedStartDate: "", migratedSource: "",
@@ -212,32 +267,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
   const [backfillHabitId, setBackfillHabitId] = useState<string | null>(null);
 
-  const [proVisible, setProVisible] = useState(false);
   const [payVisible, setPayVisible] = useState(false);
-  const [shareVisible, setShareVisible] = useState(false);
   const [exportVisible, setExportVisible] = useState(false);
-  const [confirmVisible, setConfirmVisible] = useState(false);
   const [wipeVisible, setWipeVisible] = useState(false);
-  const [celVisible] = useState(false);
 
   const [toastMsg, setToastMsg] = useState<ToastMsg | null>(null);
   const [burst, setBurst] = useState<BurstReq | null>(null);
+  /** 撒花计数器：每次 +1 触发一轮顶部彩纸（用计数而非布尔，连点两次也各播一轮） */
+  const [confettiNonce, setConfettiNonce] = useState(0);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingDel = useRef<{ kind: "habit" | "honor"; id: string } | null>(null);
 
   const dict = getDict(lang);
   const t = useCallback((k: keyof Dict) => dict[k] as string, [dict]);
-  const fmt = useCallback((s: string, o: Record<string, string | number>) => fmtTpl(s, o), []);
 
-  const showToast = useCallback((msg: string, ok = false) => {
+  const showToast = useCallback((msg: string, ok = false, ms = 2200) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     setToastMsg({ msg: String(msg).replace(/\n/g, " "), ok, nonce: Date.now() });
-    toastTimer.current = setTimeout(() => setToastMsg(null), 2200);
+    toastTimer.current = setTimeout(() => setToastMsg(null), ms);
   }, []);
 
   const fireBurst = useCallback((x?: number, y?: number) => {
     setBurst({ x, y, nonce: Date.now() + Math.random() });
   }, []);
+
+  const fireConfetti = useCallback(() => setConfettiNonce((n) => n + 1), []);
 
   const hapticsOn = useCallback(() => {
     if (settings.haptics) {
@@ -258,26 +311,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   /* ===================== Pro ===================== */
   const router = useRouter();
   const nav = useMemo(
-    () => ({ push: (h: string) => router.push(h), back: () => router.back() }),
+    () => ({ push: (h: Href) => router.push(h), back: () => router.back() }),
     [router]
   );
   const {
     payPlan, openPro, closePro, openPay, closePay, payDone, payRestore, gatePro,
-  } = usePro({ pro, purchased, setPurchased, lang, dict, showToast, setProVisible, setPayVisible, nav });
+  } = usePro({ pro, purchased, setPurchased, lang, dict, showToast, setPayVisible, nav });
 
   /* ===================== 习惯行为 ===================== */
   const {
     toggleToday, toggleRest, openBackfill, closeBackfill, toggleBackfillDate,
     openHabitForm, closeHabitForm, setHabitForm, saveHabit,
     openHonorForm, closeHonorForm, setHonorForm, saveHonor,
-    askDelete, closeConfirm, doDelete, importBackup,
+    deleteHabitNow, importBackup,
   } = useHabitActions({
-    habits, honors, settings, pro, openPay, setHabits, setHonors, persist, snapshotNow,
-    dict, lang, showToast, fireBurst, hapticsOn,
+    habits, honors, settings, pro, frozenIds, openPro, setHabits, setHonors, persist, snapshotNow,
+    dict, lang, showToast, fireBurst, fireConfetti, hapticsOn,
     habitForm, editingHabitId, setHabitFormState, setEditingHabitId, setHabitFormVisible,
     honorForm, editingHonorId, setHonorFormState, setEditingHonorId, setHonorFormVisible,
     backfillHabitId, setBackfillHabitId,
-    pendingDel, setConfirmVisible, setBadgeCount,
+    setBadgeCount,
   });
 
   /* ===================== 首次进入 / 重看引导 ===================== */
@@ -307,7 +360,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setWeekStartOn = useCallback((w: WeekStartOn) => patchSettings({ weekStartOn: w }), [patchSettings]);
   const setHaptics = useCallback((v: boolean) => patchSettings({ haptics: v }), [patchSettings]);
   const setIcloudSync = useCallback((v: boolean) => patchSettings({ icloudSync: v }), [patchSettings]);
-  const setDailyReminder = useCallback((v: boolean) => patchSettings({ dailyReminder: v }), [patchSettings]);
   const setBadge = useCallback((v: boolean) => {
     patchSettings({ badge: v });
     if (!v) void setAppBadge(0);
@@ -321,13 +373,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   /* ===================== 分享 / 导出弹层 ===================== */
   const openShare = useCallback((habitId?: string) => {
     if (!gatePro("shareTitle")) return;
-    setShareVisible(true);
     nav.push(habitId ? `/share?habit=${encodeURIComponent(habitId)}` : "/share"); // modal 路由呈现 Share Card
-  }, [gatePro, setShareVisible, nav]);
+  }, [gatePro, nav]);
   const closeShare = useCallback(() => {
-    setShareVisible(false);
     nav.back();
-  }, [setShareVisible, nav]);
+  }, [nav]);
 
   const openExport = useCallback(() => {
     if (!gatePro("dataExport")) return;
@@ -344,8 +394,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     persist(snapshotNow({ habits: [], honors: [] }));
     void setAppBadge(0);
     setWipeVisible(false);
-    showToast(lang === "zh" ? "已抹掉全部数据" : "All data erased");
-  }, [setHabits, setHonors, persist, snapshotNow, setWipeVisible, showToast, lang]);
+    showToast(dict.wipeDone);
+  }, [setHabits, setHonors, persist, snapshotNow, setWipeVisible, showToast, dict]);
 
   /* ===================== 派生算法 ===================== */
   /* === v0.2：周期节点 / 连续 / 可视化 === */
@@ -360,12 +410,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const canRestOf = useCallback((h: HabitLike, date: string) => canRestOn(h, date), []);
   const canMakeupOf = useCallback((h: HabitLike, date: string) => canMakeupOn(h, date), []);
 
-  const allTotalOf = useCallback((h: HabitLike) => allTotal(h), []);
-  const allImportedOf = useCallback((h: HabitLike) => allImported(h), []);
-  const leaderboardOf = useCallback((sort: LeaderSort) => leaderboard(habits, sort, lang) as Habit[], [habits, lang]);
-  const badgeOf = useCallback((totalDays: number) => streakBadge(totalDays), []);
-  const heatDates = useMemo(() => heatOn(habits, 119), [habits]);
-  const realSet = useMemo(() => realDateSet(habits), [habits]);
   const importedTotalAll = useCallback(
     () => habits.reduce((acc, h) => acc + (h.migratedTotalDays || 0), 0),
     [habits]
@@ -390,38 +434,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [importBackup, dict, showToast]);
 
   const value: AppCtx = useMemo(() => ({
-    hydrated, lang, dict, t, fmt, setLang, theme, setTheme, dark, colors,
-    visited, installAt, enterApp, openOnboarding,
-    habits, honors, settings, setWeekStartOn, setHaptics, setIcloudSync, setBadge, setDailyReminder,
-    pro, purchased, trialActive, trialDaysLeft, openPro, closePro, openPay, closePay, payDone, payRestore, gatePro, payPlan,
+    hydrated, lang, dict, t, setLang, theme, setTheme, dark, colors,
+    visited, enterApp, openOnboarding,
+    habits, honors, settings, setWeekStartOn, setHaptics, setIcloudSync, setBadge,
+    pro, purchased, trialActive, trialDaysLeft, trialUntil, startTrial, frozenIds, openPro, closePro, openPay, closePay, payDone, payRestore,
     habitFormVisible, editingHabitId, habitForm, honorFormVisible, editingHonorId, honorForm,
-    backfillHabitId, proVisible, payVisible, shareVisible, exportVisible, confirmVisible, wipeVisible, celVisible,
+    backfillHabitId, payVisible, exportVisible, wipeVisible,
     openHabitForm, closeHabitForm, setHabitForm, saveHabit,
     openHonorForm, closeHonorForm, setHonorForm, saveHonor,
     openBackfill, closeBackfill, toggleBackfillDate, toggleToday, toggleRest,
     openShare, closeShare, openExport, closeExport,
-    askDelete, closeConfirm, doDelete, openWipe, closeWipe, doWipe,
-    showToast, fireBurst, toastMsg, burst,
+    deleteHabitNow, openWipe, closeWipe, doWipe,
+    showToast, confettiNonce, toastMsg, burst,
     streakOf, bestOf, nodesOf, curveOf, miniOf, nodeStateOf, nodeIdxOf, freqOf: freqOfH, canRestOf, canMakeupOf,
-    allTotalOf, allImportedOf, leaderboardOf, badgeOf, heatDates, realSet, importedTotalAll,
+    importedTotalAll,
     exportJson, importJson,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [
-    hydrated, lang, dict, t, fmt, setLang, theme, setTheme, dark, colors,
-    visited, installAt, enterApp, openOnboarding,
-    habits, honors, settings, setWeekStartOn, setHaptics, setIcloudSync, setBadge, setDailyReminder,
-    pro, purchased, trialActive, trialDaysLeft, openPro, closePro, openPay, closePay, payDone, payRestore, gatePro, payPlan,
+    hydrated, lang, dict, t, setLang, theme, setTheme, dark, colors,
+    visited, enterApp, openOnboarding,
+    habits, honors, settings, setWeekStartOn, setHaptics, setIcloudSync, setBadge,
+    pro, purchased, trialActive, trialDaysLeft, trialUntil, startTrial, frozenIds, openPro, closePro, openPay, closePay, payDone, payRestore,
     habitFormVisible, editingHabitId, habitForm, honorFormVisible, editingHonorId, honorForm,
-    backfillHabitId, proVisible, payVisible, shareVisible, exportVisible, confirmVisible, wipeVisible, celVisible,
+    backfillHabitId, payVisible, exportVisible, wipeVisible,
     openHabitForm, closeHabitForm, setHabitForm, saveHabit,
     openHonorForm, closeHonorForm, setHonorForm, saveHonor,
     openBackfill, closeBackfill, toggleBackfillDate, toggleToday, toggleRest,
     openShare, closeShare, openExport, closeExport,
-    askDelete, closeConfirm, doDelete, openWipe, closeWipe, doWipe,
-    showToast, fireBurst, toastMsg, burst,
+    deleteHabitNow, openWipe, closeWipe, doWipe,
+    showToast, confettiNonce, toastMsg, burst,
     streakOf, bestOf, nodesOf, curveOf, miniOf, nodeStateOf, nodeIdxOf, freqOfH, canRestOf, canMakeupOf,
-    allTotalOf, allImportedOf, leaderboardOf, badgeOf,
-    heatDates, realSet, importedTotalAll, exportJson, importJson,
+    importedTotalAll, exportJson, importJson,
   ]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

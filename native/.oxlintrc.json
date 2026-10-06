@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["./node_modules/miaoda-expo-devkit/oxlint-config.json"],
+
+  "env": { "browser": true },
+  "globals": {
+    "__DEV__": "readonly",
+    "process": "readonly",
+    "global": "readonly",
+    "localStorage": "readonly"
+  },
+
+  "ignorePatterns": [
+    "metro.config.js",
+    "babel.config.js",
+    ".pnpmfile.cjs",
+    "output/**",
+    "supabase/**",
+    "src/components/ui/**",
+    ".skills/**"
+  ],
+
+  "overrides": [
+    {
+      "files": ["tailwind.config.js", "**/tailwind.config.js"],
+      "env": { "node": true }
+    },
+    {
+      "files": [
+        "**/__tests__/**/*.{ts,tsx,js,jsx}",
+        "**/*.test.{ts,tsx,js,jsx}",
+        "**/*.spec.{ts,tsx,js,jsx}"
+      ],
+      "env": { "jest": true }
+    },
+    {
+      "files": ["plugins/**/*.js", "scripts/**/*.{js,mjs,cjs}"],
+      "env": { "node": true }
+    }
+  ]
+}

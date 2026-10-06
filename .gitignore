@@ -1,0 +1,27 @@
+# ⚠️ 本文件位于**仓库根**。native/.gitignore 只对 native/ 子树生效，
+#    根目录下的文件（如 Apple 内购私钥）必须由本文件保护。
+# 每条规则新增后必须实测：git check-ignore -v <路径>（有输出才算生效）。
+# 注意：.gitignore 不支持行尾注释，注释一律独立成行。
+
+# ── 敏感凭证：绝不可进仓库 ──
+*.p8
+*.p12
+*.key
+*.pem
+*.mobileprovision
+*.jks
+SubscriptionKey_*
+AuthKey_*
+.env
+.env.*.local
+
+# ── 临时 / 外部复核材料 ──
+给DeepSeek-复核文件包/
+deepseek_svg_*.svg
+# Expo / Metro 等工具在 native/ 根留下的 0 字节临时文件（实测出现过 _tmp_8636_xxx）
+native/_tmp_*
+
+# ── 系统 ──
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -11,7 +11,7 @@ import { Text as T } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 
 export function Onboarding() {
-  const { dict: d, colors: c, enterApp, lang } = useApp();
+  const { dict: d, colors: c, enterApp } = useApp();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [page, setPage] = useState(0);
@@ -82,7 +82,7 @@ export function Onboarding() {
           onPress={() => (page === cards.length - 1 ? finish() : go(page + 1))}
         >
           <Text className="text-base font-bold" style={{ color: "#FFFFFF" }}>
-            {page === cards.length - 1 ? d.obDone : (lang === "zh" ? "下一步" : "Next")}
+            {page === cards.length - 1 ? d.obDone : d.obNext}
           </Text>
         </Button>
       </View>

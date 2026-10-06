@@ -65,7 +65,9 @@ export const darkColors: Record<keyof typeof lightColors, string> = {
   ink: appleColorsDark.ink,
   ink2: "#c9c9ce",
   ink3: "#a1a1a6",
-  ink4: "#7a7a7a",
+  /* 深底占位符 / 禁用：原 #7a7a7a 压近黑底仅 3.92:1（不达 AA），提亮一档。
+   * 与 appleColorsDark.inkMuted48 保持一致（真正的源在 appleDesign.ts）。 */
+  ink4: "#8e8e93",
   inkGroup: "#8e8e93", // 分组头：深底上提亮一档，保证 AA 4.5:1（#7a7a7a 在深底只有 3.92:1）
   accent: appleColorsDark.primary, // 深底上的图形/图标：保持亮绿，可读
   // 实心块底色（按钮 / 胶囊 / 圆底，其上压白字白图标）必须用深一档绿：

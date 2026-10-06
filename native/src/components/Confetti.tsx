@@ -1,7 +1,11 @@
 /**
  * 撒花与粒子庆祝层（说明文档 §M7 + 秒哒复刻 · 完成庆祝动效）：
  * 1. 粒子爆裂（Burst）：34 片、9~18px、圆/方/彩条、全向扩散 90~250px 整体上扬、1000ms 缓动消散
- * 2. 顶部彩纸（Confetti）：全完成时自屏幕顶部撒下 60 个彩纸/emoji，1.8~3.8s 飘落旋转 720°，4.2s 自动移除
+ * 2. 顶部彩纸（Confetti）：**全部习惯完成当日目标**时自屏幕顶部撒下 60 个彩纸/emoji，
+ *    1.8~3.8s 飘落旋转 720°，4.2s 自动移除。触发源是 store 的 confettiNonce
+ *    （toggleToday 里判定「可操作的习惯全部达标」后 +1）。
+ *    ★ 2026-10-06：此前由 `celVisible`（一个**没有 setter**、恒为 false 的 state）驱动，
+ *      这段代码从未执行过 —— 属死功能，本轮接上真实触发条件。
  */
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
@@ -113,7 +117,7 @@ function ConfettiItem({ item, screenHeight }: { item: ConfettiItemData; screenHe
 }
 
 export function ConfettiHost() {
-  const { burst, celVisible } = useApp();
+  const { burst, confettiNonce } = useApp();
   const { width, height } = useWindowDimensions();
   const [bursts, setBursts] = useState<BurstPieceData[]>([]);
   const [confetti, setConfetti] = useState<ConfettiItemData[]>([]);
@@ -149,9 +153,9 @@ export function ConfettiHost() {
     return () => clearTimeout(timer);
   }, [burst, width, height]);
 
-  // 2. 庆祝层弹出时触发顶部 60 个彩纸撒花
+  // 2. 全部完成（fireConfetti 计数变化）时触发顶部 60 个彩纸撒花
   useEffect(() => {
-    if (!celVisible) return;
+    if (!confettiNonce) return;
     const count = 60;
     const arr: ConfettiItemData[] = Array.from({ length: count }, (_, i) => {
       const isEmoji = Math.random() < 0.5;
@@ -169,7 +173,7 @@ export function ConfettiHost() {
     setConfetti(arr);
     const timer = setTimeout(() => setConfetti([]), 4200);
     return () => clearTimeout(timer);
-  }, [celVisible, width]);
+  }, [confettiNonce, width]);
 
   if (!bursts.length && !confetti.length) return null;
   return (

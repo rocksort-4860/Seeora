@@ -47,10 +47,11 @@
         }
       ],
       [
-        "expo-image-picker",
+        "expo-media-library",
         {
-          "photosPermission": "允许 Seeora 访问相册，用于为分享卡片添加图片 / Allow Seeora to access your photos to attach images to your share card.",
-          "cameraPermission": "允许 Seeora 使用相机拍摄分享图片 / Allow Seeora to use the camera to take photos for sharing."
+          "photosPermission": "允许 Seeora 访问你的相册，用于把成就卡片保存为图片 / Allow Seeora to access your photos to save achievement cards as images.",
+          "savePhotosPermission": "允许 Seeora 把成就卡片保存到你的相册 / Allow Seeora to save achievement cards to your photo library.",
+          "isAccessMediaLocationEnabled": false
         }
       ],
       "expo-file-system",

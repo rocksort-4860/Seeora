@@ -11,14 +11,16 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "@/components/ui/icon";
-import { ChevronLeft, Moon, Undo2 } from "lucide-react-native";
+import { ChevronLeft, Gem, Moon, Undo2 } from "lucide-react-native";
 import { SpiralRing } from "@/components/SpiralRing";
 import { TimelineCurve } from "@/components/TimelineCurve";
 import { useApp } from "@/store/app";
+import { FREE_HABIT_LIMIT } from "@/lib/limits";
 import { todayStr } from "@/lib/dates";
 import { fmt } from "@/lib/i18n";
 import { sget, sset, SK } from "@/lib/storage";
 import { pressScale } from "@/lib/tokens";
+import { Text as T } from "@/components/ui/text";
 
 export default function HabitDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -26,6 +28,7 @@ export default function HabitDetailScreen() {
     colors: c, dict: d, lang, habits, streakOf, bestOf, nodesOf, curveOf,
     nodeIdxOf, nodeStateOf, freqOf, canRestOf, canMakeupOf,
     toggleToday, toggleRest, toggleBackfillDate, openShare, openHabitForm,
+    frozenIds, openPro,
   } = useApp();
   const insets = useSafeAreaInsets();
 
@@ -94,6 +97,8 @@ export default function HabitDetailScreen() {
   const N = freqOf(habit);
   const doneToday = !!habit.checkIns[today];
   const restingToday = !!habit.rests?.[today];
+  /** 免费版冻结（试用结束且未买断、且该习惯超出上限）：只看不改 */
+  const frozen = frozenIds.has(habit.id);
 
   /** 过去 7 天补签位（由新到旧） */
   const makeupDays = Array.from({ length: 7 }, (_, i) => {
@@ -141,6 +146,33 @@ export default function HabitDetailScreen() {
           </View>
         ) : null}
 
+        {/* 冻结横幅：数据完整保留，但写操作（打卡/休息/补签/编辑）全部不可用。
+            必须**在界面上说明原因并给出出路** —— 只拦操作不给解释 = 用户以为 App 坏了。 */}
+        {frozen ? (
+          <View
+            accessibilityLiveRegion="polite"
+            className="mt-3 flex-row items-start gap-3 rounded-xl px-4 py-3"
+            style={{ backgroundColor: c.surface, borderWidth: 1, borderColor: c.accentInk }}
+          >
+            <Icon as={Gem} color={c.accent} size={18} />
+            <View className="flex-1">
+              <T className="text-[15px] font-semibold" style={{ color: c.ink }}>{d.habitFrozen}</T>
+              <T className="mt-1 text-sm leading-5" style={{ color: c.ink2 }}>
+                {fmt(d.habitFrozenTip, { n: FREE_HABIT_LIMIT })}
+              </T>
+              <Pressable
+                onPress={() => openPro("habitLimit")}
+                hitSlop={8}
+                accessibilityRole="button"
+                className="mt-2 self-start rounded-pill px-4 py-2"
+                style={{ backgroundColor: c.accentInk }}
+              >
+                <Text className="text-[14px] font-bold" style={{ color: "#fff" }}>{d.proBuy}</Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : null}
+
         {/* 5.1 螺旋圆环 */}
         <View className="mt-2 items-center">
           <SpiralRing nodes={nodes} colors={c} breatheNonce={breatheNonce} haloNonce={haloNonce} />
@@ -156,22 +188,21 @@ export default function HabitDetailScreen() {
           {fmt(d.nodeDays, { n: N })}
         </Text>
 
-        {/* 当日打卡：规范两种按钮语法 —— 未打卡=行动色胶囊，已打卡=幽灵胶囊 */}
-        <Pressable
+        {/* 当日打卡：规范两种按钮语法 —— 未打卡=行动色胶囊，已打卡=幽灵胶囊。
+            ★ 按压反馈用静态 style + onPressIn/Out：函数式 style 会被 NativeWind v4
+              在 Android 上静默丢弃（组件不可见），见 components/HabitRow.tsx 文件头。 */}
+        <ActionPill
+          label={frozen
+            ? d.habitFrozen
+            : doneToday
+              ? (lang === "zh" ? "今日已完成" : "Done today")
+              : (lang === "zh" ? "完成今日打卡" : "Check in today")}
           onPress={onCheck}
-          className="mt-5 items-center justify-center rounded-pill py-4"
-          style={({ pressed }) => ({
-            backgroundColor: doneToday ? "transparent" : c.accent,
-            borderWidth: 1,
-            borderColor: c.accent,
-            minHeight: 44,
-            transform: [{ scale: pressed ? pressScale : 1 }],
-          })}
-        >
-          <Text className="text-[17px] font-semibold" style={{ color: doneToday ? c.accentText : c.inkInverse }}>
-            {doneToday ? (lang === "zh" ? "今日已完成" : "Done today") : (lang === "zh" ? "完成今日打卡" : "Check in today")}
-          </Text>
-        </Pressable>
+          bg={frozen ? c.surface2 : doneToday ? "transparent" : c.accent}
+          border={frozen ? c.line2 : c.accent}
+          textColor={frozen ? c.inkGroup : doneToday ? c.accentText : c.inkInverse}
+          className="mt-5"
+        />
 
         {/* 计划休息日（只能提前或当天；历史禁止补设） */}
         <SectionTitle title={d.restTitle} />
@@ -231,19 +262,52 @@ export default function HabitDetailScreen() {
         </View>
 
         {/* 八：固定成就卡片入口 */}
-        <Pressable
+        <ActionPill
+          label={d.achieve}
           onPress={() => openShare(habit.id)}
-          className="mt-5 items-center justify-center rounded-pill py-4"
-          style={({ pressed }) => ({
-            backgroundColor: c.accent,
-            minHeight: 44,
-            transform: [{ scale: pressed ? pressScale : 1 }],
-          })}
-        >
-          <Text className="text-[17px] font-semibold" style={{ color: c.inkInverse }}>{d.achieve}</Text>
-        </Pressable>
+          bg={c.accent}
+          border={c.accent}
+          textColor={c.inkInverse}
+          className="mt-5"
+        />
       </ScrollView>
     </View>
+  );
+}
+
+/**
+ * 胶囊行动按钮（静态 style + 自管按压态）。
+ * ★ 不用 `style={({pressed}) => …}`：NativeWind v4 在 Android 上会静默丢弃函数式 style，
+ *   组件会直接不可见（台账 D/渲染类坑）。用 onPressIn/Out 自行记录按压态，iOS 表现一致。
+ */
+function ActionPill({
+  label, onPress, bg, border, textColor, className,
+}: {
+  label: string;
+  onPress: () => void;
+  bg: string;
+  border: string;
+  textColor: string;
+  className?: string;
+}) {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      accessibilityRole="button"
+      className={`items-center justify-center rounded-pill py-4 ${className ?? ""}`}
+      style={{
+        backgroundColor: bg,
+        borderWidth: 1,
+        borderColor: border,
+        minHeight: 44,
+        transform: [{ scale: pressed ? pressScale : 1 }],
+      }}
+    >
+      <Text className="text-[17px] font-semibold" style={{ color: textColor }}>{label}</Text>
+    </Pressable>
   );
 }
 

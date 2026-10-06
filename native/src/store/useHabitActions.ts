@@ -3,8 +3,9 @@
  * 从 store/app.tsx 拆出；行为对齐 Seeora 范式（勾选打卡 / 添加编辑 / 删除 / 补录 / 导入导出）
  */
 import { useCallback } from "react";
-import type { Dispatch, MutableRefObject, SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { type Dict, type Lang } from "@/lib/i18n";
+import { FREE_HABIT_LIMIT } from "@/lib/limits";
 import { todayStr } from "@/lib/dates";
 import {
   currentStreak, bestStreakOf, canMakeupOn, canRestOn,
@@ -13,28 +14,36 @@ import { habitColors } from "@/lib/tokens";
 import { cancelTaskReminder, scheduleTaskReminder } from "@/lib/notify";
 import { hapticTaskDone } from "@/lib/haptic";
 import type { Snapshot } from "@/store/usePersist";
+import type { ProReason } from "@/store/usePro";
 import type {
   Habit, HabitFormState, Honor, HonorFormState, SettingsState,
 } from "@/store/app";
 
-/** v0.2 免费版习惯数量上限（文档十一：免费版最多 5 个习惯，买断后不限） */
-export const FREE_HABIT_LIMIT = 5;
+/** 免费版习惯数量上限（定义见 @/lib/limits，此处 re-export 供既有引用） */
+export { FREE_HABIT_LIMIT } from "@/lib/limits";
 
 export interface HabitActionsDeps {
   habits: Habit[];
   honors: Honor[];
   settings: SettingsState;
-  /** 买断状态与买断弹层（用于「免费版 5 个习惯」的温和提示） */
+  /** 买断状态与买断页入口（用于「免费版 5 个习惯」的升级引导） */
   pro: boolean;
-  openPay: () => void;
+  /** 免费版冻结的习惯 id（试用结束且未买断时超出上限的部分）：
+   *  冻结 = 数据保留、可见，但不可打卡 / 补签 / 标休息 / 编辑 */
+  frozenIds: Set<string>;
+  /** 打开 /pro 买断页；reason 让该页能说明「为什么被带到这里」 */
+  openPro: (reason?: ProReason) => void;
   setHabits: Dispatch<SetStateAction<Habit[]>>;
   setHonors: Dispatch<SetStateAction<Honor[]>>;
   persist: (snap: Snapshot) => void;
   snapshotNow: (over?: Partial<Snapshot>) => Snapshot;
   dict: Dict;
   lang: Lang;
-  showToast: (msg: string, ok?: boolean) => void;
+  /** ms 可选：长文案需要更长的展示时间（默认 2200ms 对两行文案不够） */
+  showToast: (msg: string, ok?: boolean, ms?: number) => void;
   fireBurst: (x?: number, y?: number) => void;
+  /** 全部习惯完成今日目标时触发顶部彩纸撒花（ConfettiHost 消费） */
+  fireConfetti: () => void;
   hapticsOn: () => void;
 
   habitForm: HabitFormState;
@@ -52,8 +61,6 @@ export interface HabitActionsDeps {
   backfillHabitId: string | null;
   setBackfillHabitId: Dispatch<SetStateAction<string | null>>;
 
-  pendingDel: MutableRefObject<{ kind: "habit" | "honor"; id: string } | null>;
-  setConfirmVisible: Dispatch<SetStateAction<boolean>>;
   setBadgeCount: (n: number) => void;
 }
 
@@ -63,12 +70,12 @@ export function uid(): string {
 
 export function useHabitActions(d: HabitActionsDeps) {
   const {
-    habits, honors, settings, pro, openPay, setHabits, setHonors, persist, snapshotNow,
-    dict, lang, showToast, fireBurst, hapticsOn,
+    habits, honors, settings, pro, frozenIds, openPro, setHabits, setHonors, persist, snapshotNow,
+    dict, lang, showToast, fireBurst, fireConfetti, hapticsOn,
     habitForm, editingHabitId, setHabitFormState, setEditingHabitId, setHabitFormVisible,
     honorForm, editingHonorId, setHonorFormState, setEditingHonorId, setHonorFormVisible,
     backfillHabitId, setBackfillHabitId,
-    pendingDel, setConfirmVisible, setBadgeCount,
+    setBadgeCount,
   } = d;
 
   const applyHabit = useCallback((nh: Habit) => {
@@ -84,12 +91,25 @@ export function useHabitActions(d: HabitActionsDeps) {
     }
   }, [habits, settings.badge, setHabits, persist, snapshotNow, setBadgeCount]);
 
+  /* ===================== 冻结拦截（免费版边界） =====================
+   * 试用结束且未买断时，超出上限的习惯被冻结：**数据完整保留，但一切写操作失效**。
+   * 四个入口（打卡 / 标休息 / 补签 / 编辑）统一走这一个函数 ——
+   * 分散判断最容易漏掉某一处，留下「明明冻结了却还能改」的口子。
+   * 返回 true = 已拦截（调用方必须立刻 return）。 */
+  const blockIfFrozen = useCallback((id: string): boolean => {
+    if (!frozenIds.has(id)) return false;
+    showToast(dict.habitFrozenToast, false, 2600);
+    openPro("habitLimit");
+    return true;
+  }, [frozenIds, dict, showToast, openPro]);
+
   /* ===================== 当日打卡（v0.2：连续累积 + 最长记录永久保存） ===================== */
   /** 返回值供仪式感使用：newBest=true 表示本次刷新了历史最长连续 */
   const toggleToday = useCallback(
     (habitId: string, rect?: { x: number; y: number }): { newBest: boolean; streak: number } | null => {
       const h = habits.find((x) => x.id === habitId);
       if (!h) return null;
+      if (blockIfFrozen(habitId)) return null; // 冻结习惯：只读，引导升级
       const t = todayStr();
       if (h.checkIns[t]) {
         // 撤销今日打卡
@@ -108,9 +128,20 @@ export function useHabitActions(d: HabitActionsDeps) {
       const newBest = streak > prevBest;
       if (newBest) nh.bestStreak = streak;
       applyHabit(nh);
+
+      /* ===== 全部完成 → 顶部撒花（设计文档 §M7「完成庆祝动效」）=====
+       * 此前由恒为 false 的 celVisible 驱动，从未真正播放过（死功能）。
+       * 判定口径：**可操作的习惯**（排除冻结 —— 它们无法打卡，算进去就永远不可能全部完成）
+       * 全部满足「今日已打卡」或「今天被标记为计划休息日」时撒花。
+       * 一次只撒一轮：从「差一个」到「全完成」的这一步才触发。 */
+      const all = habits
+        .filter((x) => !frozenIds.has(x.id))
+        .map((x) => (x.id === nh.id ? nh : x));
+      if (all.length > 0 && all.every((x) => x.checkIns[t] || !!x.rests?.[t])) fireConfetti();
+
       return { newBest, streak };
     },
-    [habits, settings.weekStartOn, lang, dict, showToast, fireBurst, hapticsOn, applyHabit]
+    [habits, frozenIds, settings.weekStartOn, lang, dict, showToast, fireBurst, fireConfetti, hapticsOn, applyHabit, blockIfFrozen]
   );
 
   /* ===================== 计划休息日（v0.2 3.1） ===================== */
@@ -119,6 +150,7 @@ export function useHabitActions(d: HabitActionsDeps) {
     (habitId: string, date: string) => {
       const h = habits.find((x) => x.id === habitId);
       if (!h) return;
+      if (blockIfFrozen(habitId)) return; // 冻结习惯：只读，引导升级
       if (!canRestOn(h, date)) {
         showToast(lang === "zh" ? "休息日只能提前或当天标记" : "Rest can only be planned ahead or for today");
         return;
@@ -129,7 +161,7 @@ export function useHabitActions(d: HabitActionsDeps) {
       const nh: Habit = { ...h, rests };
       applyHabit(nh);
     },
-    [habits, lang, showToast, applyHabit]
+    [habits, lang, showToast, applyHabit, blockIfFrozen]
   );
 
   /* ===================== 7 天补录面板 ===================== */
@@ -139,15 +171,18 @@ export function useHabitActions(d: HabitActionsDeps) {
   const toggleBackfillDate = useCallback((habitId: string, date: string) => {
     const h = habits.find((x) => x.id === habitId);
     if (!h) return;
+    if (blockIfFrozen(habitId)) return; // 冻结习惯：只读，引导升级
     if (!canMakeupOn(h, date)) { showToast(dict.backfillLocked); return; }
     const nh: Habit = { ...h, checkIns: { ...h.checkIns } };
     if (nh.checkIns[date]) delete nh.checkIns[date];
     else nh.checkIns[date] = true as const;
     applyHabit(nh);
-  }, [habits, dict, showToast, applyHabit]);
+  }, [habits, dict, showToast, applyHabit, blockIfFrozen]);
 
   /* ===================== 习惯表单 ===================== */
   const openHabitForm = useCallback((h: Habit | null) => {
+    // 冻结习惯不可编辑（表单会把改动写回同一个对象，等于绕过冻结）
+    if (h && h.id && blockIfFrozen(h.id)) return;
     setEditingHabitId(h && h.id ? h.id : null);
     if (h && h.id) {
       setHabitFormState({
@@ -166,7 +201,7 @@ export function useHabitActions(d: HabitActionsDeps) {
       });
     }
     setHabitFormVisible(true);
-  }, [setEditingHabitId, setHabitFormState, setHabitFormVisible]);
+  }, [setEditingHabitId, setHabitFormState, setHabitFormVisible, blockIfFrozen]);
 
   const closeHabitForm = useCallback(() => setHabitFormVisible(false), [setHabitFormVisible]);
   const setHabitForm = useCallback(
@@ -208,12 +243,16 @@ export function useHabitActions(d: HabitActionsDeps) {
         else void cancelTaskReminder(edited.id);
       }
     } else {
-      // v0.2 付费边界：免费版最多 5 个习惯；第 6 个温和提示一次，不反复弹窗、不主动推销
+      // v0.2 付费边界：免费版最多 5 个习惯。
+      // ★ 必须走 openPro（push /pro 路由页），**绝不能**用 openPay：
+      //   openPay 只把 payVisible 置真，而该状态的唯一消费者是 /pro 路由页内部的弹层，
+      //   从 Today 触发时 /pro 未挂载 → 弹层无处渲染 → 用户看到「点了买断没反应」。
       if (!pro && habits.length >= FREE_HABIT_LIMIT) {
-        openPay();
-        showToast(lang === "zh"
-          ? "免费版可创建 5 个习惯。买断一次，永久不限数量。"
-          : "Free version allows 5 habits. Go unlimited with a one-time purchase.");
+        // 先关表单再引导：HabitForm 是原生 Modal，会整片盖住随后 push 上来的 /pro 页
+        // （正常路径在 Today 入口就已被拦下，这里是兜底防线）
+        setHabitFormVisible(false);
+        showToast(dict.habitLimitToast.replace("{n}", String(FREE_HABIT_LIMIT)), false, 2600);
+        openPro("habitLimit");
         return;
       }
       // C-04 变体修复：createdAt 用本地日期串，绝不用 toISOString()。
@@ -228,7 +267,7 @@ export function useHabitActions(d: HabitActionsDeps) {
     }
     setHabitFormVisible(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [habitForm, editingHabitId, habits, pro, openPay, lang, dict, showToast, setHabits, persist, snapshotNow, setHabitFormVisible]);
+  }, [habitForm, editingHabitId, habits, pro, openPro, lang, dict, showToast, setHabits, persist, snapshotNow, setHabitFormVisible]);
 
   /* ===================== 荣誉表单 ===================== */
   const openHonorForm = useCallback((hr: Honor | null) => {
@@ -274,32 +313,19 @@ export function useHabitActions(d: HabitActionsDeps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [honorForm, editingHonorId, honors, lang, dict, showToast, setHonors, persist, snapshotNow, setHonorFormVisible]);
 
-  /* ===================== 删除确认 ===================== */
-  const askDelete = useCallback((kind: "habit" | "honor", id: string) => {
-    pendingDel.current = { kind, id };
-    setConfirmVisible(true);
-  }, [pendingDel, setConfirmVisible]);
-
-  const closeConfirm = useCallback(() => { pendingDel.current = null; setConfirmVisible(false); }, [pendingDel, setConfirmVisible]);
-
-  const doDelete = useCallback(() => {
-    const p = pendingDel.current;
-    if (!p) return;
-    if (p.kind === "habit") {
-      const nl = habits.filter((x) => x.id !== p.id);
-      setHabits(nl);
-      persist(snapshotNow({ habits: nl }));
-      void cancelTaskReminder(p.id);
-    } else {
-      const nl = honors.filter((x) => x.id !== p.id);
-      setHonors(nl);
-      persist(snapshotNow({ honors: nl }));
-    }
-    pendingDel.current = null;
-    setConfirmVisible(false);
-    showToast(dict.delete === "Delete" ? (lang === "zh" ? "已删除" : "Deleted") : (lang === "zh" ? "已删除" : "Deleted"));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [habits, honors, dict, lang, showToast, persist, snapshotNow, pendingDel, setConfirmVisible, setHabits, setHonors]);
+  /* ===================== 删除习惯（内联二次确认） =====================
+   * ★ 2026-10-06：删除确认从「关掉表单 → 再开一个确认弹层」改为**表单内联第二步**。
+   *   原路径会先卸载 HabitForm 的 Modal、再挂载 ConfirmDialog 的 Modal ——
+   *   两个原生 Modal 在退场 270ms 内并存（RN 0.83 会留下全屏透明层，关掉后整页点不动），
+   *   靠 sheetArbiter 兜底才没出事。内联确认后这条路彻底不存在，同时更贴 iOS 的
+   *   「破坏性操作就地二次确认」习惯。确认后**直接删**，不再经过 pendingDel 中转。 */
+  const deleteHabitNow = useCallback((id: string) => {
+    const nl = habits.filter((x) => x.id !== id);
+    setHabits(nl);
+    persist(snapshotNow({ habits: nl }));
+    void cancelTaskReminder(id);
+    showToast(lang === "zh" ? "已删除" : "Deleted");
+  }, [habits, lang, showToast, persist, snapshotNow, setHabits]);
 
   /* ===================== 导入备份（JSON） ===================== */
   // 解析 Seeora 备份 JSON；合并 habits/honors（按 id 覆盖）；破坏或非 JSON → 抛错
@@ -331,6 +357,6 @@ export function useHabitActions(d: HabitActionsDeps) {
     toggleToday, toggleRest, openBackfill, closeBackfill, toggleBackfillDate,
     openHabitForm, closeHabitForm, setHabitForm, saveHabit,
     openHonorForm, closeHonorForm, setHonorForm, saveHonor,
-    askDelete, closeConfirm, doDelete, importBackup,
+    deleteHabitNow, importBackup,
   };
 }

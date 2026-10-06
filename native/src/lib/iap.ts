@@ -44,24 +44,40 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 const IAP_TIMEOUT_MS = 8000;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Purchases: any = null;
-let purchasesLoaded = false;
+let loadPromise: Promise<any> | null = null;
 
-// 懒加载 RevenueCat：仅原生 + 已配置 key 时才求值模块（避免冷启动触碰原生 TurboModule 崩溃）
+/**
+ * 懒加载 RevenueCat：仅原生 + 已配置 key 时才求值模块（避免冷启动触碰原生 TurboModule 崩溃）。
+ *
+ * ★ 缓存的是 **Promise 本身**，不是「已发起」的布尔量 —— 这是本文件最容易写错的一处：
+ *   · 旧实现是 `purchasesLoaded: boolean` + 一个模块变量。布尔量只能表达「已发起」，
+ *     表达不了「已完成」。弹层打开时价格 hook 先发起初始化，几百毫秒内用户/审核员
+ *     点「买断」会**并发**进入这里 → 第二次调用立刻返回尚未赋值的模块变量（null）
+ *     → 判定失败并提示「请检查网络」。冷启动后第一次点购买**必然**命中这条竞态。
+ *   · 改成缓存 Promise 后，并发调用共享同一次加载；拿到 null 只可能是
+ *     RC_KEY 未配 / web / import 失败，与调用时序无关。
+ *
+ * ★ 失败也缓存：import 失败 = 模块不存在（或构建里没打进原生模块），重试无意义。
+ *   若将来要加「重试」按钮，**必须显式 `loadPromise = null;`** 后再调本函数 ——
+ *   只调一次 getPurchases() 拿到的仍是那个已定局的旧 Promise，不会重新加载。
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getPurchases(): Promise<any> {
-  if (purchasesLoaded) return Purchases;
-  purchasesLoaded = true;
-  if (!RC_KEY || Platform.OS === "web") return null;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mod: any = await import("react-native-purchases");
-    Purchases = mod.default ?? mod;
-    Purchases.configure({ apiKey: RC_KEY });
-  } catch {
-    Purchases = null;
+function getPurchases(): Promise<any> {
+  if (!loadPromise) {
+    loadPromise = (async () => {
+      if (!RC_KEY || Platform.OS === "web") return null;
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const mod: any = await import("react-native-purchases");
+        const P = mod.default ?? mod;
+        P.configure({ apiKey: RC_KEY });
+        return P;
+      } catch {
+        return null;
+      }
+    })();
   }
-  return Purchases;
+  return loadPromise;
 }
 
 export type PlanPrices = Record<PlanKey, string>;
@@ -80,7 +96,13 @@ export function usePlanPrices(enabled: boolean = false, nonce: number = 0): { pr
     let on = true;
     (async () => {
       const rc = await getPurchases();
-      if (!rc) return; // 演示态：无价格源，展示位保持占位符
+      /* ★ 无价格源（未配 key / web / 原生模块加载失败）也必须**结束加载态**。
+       *   ready 若永远停在 false，会有两个后果，且都是拒审项：
+       *     ① 价格位永久显示「价格加载中…」（用户以为卡死）；
+       *     ② 买断按钮被 `disabled={... || !ready}` 永久禁用 —— 看得见却永远点不动，
+       *        比 P0-1 那条竞态更严重（Guideline 2.1：功能不可用）。
+       *   置 true 只影响「加载中 vs 已结束」的语义，「取到价没有」由 prices 表达。 */
+      if (!rc) { if (on) setReady(true); return; }
       try {
         const off: any = await withTimeout(rc.getOfferings(), IAP_TIMEOUT_MS);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -97,7 +119,18 @@ export function usePlanPrices(enabled: boolean = false, nonce: number = 0): { pr
         const s = hit?.product?.priceString;
         if (on) {
           setPrices({ l: typeof s === "string" && s ? s : "" });
-          setReady(typeof s === "string" && s ? true : false);
+          /* ★ 这里**无条件**置 true：ready 的语义是「加载已结束」，不是「拿到价了」。
+           *   旧写法按「有没有拿到价」置位，于是漏掉了第四条路：
+           *     ① 未配 key / web / 原生模块加载失败 → 上面 `if (!rc)` 已置 true
+           *     ② 超时 / getOfferings 抛错          → 下面的 catch 已置 true
+           *     ③ 正常取到价                        → 置 true
+           *     ④ ★ 请求成功、但 Offering 里没挂本商品 / priceString 为空
+           *        （后台漏挂商品、或商品元数据尚未同步完整）→ 旧写法把 ready 留成 false
+           *   第 ④ 条的后果与 ① 相同：价格位永久显示「价格加载中…」，
+           *   买断按钮被 `disabled={... || !ready}` **永久禁用**且没有任何自救入口（拒审项）。
+           *   所以这里必须无条件归位：「有没有价」由 prices 表达，
+           *   「已结束但没价」由 priceState 判定 —— UI 必须给出可见原因 + 重试（见 pro.tsx）。 */
+          setReady(true);
         }
       } catch {
         // 超时或读取失败：停止 loading，价格位回落占位符，由 UI 决定下一步
@@ -117,10 +150,18 @@ export function priceLabel(prices: PlanPrices, key: PlanKey, ready: boolean, loa
   return prices[key] || (hasRcKey() && !ready ? loadingTxt : "—");
 }
 
+/**
+ * 购买结果三态。★ 必须区分「用户主动取消」与「真失败」：
+ *   StoreKit 上用户点「取消」也走异常路径，若与网络/配置故障合并成同一种结果，
+ *   界面就会把「我自己点的取消」报成「购买未完成，请检查网络」——
+ *   用户以为付不了款，审核员（测内购必点一次取消）会判内购功能损坏（Guideline 2.1）。
+ */
+export type PurchaseOutcome = "ok" | "cancelled" | "failed";
+
 // 购买：有 RC key → 走 RevenueCat 真实购买；无 key 且开了演示开关 → 演示成功；否则失败（不静默解锁）
-export async function purchasePlan(_plan: PlanKey): Promise<boolean> {
+export async function purchasePlan(_plan: PlanKey): Promise<PurchaseOutcome> {
   const rc = await getPurchases();
-  if (!rc) return demoIapEnabled();
+  if (!rc) return demoIapEnabled() ? "ok" : "failed";
   try {
     const pkgs: any = await withTimeout(rc.getOfferings(), IAP_TIMEOUT_MS);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -137,25 +178,31 @@ export async function purchasePlan(_plan: PlanKey): Promise<boolean> {
           p.packageType === "LIFETIME" ||
           p.identifier === "$rc_lifetime"
       );
-    if (!hit) return false;
+    if (!hit) return "failed"; // 后台没挂本 App 的商品：属配置故障，不是用户取消
     const { customerInfo } = await rc.purchasePackage(hit);
     const ent = customerInfo?.entitlements?.active || {};
     const hasEntitlement = !!ent["seeora_pro"];
     const hasNonSubscription = Object.keys(customerInfo?.nonSubscriptionTransactions || {}).length > 0;
     const hasAllPurchased = (customerInfo?.allPurchasedProductIdentifiers || []).includes("seeora_pro_lifetime");
-    return hasEntitlement || hasNonSubscription || hasAllPurchased;
-  } catch {
-    return false; // 用户取消 / 失败均视为未成功
+    return hasEntitlement || hasNonSubscription || hasAllPurchased ? "ok" : "failed";
+  } catch (e) {
+    /* RevenueCat 用 error.userCancelled 标记「用户在 StoreKit 面板上点了取消」。
+     * 这条必须单独成态：它不是故障，界面不提示、不涂红、不写「检查网络」。 */
+    const cancelled = !!(e as { userCancelled?: boolean } | null | undefined)?.userCancelled;
+    return cancelled ? "cancelled" : "failed";
   }
 }
 
 /** 恢复购买结果（带原因，供 UI 给出准确提示，避免把「按钮文案」当错误提示弹） */
-export type RestoreResult = { ok: boolean; reason?: "none" | "error" | "timeout" };
+export type RestoreResult = { ok: boolean; reason?: "none" | "error" | "timeout" | "unconfigured" };
 
 // 恢复购买：无 RC key → 直接失败（非演示态，防止伪造权益）
 export async function restorePurchases(): Promise<RestoreResult> {
   const rc = await getPurchases();
-  if (!rc) return { ok: false, reason: "error" };
+  /* ★ 必须与「网络故障」区分开：无 RC key / web端 时返回 unconfigured，
+   *   否则 usePro 会把它渲染成「恢复失败，请检查网络连接」——
+   *   把「原生模块没配」说成网络问题，用户按提示重试一万次也没用（台账 A4 少一态）。 */
+  if (!rc) return { ok: false, reason: "unconfigured" };
   try {
     const info: any = await withTimeout(rc.restorePurchases(), IAP_TIMEOUT_MS);
     const ent = info?.entitlements?.active || {};
@@ -165,5 +212,45 @@ export async function restorePurchases(): Promise<RestoreResult> {
   } catch (e) {
     const msg = e && typeof (e as Error).message === "string" ? (e as Error).message : "";
     return { ok: false, reason: msg === "iap-timeout" ? "timeout" : "error" };
+  }
+}
+
+/* ===================== 权益校验（台账 A-05 / A6） ===================== */
+
+/**
+ * 权益核验结果：
+ *   active   —— 苹果侧确认有权益（或确有本商品的一次性购买记录）
+ *   inactive —— 苹果侧**明确**回答「没有任何本商品购买记录」
+ *   unknown  —— 说不上来（未配 key / web / 网络超时 / getCustomerInfo 抛错）
+ */
+export type EntitlementSync = "active" | "inactive" | "unknown";
+
+/**
+ * 与苹果侧核对买断权益（台账 A-05：本项目原先「只信本地 {pro:true} 布尔，全项目 0 处 getCustomerInfo」）。
+ *
+ * ★ 为什么不在冷启动调用：`iap.ts` 的红线是「启动时绝不初始化 RevenueCat」，
+ *   冷启动 configure 会触碰原生 TurboModule —— 这正是 iOS 26 启动崩溃的触发路径。
+ *   所以本函数只由**用户主动打开买断页 / 支付弹层**时触发（那时 RC 本来就要被 configure 来取价格）。
+ *
+ * ★ 语义边界（决定 usePro 怎么用）：
+ *   · active  → 可以**补回**本地丢失的凭证（重装后没点「恢复购买」的用户，靠这条自动找回）。
+ *   · inactive→ 只有在苹果侧**明确**返回「无购买记录」时才给出；unknown **绝不**等于未购买，
+ *              据此降级会把网络抖动变成「已付费用户被剥夺权益」。
+ *   三个信号任一成立即视为 active：entitlement 命中 / 存在非订阅交易 / 已购商品列表含本商品 ID。
+ *   对一次性买断而言，`allPurchasedProductIdentifiers` 由 StoreKit 直接给出，最权威。
+ */
+export async function syncEntitlement(): Promise<EntitlementSync> {
+  const rc = await getPurchases();
+  if (!rc) return "unknown";
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const info: any = await withTimeout(rc.getCustomerInfo(), IAP_TIMEOUT_MS);
+    const ent = info?.entitlements?.active || {};
+    const hasEntitlement = !!ent["seeora_pro"];
+    const hasNonSubscription = Object.keys(info?.nonSubscriptionTransactions || {}).length > 0;
+    const hasAllPurchased = (info?.allPurchasedProductIdentifiers || []).includes(RC_PRODUCT_IDS.l);
+    return hasEntitlement || hasNonSubscription || hasAllPurchased ? "active" : "inactive";
+  } catch {
+    return "unknown"; // 超时 / 无网络 / SDK 报错 —— 一律不下结论
   }
 }

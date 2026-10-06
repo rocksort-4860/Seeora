@@ -23,6 +23,8 @@ export function HonorRoom() {
         </CardHeader>
         <Pressable
           onPress={() => openHonorForm(null)}
+          accessibilityRole="button"
+          accessibilityLabel={d.addHonor}
           className="mt-2 flex-row items-center gap-3 rounded-xl border-2 border-dashed px-4 py-3"
           style={{ borderColor: c.line2 }}
         >
@@ -37,7 +39,14 @@ export function HonorRoom() {
     <Card className="mt-4">
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle className="text-[21px] font-extrabold">{d.hallOfFame}</CardTitle>
-        <Pressable onPress={() => openHonorForm(null)} hitSlop={10}>
+        {/* ★ 纯图标按钮必须给 accessibilityLabel：VoiceOver 下「+」无任何可读名，
+            审核与无障碍都算缺陷。d.addHonor 这个键此前声明了却一直没被使用。 */}
+        <Pressable
+          onPress={() => openHonorForm(null)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={d.addHonor}
+        >
           <Icon as={Plus} color={c.accent} size={20} />
         </Pressable>
       </CardHeader>

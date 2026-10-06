@@ -4,7 +4,7 @@
  */
 import { useCallback, useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { sget, sset, SK, TRIAL_MS } from "@/lib/storage";
+import { sget, sset, SK } from "@/lib/storage";
 import type { Lang } from "@/lib/i18n";
 import type { Habit, Honor, SettingsState, ThemeMode } from "@/store/app";
 
@@ -88,12 +88,15 @@ export function useHydration(d: HydrationSetters) {
         ...(snap && snap.settings && typeof snap.settings === "object" ? snap.settings : {}),
       } as SettingsState;
       const isPurchased = !!(r && r.pro);
-      // 本地 7 天试用：首次打开（未买断且无试用记录）自动开启计时，仅本地、无关苹果
-      let trialUntil = tuRaw;
-      if (!isPurchased && trialUntil == null) {
-        trialUntil = Date.now() + TRIAL_MS;
-        void sset(SK.trialUntil, trialUntil);
-      }
+      /* 本地 7 天试用：**用户手动领取**才开始计时（领取动作见 store/app.tsx 的 startTrial）。
+       *   原实现是「装完首次启动自动开启」—— 用户全程无感知，第 8 天突然被降级，
+       *   属于「服务悄悄变了」的差评来源；且与网页原型（点按钮才计时）口径分裂。
+       *   改为手动领取后三种状态由 trialUntil 单一表达：
+       *     trialUntil == null   → 从未领取（纯免费版，Pro 页显示「开始 7 天免费试用」）
+       *     trialUntil > now     → 试用进行中（享完整专业版功能）
+       *     trialUntil <= now    → 试用已结束（超限习惯冻结，见 app.tsx 的 frozenIds）
+       *   ★ 本函数只负责把已存的值**读回来**，绝不在此写入任何试用时间。 */
+      const trialUntil = tuRaw;
       d.setLangState(lg === "zh" ? "zh" : "en");
       d.setThemeState(th === "light" || th === "dark" ? th : "system");
       d.setVisited(!!vi);

@@ -51,7 +51,9 @@ export const appleColors = {
   bodyOnDark: "#ffffff",
   bodyMuted: "#cccccc",
   inkMuted80: "#333333",
-  inkMuted48: "#7a7a7a",
+  /* 占位符 / 禁用文字。★ 原值 #7a7a7a 压在白/羊皮纸底上复算只有 3.94:1（< WCAG AA 4.5:1），
+   * 占位符是「可读信息」不是装饰，必须达标；#6e6e73 对白底 5.07:1、对 #f5f5f7 4.66:1 均达标。 */
+  inkMuted48: "#6e6e73",
 
   /** 发丝线 */
   dividerSoft: "#f0f0f0",
@@ -80,7 +82,8 @@ export const appleColorsDark: Record<keyof typeof appleColors, string> = {
   bodyOnDark: "#ffffff",
   bodyMuted: "#cccccc",
   inkMuted80: "#9a9a9e",
-  inkMuted48: "#7a7a7a",
+  /* 深底上的占位符：原值 #7a7a7a 压近黑底只有 3.92:1，不达标；提亮到 #8e8e93（≈5.4:1） */
+  inkMuted48: "#8e8e93",
   dividerSoft: "#2c2c2e",
   hairline: "#3a3a3c",
   onPrimary: "#ffffff",

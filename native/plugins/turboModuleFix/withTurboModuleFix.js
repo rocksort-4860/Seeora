@@ -28,6 +28,18 @@
  *     `convertNSExceptionToJSError` 的 .mm，对其应用上述两处补丁。
  *   - 若没有任何目标文件被 patch，直接抛错让构建快速失败（避免静默漏打补丁），
  *     并额外列出含 performVoidMethodInvocation 的候选文件。
+ *
+ * ★★ 上架红线（2026-10-06 修复，勿回退）：
+ *   本插件**只做修复，绝不夹带任何诊断 UI / 副作用**。
+ *   此前两处补丁里除 `throw → RCTLogError + return` 外，还塞了三件诊断：
+ *     ① `[[UIPasteboard generalPasteboard] setString:…]`  → 污染用户剪贴板
+ *     ② 主线程 `UIAlertController`「启动诊断(已复制到剪贴板)」 → **英文 App 里的中文弹窗**
+ *     ③ 往 `Documents/turbo_module_exception.txt` 写文件
+ *   危害：只要任一原生模块抛 NSException，审核员/用户就会看到一个中文诊断弹窗，
+ *   属 Guideline 2.3.1「隐藏功能」拒审风险；且在 TurboModule 队列线程碰 UIKit、
+ *   未经用户操作写剪贴板，本身可能引入新的崩溃。
+ *   修复逻辑完全不需要诊断代码 —— 只保留 RCTLogError 即可（日志走系统 console，
+ *   不弹窗、不写剪贴板、不落沙盒文件）。
  * ---------------------------------------------------------------------------
  */
 const fs = require('fs');
@@ -46,41 +58,12 @@ const OLD_VOID = `    @try {
     } @finally {`;
 
 const NEW_VOID = `    @try {
-[inv invokeWithTarget:strongModule];
-} @catch (NSException *exception) {
-RCTLogError(@"[TurboModule] Swallowed NSException in void method of module %@: %@",
-NSStringFromClass([strongModule class]),
-exception);
-{
-  NSString *tmMsg = [NSString stringWithFormat:@"[TurboModule:VOID] %@ module=%@ method=%s exc=%@ reason=%@\\n", [NSDate date], NSStringFromClass([strongModule class]), methodNameStr.c_str(), exception.name, exception.reason];
-  NSString *tmPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/turbo_module_exception.txt"];
-  NSFileHandle *tmFh = [NSFileHandle fileHandleForWritingAtPath:tmPath];
-  if (tmFh) { [tmFh seekToEndOfFile]; [tmFh writeData:[tmMsg dataUsingEncoding:NSUTF8StringEncoding]]; [tmFh closeFile]; } else { [tmMsg writeToFile:tmPath atomically:YES encoding:NSUTF8StringEncoding error:nil]; }
-  static BOOL tmDiagShownVoid = NO;
-  if (!tmDiagShownVoid) {
-    tmDiagShownVoid = YES;
-    [[UIPasteboard generalPasteboard] setString:tmMsg];
-    NSString *tmAlert = tmMsg;
-    dispatch_async(dispatch_get_main_queue(), ^{
-      UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"启动诊断(已复制到剪贴板)" message:tmAlert preferredStyle:UIAlertControllerStyleAlert];
-      [alert addAction:[UIAlertAction actionWithTitle:@"知道了" style:UIAlertActionStyleDefault handler:nil]];
-      UIWindow *win = nil;
-      if (@available(iOS 13.0, *)) {
-        for (UIScene *s in [UIApplication sharedApplication].connectedScenes) {
-          if ([s isKindOfClass:[UIWindowScene class]] && ((UIWindowScene *)s).activationState == UISceneActivationStateForegroundActive) {
-            for (UIWindow *w in ((UIWindowScene *)s).windows) { if (w.isKeyWindow) { win = w; break; } }
-          }
-        }
-      }
-      if (!win) win = [UIApplication sharedApplication].keyWindow;
-      UIViewController *vc = win.rootViewController;
-      while (vc && vc.presentedViewController) vc = vc.presentedViewController;
-      if (vc) [vc presentViewController:alert animated:YES completion:nil];
-    });
-  }
-}
-return;
-} @finally {`;
+      [inv invokeWithTarget:strongModule];
+    } @catch (NSException *exception) {
+      RCTLogError(@"[TurboModule] Swallowed NSException in void method of module %@: %@",
+                  NSStringFromClass([strongModule class]), exception);
+      return;
+    } @finally {`;
 
 // (B) performMethodInvocation 的 @catch 整块：
 //       `@catch (NSException *exception) { if (isSync) { throw ...; } else { @throw exception; } }`
@@ -96,34 +79,6 @@ return;
 const METHOD_RE = /@catch \(NSException \*exception\) \{[^@]*?if \(isSync\) \{[^@]*?throw convertNSExceptionToJSError\(runtime, exception, std::string\{moduleName\}, methodNameStr\);[^@]*?@throw exception;\s*\}\s*\}/;
 
 const NEW_METHOD = `  @catch (NSException *exception) {
-    {
-      NSString *tmMsg = [NSString stringWithFormat:@"[TurboModule:METHOD] %@ module=%s method=%s sync=%d exc=%@ reason=%@\\n", [NSDate date], moduleName, methodNameStr.c_str(), (int)isSync, exception.name, exception.reason];
-      NSString *tmPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/turbo_module_exception.txt"];
-      NSFileHandle *tmFh = [NSFileHandle fileHandleForWritingAtPath:tmPath];
-      if (tmFh) { [tmFh seekToEndOfFile]; [tmFh writeData:[tmMsg dataUsingEncoding:NSUTF8StringEncoding]]; [tmFh closeFile]; } else { [tmMsg writeToFile:tmPath atomically:YES encoding:NSUTF8StringEncoding error:nil]; }
-      static BOOL tmDiagShownMethod = NO;
-      if (!tmDiagShownMethod) {
-        tmDiagShownMethod = YES;
-        [[UIPasteboard generalPasteboard] setString:tmMsg];
-        NSString *tmAlert = tmMsg;
-        dispatch_async(dispatch_get_main_queue(), ^{
-          UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"启动诊断(已复制到剪贴板)" message:tmAlert preferredStyle:UIAlertControllerStyleAlert];
-          [alert addAction:[UIAlertAction actionWithTitle:@"知道了" style:UIAlertActionStyleDefault handler:nil]];
-          UIWindow *win = nil;
-          if (@available(iOS 13.0, *)) {
-            for (UIScene *s in [UIApplication sharedApplication].connectedScenes) {
-              if ([s isKindOfClass:[UIWindowScene class]] && ((UIWindowScene *)s).activationState == UISceneActivationStateForegroundActive) {
-                for (UIWindow *w in ((UIWindowScene *)s).windows) { if (w.isKeyWindow) { win = w; break; } }
-              }
-            }
-          }
-          if (!win) win = [UIApplication sharedApplication].keyWindow;
-          UIViewController *vc = win.rootViewController;
-          while (vc && vc.presentedViewController) vc = vc.presentedViewController;
-          if (vc) [vc presentViewController:alert animated:YES completion:nil];
-        });
-      }
-    }
     if (isSync) {
       RCTLogError(@"[TurboModule] Swallowed NSException in sync method %s.%s: %@",
                   moduleName, methodNameStr.c_str(), exception);
