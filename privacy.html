@@ -21,6 +21,7 @@
       .lang-switch button { background: #4a9c8a !important; }
       .privacy-banner { background: rgba(74,156,138,0.14) !important; border-color: rgba(74,156,138,.28) !important; color: #7fc0b0 !important; }
       .privacy-banner h2 { color: #7fc0b0 !important; }
+      .toc { background: rgba(255,255,255,.05) !important; }
     }
     nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid rgba(0,0,0,.1); padding-bottom: 15px; }
     @media (prefers-color-scheme: dark) { nav { border-bottom-color: rgba(255,255,255,.1); } }
@@ -33,12 +34,20 @@
     .logo svg { height: 28px; }
     h1 { font-size: 28px; margin-top: 30px; margin-bottom: 5px; }
     h2 { font-size: 18px; margin-top: 30px; margin-bottom: 10px; }
+    h3 { font-size: 15px; margin-top: 18px; margin-bottom: 6px; }
     p, li { font-size: 15px; margin-bottom: 10px; }
     ul { padding-left: 20px; margin-bottom: 15px; }
     a { color: #2d7a6b; }
-    .updated { font-size: 13px; color: #8a8a85; margin-bottom: 30px; }
+    .updated { font-size: 13px; color: #8a8a85; margin-bottom: 20px; }
     .privacy-banner { background: #e8f2ef; border: 1px solid rgba(45,122,107,.2); border-radius: 12px; padding: 20px; margin: 20px 0; }
     .privacy-banner h2 { margin-top: 0; color: #245f54; }
+    .toc { background: #f6f3ee; border-radius: 12px; padding: 16px 20px; margin: 20px 0 8px; }
+    .toc ol { margin: 0; padding-left: 20px; }
+    .toc li { font-size: 14px; margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 14px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,.08); vertical-align: top; }
+    th { font-weight: 600; }
+    @media (prefers-color-scheme: dark) { th, td { border-bottom-color: rgba(255,255,255,.1); } }
   </style>
 </head>
 <body>
@@ -79,71 +88,128 @@
   <main>
     <h1 class="en">Privacy Policy</h1>
     <h1 class="zh">隐私政策</h1>
-    <p class="updated en">Effective date: September 29, 2026</p>
-    <p class="updated zh">生效日期：2026 年 9 月 29 日</p>
+    <p class="updated en">Effective date: October 7, 2026 &middot; Last updated: October 7, 2026</p>
+    <p class="updated zh">生效日期：2026 年 10 月 7 日 &middot; 最后更新：2026 年 10 月 7 日</p>
 
     <div class="privacy-banner">
-      <h2 class="en">In short: we don't collect your data</h2>
-      <h2 class="zh">一句话总结：我们不收集你的数据</h2>
-      <p class="en">Seeora has no user accounts and no self-hosted backend, and we don't include third-party tracking or ad SDKs. Every habit, check-in, and note you record lives only on your own device.</p>
-      <p class="zh">Seeora 无自有账号系统、无自有后端服务，也不含第三方追踪与广告 SDK。你记录的所有习惯、打卡、备注，都只存在你自己的设备本地。</p>
+      <h2 class="en">In short: your habit data stays on your device</h2>
+      <h2 class="zh">一句话总结：你的习惯数据保存在你自己的设备上</h2>
+      <p class="en">Seeora is a local-first habit tracker. The habits, check-ins, streaks and notes you record are stored on your own device. The app does not require an account, and we do not collect directly identifying information such as your name, email address or phone number. To process in-app purchases and to support restore purchases, we use a third-party purchase service, <strong>RevenueCat</strong>, which receives limited purchase and technical information as described in Section 3 below.</p>
+      <p class="zh">Seeora 是一款「本地优先」的习惯打卡应用。你记录的习惯、打卡、连续天数与备注，保存在你自己的设备上。本应用不需要注册账号，我们也不收集你的姓名、邮箱地址或电话号码等可直接识别身份的信息。为处理应用内购买并支持「恢复购买」，我们使用第三方内购服务 <strong>RevenueCat</strong>，它会接收有限的购买与技术信息，详见下文第 3 节。</p>
     </div>
 
-    <h2 class="en">1. Information we collect</h2>
-    <h2 class="zh">1. 我们收集的信息</h2>
-    <p class="en"><strong>We do not proactively collect any personal information.</strong> Seeora runs entirely on your device — no registration, no login, and no usage data uploaded. Your habits, check-ins, streaks, and notes are stored only in local storage on your machine (browser/app). We keep no copies on any self-hosted server and no analytics.</p>
-    <p class="zh"><strong>我们不会主动收集任何个人信息。</strong>Seeora 完全在设备本地运行，不要求注册、不登录、不上传任何使用数据。你创建的习惯、打卡记录、连续天数、备注说明等，均仅存储于本机（浏览器/应用的本地存储）。我们自有服务端无副本、无分析埋点。</p>
+    <div class="toc">
+      <ol class="en">
+        <li>Scope of this policy</li>
+        <li>What we collect &mdash; and what we do not</li>
+        <li>In-app purchases and our third-party service (RevenueCat)</li>
+        <li>Diagnostics</li>
+        <li>How we use information</li>
+        <li>Data retention and deletion</li>
+        <li>Your rights and choices</li>
+        <li>Children's privacy</li>
+        <li>Contact us</li>
+        <li>Changes to this policy</li>
+      </ol>
+      <ol class="zh">
+        <li>本政策的适用范围</li>
+        <li>我们收集什么、不收集什么</li>
+        <li>应用内购买与第三方服务（RevenueCat）</li>
+        <li>诊断信息</li>
+        <li>我们如何使用信息</li>
+        <li>数据保留与删除</li>
+        <li>你的权利与控制</li>
+        <li>儿童隐私</li>
+        <li>联系方式</li>
+        <li>政策变更</li>
+      </ol>
+    </div>
 
-    <h2 class="en">2. Local data storage</h2>
-    <h2 class="zh">2. 本地数据存储</h2>
+    <h2 class="en">1. Scope of this policy</h2>
+    <h2 class="zh">1. 本政策的适用范围</h2>
+    <p class="en">This policy applies to the Seeora app for iOS (the "App"), provided by individual developer <strong>Zhang Xinhua</strong>. It explains what information the App and its service providers handle, how we use it, and the choices you have. Contact details are in Section 9.</p>
+    <p class="zh">本政策适用于 Seeora iOS 应用（以下简称「本应用」），由个人开发者 <strong>张新华</strong> 提供。本政策说明本应用及其服务提供商会处理哪些信息、我们如何使用这些信息，以及你可以作出的选择。联系方式见第 9 节。</p>
+
+    <h2 class="en">2. What we collect &mdash; and what we do not</h2>
+    <h2 class="zh">2. 我们收集什么、不收集什么</h2>
+    <p class="en">To be precise, we separate what the App itself does from what our purchase service provider does. The App itself does <strong>not</strong> send your content anywhere:</p>
+    <p class="zh">为准确起见，我们将「本应用自身的行为」与「内购服务提供商的行为」分开说明。本应用自身<strong>不会</strong>将你的内容发送到任何地方：</p>
     <ul>
-      <li class="en">All app data is saved using device-local storage (e.g., browser <code>localStorage</code> or the app sandbox).</li>
-      <li class="zh">所有应用数据通过设备本地存储（如浏览器 <code>localStorage</code> / 应用沙盒）保存。</li>
-      <li class="en">Uninstalling the app or clearing local storage deletes this data, and we cannot restore it — because it never leaves your device.</li>
-      <li class="zh">卸载应用或清除本地存储会删除这些数据，且我们无法为你恢复——因为数据从未离开你的设备。</li>
-      <li class="en">We do not set any tracking cookies or use third-party ad or analytics SDKs.</li>
-      <li class="zh">我们不设置任何追踪 Cookie，也不使用第三方广告或分析 SDK。</li>
+      <li class="en"><strong>Your content stays local.</strong> Habits, check-ins, streaks, notes, archived items and migration records are stored only on your device. The App operates no server for this content, and we cannot read it. (If you use iCloud Backup on your iPhone, that device backup is created and managed by Apple under Apple's privacy policy &mdash; it is not operated by us.)</li>
+      <li class="zh"><strong>你的内容留在本地。</strong>习惯、打卡、连续天数、备注、归档项与迁移记录仅存储在你的设备上。我们没有为这些内容运营服务器，也无法读取它们。（若你在 iPhone 上开启了 iCloud 备份，该设备备份由 Apple 依其自身隐私政策创建与管理，并非由我们运营。）</li>
+      <li class="en"><strong>No account is required.</strong> Because the App has no sign-up, we do not collect your name, email address, phone number, contacts, precise location, or microphone content.</li>
+      <li class="zh"><strong>无需注册账号。</strong>由于本应用没有注册流程，我们不收集你的姓名、邮箱地址、电话号码、通讯录、精确位置或麦克风内容。</li>
+      <li class="en"><strong>Saving an achievement card.</strong> When you ask the App to save an achievement card, the image is generated on your device and written to your photo library by iOS at your request. The App does not browse, read or upload your other photos, and the card itself is not sent to us.</li>
+      <li class="zh"><strong>保存成就卡。</strong>当你选择把成就卡保存为图片时，该图片在你的设备上生成，并由 iOS 按你的请求写入相册。本应用不会浏览、读取或上传你的其他照片，这张卡片本身也不会发送给我们。</li>
+      <li class="en"><strong>No advertising or tracking SDKs.</strong> The App contains no third-party advertising SDKs and does not use your data to track you across other apps or websites.</li>
+      <li class="zh"><strong>无广告、无追踪 SDK。</strong>本应用不含第三方广告 SDK，也不会使用你的数据在其他应用或网站之间追踪你。</li>
     </ul>
 
-    <h2 class="en">3. In-app purchases (IAP)</h2>
-    <h2 class="zh">3. 应用内购买（IAP）</h2>
-    <p class="en">Seeora Pro is a one-time purchase completed through the <strong>Apple App Store</strong>, with <strong>RevenueCat</strong> handling purchase receipts as a wrapper. In this step:</p>
-    <p class="zh">Seeora 专业版为一次性买断，通过 <strong>Apple App Store（苹果应用商店）</strong> 完成支付，并由 <strong>RevenueCat</strong> 作为内购封装层处理购买凭证。在此环节：</p>
+    <h2 class="en">3. In-app purchases and our third-party service (RevenueCat)</h2>
+    <h2 class="zh">3. 应用内购买与第三方服务（RevenueCat）</h2>
+    <p class="en">Seeora Pro is a one-time purchase completed through the <strong>Apple App Store</strong>. Payment is handled by Apple. We do not receive or store your payment card number or bank account details.</p>
+    <p class="zh">Seeora 专业版为一次性买断，通过 <strong>Apple App Store（苹果应用商店）</strong> 完成支付。支付由 Apple 处理。我们不接收、也不存储你的支付卡号或银行账户信息。</p>
+    <p class="en">We use <strong>RevenueCat, Inc.</strong> as our purchase-management service provider, to validate purchase receipts, unlock Pro entitlements and support "restore purchases". In that role, RevenueCat receives and processes:</p>
+    <p class="zh">我们使用 <strong>RevenueCat, Inc.</strong> 作为内购管理服务提供商，用于验证购买凭据、解锁专业版权益并支持「恢复购买」。在此角色下，RevenueCat 会接收并处理：</p>
     <ul>
-      <li class="en">Payment is handled by Apple; account and transaction details are managed by Apple under its privacy policy. We do <strong>not receive</strong> your payment card number or other payment credentials.</li>
-      <li class="zh">支付由 Apple 处理，付款相关的账户与交易信息由 Apple 按其隐私政策管理，我们<strong>不接收你的付款卡号等支付凭据</strong>。</li>
-      <li class="en">RevenueCat processes the records necessary to support "restore purchases" as returned by Apple; its data handling follows the <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat Privacy Policy</a>.</li>
-      <li class="zh">RevenueCat 会按苹果回传处理与"已购权益"相关的必要记录，以支撑"恢复购买"功能；其数据处理遵循 <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat 隐私政策</a>。</li>
-      <li class="en">We do <strong>not store</strong> your purchase account or payment information.</li>
-      <li class="zh">我们自身<strong>不存储</strong>你的购买账户或支付信息。</li>
+      <li class="en">Purchase history and transaction information (for example, the product identifier, date of purchase and entitlement status);</li>
+      <li class="zh">购买历史与交易记录（例如商品标识、购买日期与权益状态）；</li>
+      <li class="en">The Apple receipt associated with your purchase;</li>
+      <li class="zh">与你购买相关的 Apple 收据信息；</li>
+      <li class="en">Basic technical context needed to validate the purchase, such as platform, operating-system version, app version, and country/locale.</li>
+      <li class="zh">完成购买验证所需的基础技术信息，例如平台、操作系统版本、应用版本、国家或语言地区。</li>
+    </ul>
+    <p class="en">This information is associated with a randomly generated anonymous identifier. It does not include your name or email address, and it cannot be used to determine who you are. RevenueCat's handling of data is described in the <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat Privacy Policy</a>.</p>
+    <p class="zh">这些信息与一个随机生成的匿名标识符相关联，不包含你的姓名或邮箱地址，也无法据以确定你的真实身份。RevenueCat 的数据处理方式见 <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat 隐私政策</a>。</p>
+    <p class="en"><strong>Third-party protection.</strong> We require, and confirm, that any third party with whom we share user data &mdash; here, Apple and RevenueCat &mdash; provides the same or equal protection of that data as described in this policy and as required by the App Store Review Guidelines.</p>
+    <p class="zh"><strong>第三方保护。</strong>我们要求并确认：与我们共享用户数据的任何第三方（此处为 Apple 与 RevenueCat）会依照本政策所述标准及 App Store 审核指南的要求，为该数据提供同等或同等级别的保护。</p>
+
+    <h2 class="en">4. Diagnostics</h2>
+    <h2 class="zh">4. 诊断信息</h2>
+    <p class="en">The App contains <strong>no third-party crash-reporting, analytics or attribution SDK</strong>, and we <strong>do not collect or upload crash logs, diagnostics or usage statistics</strong> from your device. We receive diagnostic information about a problem only if you choose to contact us and send it to us yourself. (If you have enabled the system setting "Share with App Developers" in iOS, Apple may collect crash and usage data under its own privacy policy; that collection is performed by Apple and is independent of us.)</p>
+    <p class="zh">本应用<strong>不含任何第三方崩溃上报、统计分析或归因 SDK</strong>，我们<strong>不会收集、也不会上传</strong>你设备上的崩溃日志、诊断信息或使用统计。只有当您主动联系我们并自行发送时，我们才会收到与问题有关的诊断信息。（若你在 iOS 系统设置中开启了「与 App 开发者共享」，Apple 可能依据其自身隐私政策收集崩溃与使用数据；该收集由 Apple 执行，与我们无关。）</p>
+
+    <h2 class="en">5. How we use information</h2>
+    <h2 class="zh">5. 我们如何使用信息</h2>
+    <ul>
+      <li class="en">To verify your Pro purchase status and unlock the corresponding features;</li>
+      <li class="zh">验证你的专业版购买状态并解锁相应功能；</li>
+      <li class="en">To support "restore purchases" so your purchased entitlement carries over to a new device;</li>
+      <li class="zh">支持「恢复购买」，使你的已购权益在更换设备后继续可用；</li>
+      <li class="en">To detect and prevent purchase-related errors or fraudulent transactions.</li>
+      <li class="zh">排查与预防购买环节的故障或异常交易。</li>
     </ul>
 
-    <h2 class="en">4. What we do not do</h2>
-    <h2 class="zh">4. 我们不会做的事</h2>
+    <h2 class="en">6. Data retention and deletion</h2>
+    <h2 class="zh">6. 数据保留与删除</h2>
     <ul>
-      <li class="en">We do not sell, rent, or share your personal data with third parties.</li>
-      <li class="zh">不会出售、出租或共享你的个人数据给第三方。</li>
-      <li class="en">We do not send ads or behavioral tracking to third parties.</li>
-      <li class="zh">不会向第三方发送广告或行为追踪。</li>
-      <li class="en">We do not upload any of your content without your consent.</li>
-      <li class="zh">不会在未经你同意的情况下上传你的任何内容。</li>
+      <li class="en"><strong>Local content.</strong> You control it entirely. Uninstalling the App, or using "Erase data" inside the App, removes it from your device. We keep no copy and cannot recover it for you.</li>
+      <li class="zh"><strong>本地内容。</strong>完全由你掌控。卸载应用或在应用内使用「抹掉数据」，即可将其从你的设备上删除。我们不保留任何副本，也无法为你恢复。</li>
+      <li class="en"><strong>Purchase and transaction records.</strong> Retained by Apple and by RevenueCat under their respective privacy policies, generally for as long as needed to validate purchases and to meet legal obligations.</li>
+      <li class="zh"><strong>购买与交易记录。</strong>由 Apple 与 RevenueCat 按其各自的隐私政策保留，通常为完成购买验证与履行法定义务所必需的期限。</li>
+      <li class="en"><strong>Backups you make yourself.</strong> If you use "Export data", the App writes a backup file into its own folder on your device and then opens the iOS share sheet. You can save that copy wherever you like &mdash; including to your own iCloud Drive through the Files app &mdash; or send it to another app. It is created and kept by you; we do not receive it.</li>
+      <li class="zh"><strong>你自己做的备份。</strong>若你使用「导出数据」，本应用会在设备的应用文件夹中生成一个备份文件，然后打开 iOS 分享面板。你可以把这份副本另存到你喜欢的位置——包括通过「文件」App 存进你自己的 iCloud 云盘——或发送到其他 App。它由你自己创建与保管，我们不会收到。</li>
     </ul>
 
-    <h2 class="en">5. Children's privacy</h2>
-    <h2 class="zh">5. 儿童隐私</h2>
-    <p class="en">Seeora is not designed for children under 13, and we do not proactively collect personal information from users of any age. If a parent discovers a child has used the app, since all data is stored locally, it can be removed by uninstalling the app or clearing local storage.</p>
-    <p class="zh">Seeora 不面向 13 岁以下儿童设计，我们也不主动收集任何年龄用户的个人信息。如家长发现儿童误使用了本应用，由于数据仅存于本地，可通过卸载或清除本地存储删除相关内容。</p>
+    <h2 class="en">7. Your rights and choices</h2>
+    <h2 class="zh">7. 你的权利与控制</h2>
+    <p class="en">You may contact us at any time using the email in Section 9 to request access to, correction of, or deletion of your data, or to withdraw consent you previously gave. Because the App has no account system, your content is always under your own control on your device: uninstalling the App or using "Erase data" deletes it. Where you believe we hold data about you, we will respond to your request within the time required by applicable law.</p>
+    <p class="zh">你可以随时通过第 9 节的邮箱联系我们，请求查询、更正或删除你的数据，或撤回你此前给出的同意。由于本应用没有账号系统，你的内容始终由你在设备上自行掌控：卸载应用或使用「抹掉数据」即可删除。若你认为我们持有与你相关的数据，我们将在适用法律要求的期限内回应你的请求。</p>
 
-    <h2 class="en">6. Your rights and how to contact us</h2>
-    <h2 class="zh">6. 你的权利与联系方式</h2>
-    <p class="en">Because we hold no cloud data about you, there is no need to request "data export/deletion" — your data already belongs solely to your device. If you have questions about this policy or need to reach us about an in-app purchase, email us at:</p>
-    <p class="zh">由于我们不持有你的任何云端个人数据，你无需申请"数据导出/删除"——数据本就只属于你的设备。如你对隐私政策有疑问，或就应用内购买相关事宜需要联系，请邮件至：</p>
-    <p><a href="mailto:365504860@qq.com">365504860@qq.com</a></p>
+    <h2 class="en">8. Children's privacy</h2>
+    <h2 class="zh">8. 儿童隐私</h2>
+    <p class="en">The App is not directed to children under 13, and we do not knowingly collect personal information from children. If a parent or guardian discovers that a child has used the App, all local content can be removed by uninstalling the App or using "Erase data" inside it.</p>
+    <p class="zh">本应用不面向 13 岁以下儿童，我们也不会在知情的情况下收集儿童的个人信息。如家长或监护人发现儿童使用了本应用，可通过卸载应用或使用应用内的「抹掉数据」删除全部本地内容。</p>
 
-    <h2 class="en">7. Changes to this policy</h2>
-    <h2 class="zh">7. 政策变更</h2>
-    <p class="en">If this policy is updated, we will publish the latest version in the app or on this page, marked with an "effective date." Continued use is deemed acceptance of the updated policy.</p>
-    <p class="zh">若本政策更新，我们会在应用内或本页面发布最新版本，并以"生效日期"标注。持续使用即视为接受更新后的政策。</p>
+    <h2 class="en">9. Contact us</h2>
+    <h2 class="zh">9. 联系方式</h2>
+    <p class="en">For any question about this policy, or to exercise the rights described above, email: <a href="mailto:365504860@qq.com">365504860@qq.com</a></p>
+    <p class="zh">如对本政策有任何疑问，或需要行使上述权利，请邮件联系：<a href="mailto:365504860@qq.com">365504860@qq.com</a></p>
+
+    <h2 class="en">10. Changes to this policy</h2>
+    <h2 class="zh">10. 政策变更</h2>
+    <p class="en">If this policy is updated, we will publish the latest version on this page and update the "Last updated" date at the top. For material changes we will also provide notice in the App. Continued use of the App means you accept the updated policy.</p>
+    <p class="zh">若本政策发生更新，我们会在本页面发布最新版本，并更新顶部的「最后更新」日期。对于重大变更，我们还会在应用内作出提示。继续使用本应用即表示你接受更新后的政策。</p>
   </main>
 
   <footer style="margin-top:50px; border-top:1px solid rgba(0,0,0,.1); padding-top:20px; font-size:14px; display:flex; flex-wrap:wrap; gap:15px;">
