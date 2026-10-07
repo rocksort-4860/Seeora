@@ -3,53 +3,72 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Seeora · v8</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%232d7a6b'/><path d='M6.5 12.2 L10.2 16 L17.5 8.2' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%2300A898'/><path d='M6.5 12.2 L10.2 16 L17.5 8.2' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <style>
 :root{
-  --brand:#2d7a6b;--brandRgb:45,122,107;--brand-deep:#245f54;
-  --brand-soft:#e8f2ef;--brand-soft-text:#245f54;
+  --brand:#00A898;--brandRgb:0,168,152;--brand-deep:#006B5A;
+  --brand-soft:#e0f7f3;--brand-soft-text:#006B5A;
   --rest:#94a8a2;--missFill:rgba(0,0,0,0.04);--missStroke:rgba(0,0,0,0.12);
   --bg:#f1ede6;--bg-outer:#e3ded4;--card:#ffffff;--input-bg:#ffffff;
   --ink:#2a2a2a;--muted:#8a8a85;--tagline:#b9b3a8;--hair:rgba(0,0,0,0.06);
   --tabbar-bg:rgba(255,255,255,.94);
-  --mig-card-bg:#eef4f2;--mig-card-border:rgba(45,122,107,.20);--mig-card-hair:rgba(45,122,107,.14);--mig-t:#245f54;
+  --mig-card-bg:#e6f7f4;--mig-card-border:rgba(0,168,152,.20);--mig-card-hair:rgba(0,168,152,.14);--mig-t:#006B5A;
   --add-row-border:rgba(0,0,0,0.10);--add-row-bg:rgba(255,255,255,.55);
   --ringGuide:rgba(0,0,0,0.06);--ringTodayStroke:#f1ede6;
   --gridLine:rgba(0,0,0,0.06);--axisLine:rgba(0,0,0,0.12);--axisText:#8a8a85;--heatEmpty:rgba(0,0,0,0.05);
   --icon-btn-shadow:0 1px 2px rgba(0,0,0,.03);
   --card-shadow:0 1px 2px rgba(0,0,0,.03),0 4px 12px rgba(0,0,0,.05);
   --card-shadow-press:0 1px 2px rgba(0,0,0,.04);
+  /* ★ 2026-10-07（哥哥：「编辑和删除按钮颜色不正、很奇怪」）：
+     旧值 编辑 #b8932c（土黄）/ 删除 #b23b34（暗砖红）—— 两个色都偏暗偏脏，
+     还都是「黄＋红」的暖色，跟青绿主色系完全撞，看着像打翻的调色盘。
+     改用 **iOS 系统标准色**：编辑=systemGray、删除=systemRed。
+     灰色=中性/非破坏性，红色=破坏性，这是苹果左滑操作的通用语义，且不与品牌青绿抢戏。 */
+  --act-edit:#8e8e93;--act-del:#ff3b30;
 }
 [data-theme="dark"]{
-  --brand:#4a9c8a;--brandRgb:74,156,138;--brand-deep:#2d7a6b;
-  --brand-soft:rgba(74,156,138,0.14);--brand-soft-text:#7fc0b0;
+  --brand:#00A898;--brandRgb:0,168,152;--brand-deep:#00A898;
+  --brand-soft:rgba(0,168,152,0.14);--brand-soft-text:#4dd8c4;
   --rest:#6b7d78;--missFill:rgba(255,255,255,0.05);--missStroke:rgba(255,255,255,0.15);
   --bg:#1c1b19;--bg-outer:#0f0e0d;--card:#292725;--input-bg:#322f2c;
   --ink:#ebe8e2;--muted:#8a8a85;--tagline:#6b6862;--hair:rgba(255,255,255,0.08);
   --tabbar-bg:rgba(37,36,33,.94);
-  --mig-card-bg:rgba(74,156,138,0.10);--mig-card-border:rgba(74,156,138,.28);--mig-card-hair:rgba(74,156,138,.15);--mig-t:#7fc0b0;
+  --mig-card-bg:rgba(0,168,152,0.10);--mig-card-border:rgba(0,168,152,.28);--mig-card-hair:rgba(0,168,152,.15);--mig-t:#4dd8c4;
   --add-row-border:rgba(255,255,255,0.12);--add-row-bg:rgba(255,255,255,.03);
   --ringGuide:rgba(255,255,255,0.08);--ringTodayStroke:#1c1b19;
   --gridLine:rgba(255,255,255,0.06);--axisLine:rgba(255,255,255,0.12);--axisText:#8a8a85;--heatEmpty:rgba(255,255,255,0.06);
   --icon-btn-shadow:0 1px 2px rgba(0,0,0,.2);
   --card-shadow:0 1px 2px rgba(0,0,0,.25),0 4px 12px rgba(0,0,0,.3);
   --card-shadow-press:0 1px 2px rgba(0,0,0,.3);
+  /* iOS 深色模式下的系统灰 / 系统红（比浅色档各提亮一档，避免在深底上发闷） */
+  --act-edit:#98989d;--act-del:#ff453a;
 }
 /* ===== 启动画面 splash ===== */
-#splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:linear-gradient(160deg,#ffffff 0%,#e8f2ef 100%);transition:opacity .45s ease,visibility .45s ease}
+/* 与 #app 同尺寸同边框 —— 启动画面期间不会露出机身缝隙 */
+#splash{position:fixed;inset:0;margin:auto;width:399px;height:min(844px,calc(100dvh - 40px));z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;border:12px solid #1b1b1f;border-radius:52px;overflow:hidden;
+  background:linear-gradient(160deg,#ffffff 0%,#e0f7f3 100%);transition:opacity .45s ease,visibility .45s ease}
 #splash.splash-hidden{opacity:0;visibility:hidden;pointer-events:none}
 #splash .sp-logo{width:min(300px,64vw);height:auto;display:block;animation:sp-pop .5s ease}
 #splash .sp-name{margin-top:18px;font-size:26px;font-weight:700;letter-spacing:.5px;color:var(--brand)}
 #splash .sp-slogan{margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:.2px}
-#splash .sp-spin{margin-top:26px;width:26px;height:26px;border-radius:50%;border:3px solid rgba(45,122,107,.18);border-top-color:var(--brand);animation:sp-spin .8s linear infinite}
+#splash .sp-spin{margin-top:26px;width:26px;height:26px;border-radius:50%;border:3px solid rgba(0,168,152,.18);border-top-color:var(--brand);animation:sp-spin .8s linear infinite}
 @keyframes sp-spin{to{transform:rotate(360deg)}}
 @keyframes sp-pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
-body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center;min-height:100vh;transition:background-color .25s ease}
-#app{width:375px;min-height:100vh;background:var(--bg);position:relative;overflow:hidden;box-shadow:0 0 30px rgba(0,0,0,.10);transition:background-color .25s ease}
-.view{display:none}.view.on{display:block}
+body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:20px 0;transition:background-color .25s ease}
+/* ★ 2026-10-07：加「手机外框」，让原型一眼看出是手机屏幕（哥哥要求更直观）。
+   做法：不改 DOM 结构（弹层/回归脚本都按 #app 定位），只把 #app 变成带边框的机身。
+   宽度 399 = 原内容宽 375 + 两侧各 12px 边框（box-sizing:border-box），
+   所以**内容宽度仍是 375，所有既有布局不受影响**。
+   高度取 min(844px, 视口高-40)：既像真机比例，小屏窗口下也不会被截断。 */
+#app{width:399px;height:min(844px,calc(100dvh - 40px));background:var(--bg);position:relative;overflow:hidden;
+  border:12px solid #1b1b1f;border-radius:52px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.06),0 26px 60px rgba(0,0,0,.35);transition:background-color .25s ease}
+/* ★ 2026-10-07：改为「视口定高 + 各视图内部滚动」（原来是 min-height 让 body 滚动）。
+   原因：右侧滑入的整页弹层用 position:absolute 相对 #app 定位，必须让 #app 恰好等于视口高度，
+   否则长列表会把 #app 撑高，弹层与 Tab 栏都会跑到视口外。 */
+.view{display:none;position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch}.view.on{display:block}
 .brand{padding:12px 16px 0;text-align:center}
 .brand-row{display:flex;align-items:center;justify-content:center;gap:8px}
 .brand-name{font-size:20px;font-weight:700;letter-spacing:.5px}
@@ -68,7 +87,7 @@ body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"Pi
 .h-sub{font-size:12px;color:var(--muted);margin-top:3px}
 .mini{margin-top:8px}
 .chev{flex:none;margin-left:-2px;margin-right:-2px;opacity:.85}
-.check{width:44px;height:44px;border-radius:999px;border:1.5px solid var(--missStroke);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:border-color .3s ease,background-color .3s ease;flex:none}
+.check{width:44px;height:44px;border-radius:999px;border:1.5px solid var(--brand);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:border-color .3s ease,background-color .3s ease;flex:none}
 .check.on{background:var(--brand);border-color:var(--brand)}
 .check svg{width:22px;height:22px}
 .check path{stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;fill:none;opacity:0;transition:opacity .3s ease}
@@ -111,7 +130,7 @@ body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"Pi
 .big-btn.rest{background:var(--rest);color:#fff}
 .row{display:flex;align-items:center;justify-content:space-between;margin:10px 16px 0;background:var(--card);border-radius:14px;padding:12px 14px;box-shadow:var(--card-shadow)}
 .row-lab{font-size:15px}.row-sub{font-size:11px;color:var(--muted);margin-top:3px}
-.tick{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--missStroke);background:var(--input-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s ease;flex:none}
+.tick{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--brand);background:var(--input-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s ease;flex:none}
 .tick svg{width:16px;height:16px}
 .tick path{stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;fill:none;opacity:0;transition:opacity .25s ease}
 .tick.on{background:var(--rest);border-color:var(--rest)}.tick.on path{opacity:1}
@@ -144,9 +163,25 @@ body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"Pi
 .mig-swipe:first-child{border-top:none}
 .mig-actions{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:stretch}
 .mig-actions span{display:flex;align-items:center;justify-content:center;width:60px;font-size:12.5px;font-weight:600;color:#fff;cursor:pointer}
-.mig-act-edit{background:#b8932c}.mig-act-del{background:#b23b34}
+.mig-act-edit{background:var(--act-edit)}.mig-act-del{background:var(--act-del)}
 .mig-front{position:relative;background:var(--mig-card-bg);display:flex;align-items:center;gap:10px;padding:9px 0;transition:transform .22s ease;will-change:transform}
 .mig-swipe.open .mig-front{transform:translateX(-120px)}
+
+/* ===== 习惯卡左滑（2026-10-07 哥哥要求：与迁移条同款交互，补上编辑/删除） =====
+   结构：.h-swipe(裁剪容器) > [.h-actions 绝对定位在右侧] + [.card 前景]
+   为什么外面要包一层 .h-swipe 而不是直接给 .card 加绝对定位按钮：
+     .card 自带 margin 与圆角，若直接改成相对定位容器，会连带影响 :active 缩放与列表间距；
+     包一层后 .h-swipe 承接原来的「外边距 + 圆角 + 裁剪」，.card 的 margin 归零，其余规则原样不动。
+   宽 144 = 编辑 72 + 删除 72，与迁移条的 120（60×2）同比例但更宽（卡片更大、字更大）。 */
+.h-swipe{position:relative;overflow:hidden;margin:10px 16px;border-radius:14px;touch-action:pan-y}
+.h-swipe .card{margin:0;transition:transform .22s ease,box-shadow .12s ease;will-change:transform}
+.h-actions{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:stretch}
+.h-actions span{display:flex;align-items:center;justify-content:center;width:72px;font-size:14px;font-weight:600;color:#fff;cursor:pointer}
+.h-act-edit{background:var(--act-edit)}.h-act-del{background:var(--act-del)}
+.h-swipe.open .card{transform:translateX(-144px)}
+/* 滑动过程中：禁掉过渡与 :active 缩放，否则手指刚按下时卡片会先缩一下再跟手，很出戏 */
+.h-swipe.swiping .card{transition:none}
+.h-swipe.swiping .card:active{transform:none}
 .mig-em{width:30px;height:30px;border-radius:999px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;border:1px solid var(--hair)}
 .mig-main{flex:1;min-width:0}
 .mig-n1{font-size:13.5px;font-weight:600}
@@ -172,17 +207,49 @@ body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"Pi
 .pro-card-t{font-size:15px;font-weight:700}
 .pro-card-s{font-size:12px;opacity:.85;margin-top:4px}
 .pro-card-a{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600}
-.tabbar{position:absolute;left:0;right:0;bottom:0;height:56px;background:var(--tabbar-bg);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);border-top:1px solid var(--hair);display:flex;z-index:15;transition:background-color .25s ease}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;color:var(--muted);cursor:pointer;gap:3px}
-.tab .ti{font-size:16px;line-height:1}
-.tab.on{color:var(--brand)}
-.pad-bottom{height:70px}
+/* ★ 2026-10-07（哥哥第二轮反馈：「tab 入口的底色和下方的白色色块大小不一致」）：
+   量出来的真问题 —— 选中色块四周留白**不对称**：
+     原值 padding:9px 12px → 左右各 12px，上下各 9px，
+     53×171 的青绿块被塞在 72 高的白条里，上边 9 下边 9 左 12 右 12
+     → 色块「扁扁地卡在偏上的位置」，与白条的视觉大小关系不是整数倍，看着别扭。
+   改法：把 padding 收成**四边统一的 12px**，并把白条升高到 80px，
+   于是色块 = 169.5 × 55，四周留白一律 12px，色块与白条形成规整的等比关系。
+   白条升高的 8px 同时让可点区从 53 涨到 55（哥哥上一轮要的「更好点」不回退）。 */
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:80px;background:var(--tabbar-bg);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);box-shadow:inset 0 1px 0 var(--hair);display:flex;gap:12px;padding:12px;z-index:15;transition:background-color .25s ease}
+/* ★ 2026-10-07 改造（哥哥要求：更好点、图标文字更大、选中用底色）：
+   ① 每块内部改为「左图标 + 右文字」横向并列（原来是图标在上文字在下的竖排，11px 太小）；
+   ② 图标 16 → 24px、文字 11 → 15px，命中区从 56 高整块升到整块可点；
+   ③ ★ 选中态**只换底色**（--brand-soft），**不改字体颜色** —— 两态文字都用 --muted。
+   注：--brand-soft(#e0f7f3) 是**面**（fill），比 --brand 亮档浅一档，
+   与白条形成「浅青块浮在白底上」的关系，不是两块同色。 */
+.tab{flex:1;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:9px;font-size:15px;font-weight:600;color:var(--muted);cursor:pointer;border-radius:16px;padding:0 10px;transition:background-color .2s ease}
+.tab:active{background:var(--hair)}
+.tab.on{background:var(--brand-soft)}
+.tab .ti{font-size:24px;line-height:1}
+/* 白条从 72 → 80，内容底部留白同步 +8，滚到底时最后一行不会被白条多吃一截 */
+.pad-bottom{height:96px}
 .sheet-mask{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:30;opacity:0;pointer-events:none;transition:opacity .25s ease}
 .sheet-mask.on{opacity:1;pointer-events:auto}
-.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--bg);border-radius:20px 20px 0 0;z-index:31;transform:translateY(102%);transition:transform .3s cubic-bezier(.2,.8,.2,1),background-color .25s ease;padding:8px 16px 20px;max-height:88%;overflow-y:auto}
-.sheet.on{transform:translateY(0)}
-.sheet-bar{width:36px;height:4px;border-radius:999px;background:var(--hair);margin:6px auto 12px}
-.sheet-title{font-size:19px;font-weight:700;margin-bottom:14px}
+/* ★ 2026-10-07 第二次改版：底部抽屉 →「右侧滑入的整页」（哥哥：从最下方滑出不像 iOS，要从右侧出现）
+   做法：
+   - .sheet 铺满 #app（top/right/bottom/left:0），收起时 translateX(100%) 推到右侧屏外，
+     由 #app 的 overflow:hidden 裁掉，不产生横向滚动。
+   - 隐藏拖拽条(.sheet-bar)与右上角 ✕(.sheet .pay-close)，改由顶部导航栏（左返回 + 居中标题）承担。
+   - .behind = 被压到左侧、留在背后的上一层，用于做出 iOS push/pop 手感（返回时上层滑回）。
+   - 收起时仍保留 pointer-events:none（与 10-07 修的「收起弹层拦点击 / 双弹层」同源）。
+   注意：.behind 规则必须排在 .on 之后，二者同时存在时才能覆盖 transform。 */
+.sheet{position:absolute;top:0;right:0;bottom:0;left:0;background:var(--bg);z-index:31;transform:translateX(100%);transition:transform .34s cubic-bezier(.32,.72,0,1),background-color .25s ease,visibility 0s linear .34s;padding:0 16px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch;pointer-events:none;visibility:hidden}
+.sheet.on{transform:translateX(0);pointer-events:auto;visibility:visible;transition:transform .34s cubic-bezier(.32,.72,0,1),background-color .25s ease,visibility 0s}
+.sheet.behind{transform:translateX(-26%);pointer-events:none;visibility:visible;transition:transform .34s cubic-bezier(.32,.72,0,1),background-color .25s ease,visibility 0s}
+.sheet-bar{display:none}
+.sheet .pay-close{display:none}
+/* 顶部导航栏：经典 iOS 页面（左返回 + 居中标题），随内容吸顶 */
+.page-nav{position:sticky;top:0;z-index:3;height:52px;margin:0 -16px 10px;background:var(--bg);border-bottom:1px solid var(--hair)}
+.page-back{position:absolute;left:4px;top:50%;transform:translateY(-50%);width:46px;height:46px;border:0;background:transparent;color:var(--brand);font-size:30px;line-height:1;cursor:pointer;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:inherit;z-index:2}
+.page-back:active{background:var(--hair)}
+.page-nav .sheet-title{width:100%;box-sizing:border-box;text-align:center;font-size:17px;font-weight:600;color:var(--ink);margin:0;padding:0 54px;line-height:52px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 纯关闭按钮已被顶部返回取代，隐藏避免重复 */
+#btnSetClose,#btnThemeClose,#btnLangClose,#btnDocClose{display:none}
 .field{margin-bottom:14px}
 .field-lab{font-size:12px;color:var(--muted);margin-bottom:6px}
 .rem-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:14px;box-shadow:var(--card-shadow)}
@@ -209,23 +276,56 @@ body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"Pi
 .set-row:first-child{border-top:none}
 .set-row:active{background:rgba(0,0,0,.03)}
 [data-theme="dark"] .set-row:active{background:rgba(255,255,255,.04)}
-.set-row .t1{font-size:15px;font-weight:500;color:var(--ink)}
-.set-row .t2{font-size:11px;color:var(--muted);margin-top:3px}
-.set-row .val{font-size:14px;color:var(--muted);flex:none}
+/* ★ 2026-10-07（哥哥第二轮反馈：「字体不美观」）—— 改成苹果的「双色调分层」：
+   ① 颜色：文字**不用亮档** --brand(#00A898) —— 它是给图形/按钮/描边用的，
+      白底上对比度仅 2.9:1（低于 WCAG AA 的 4.5:1），大面积做正文会「发飘、像链接」。
+      文字改走**深档** --brand-soft-text（亮色 #006B5A≈6.5:1 / 深色 #4dd8c4），
+      同一品牌色系但沉稳、有分量，这就是苹果「不同位置用不同明度」的做法。
+   ② 字重：600 → 500。Windows 的「微软雅黑」只有 Regular(400)/Bold(700) 两档，
+      请求 600 会被**向上取整成 Bold**，中文标题糊成一坨；500 落到 Regular，
+      iOS 的 PingFang SC 则命中 Medium —— 两个平台都干净。
+   ③ 字号：15 → 16px，向 iOS 设置页（17pt 正文）靠拢。
+   右侧当前值 .val 由 14 → 15px，与标题同屏时不被压得太小。 */
+.set-row .t1{font-size:16px;font-weight:500;color:var(--brand-soft-text);letter-spacing:.1px}
+.set-row .t2{font-size:12px;color:var(--muted);margin-top:3px}
+.set-row .val{font-size:15px;color:var(--muted);flex:none}
+/* ★ 2026-10-07：区分「可点行」与「纯信息行」—— 苹果规范里 tint 色（品牌色）只给**可操作**的项，
+   纯展示的信息（Version）用普通文字色，否则用户会以为能点进去。
+   反向保护：只有 .is-static 的行会被压回 --ink，可点行不受影响。 */
+.set-row.is-static{cursor:default}
+.set-row.is-static:active{background:transparent}
+.set-row.is-static .t1{color:var(--ink);font-weight:400}
 .set-row .arrow{color:var(--muted);font-size:14px;flex:none;opacity:.7}
 .set-row .t1-wrap{flex:1;min-width:0}
 .pay-close{position:absolute;top:14px;right:16px;width:32px;height:32px;border-radius:999px;border:0;background:var(--hair);font-size:14px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
 .pay-hero{text-align:center;padding:6px 0 18px}
-.pay-icon{width:56px;height:56px;display:block;margin:0 auto 12px}
+/* ★ 2026-10-07：付费墙顶部图标改为品牌标后，尺寸从 56×56 方框改成 3:1 横版。
+   品牌标（三联圆＋连线）原设计比例就是 240:80，塞进正方形框会被 SVG 按
+   preserveAspectRatio 缩成中间一条 56×18.7 的细条 → 缩小一半、显得没分量。
+   132×44 正好 3:1，横向占满又保持原比例，视觉重量与原来的 56 圆相当。 */
+.pay-icon{width:132px;height:44px;display:block;margin:0 auto 12px}
 .pay-title{font-size:22px;font-weight:700;margin:0 0 4px}
 .pay-sub{font-size:13px;color:var(--muted);margin:0}
 .pay-benefits{list-style:none;padding:0;margin:0 0 18px;background:var(--card);border-radius:14px;overflow:hidden;box-shadow:var(--card-shadow)}
 .pay-benefits li{position:relative;padding:12px 16px 12px 40px;border-top:1px solid var(--hair)}
 .pay-benefits li:first-child{border-top:none}
 .pay-benefits li b{display:block;font-size:15px;font-weight:600}
-.pay-benefits li span{font-size:12px;color:var(--muted);margin-top:2px;display:block}
-.pay-benefits li::before{content:"✓";position:absolute;left:14px;top:14px;color:var(--brand);font-weight:700;font-size:14px}
+/* ★ 2026-10-07（按哥哥定稿）：权益前的标记统一为「绿圈白对号」徽章。
+   演变：最早 li::before{content:"✓"}（四条共用同一个字符对号）→ 中间试过四条各自线性图标
+   → 哥哥定稿为统一徽章（见 HTML 里的注释）。
+   20px 实心 --brand 圆 + #fff 对号：浅色深色都清晰，卡片底色上比细线图标更醒目。 */
+.pay-ic{position:absolute;left:13px;top:12px;width:20px;height:20px;display:block}
 .pay-actions{display:flex;flex-direction:column;gap:10px}
+/* ★ 2026-10-07：试用 / 买断两个主 CTA 加高（目标 56）。
+   ⚠️ 关键：必须带 flex:none —— .btn 全局是 flex:1（在横向的 .sheet-actions 里分配宽度），
+   而 .pay-actions 是**纵向** flex 容器：此时 flex:1 等价 flex-basis:0%，
+   会把 height 直接压掉，按钮退化成文字行高（实测 24px）——
+   这才是「看着矮、不好点」的真因，只写 height 是没用的。
+   只作用于 .pay-actions，表单里的保存/取消保持原样。 */
+.pay-actions .btn{flex:none;height:56px;font-size:17px}
+/* ★ 2026-10-07：恢复购买按钮 —— 透明底 + 品牌色字 + 细描边。
+   与上面两个主 CTA 同高（56px，好点按），但视觉更轻，不抢「试用 / 直接购买」的主次。 */
+.pay-actions .btn-restore{background:transparent;color:var(--brand);border:1.5px solid var(--brand)}
 .pay-foot{display:flex;justify-content:center;gap:6px;margin-top:14px;font-size:12px;color:var(--muted)}
 .pay-foot span{cursor:pointer}
 .pay-fine{font-size:11px;color:var(--muted);text-align:center;margin:8px 0 0;line-height:1.5}
@@ -237,7 +337,7 @@ body{background:var(--bg-outer);font-family:-apple-system,BlinkMacSystemFont,"Pi
 .pay-fail-t{font-size:15px;font-weight:700;color:var(--brand-soft-text);margin:0 0 6px}
 .pay-fail-s{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.5}
 .pay-retry{display:inline-block;padding:8px 20px;background:var(--brand);color:#fff;border-radius:999px;font-size:14px;font-weight:600;border:0;cursor:pointer;font-family:inherit}
-.doc-sheet{max-height:88%}
+/* .doc-sheet 的 max-height 已随「整页」改版移除（整页本就铺满，无需限高） */
 .doc-title{font-size:22px;font-weight:700;margin:0 0 6px}
 .doc-updated{font-size:11px;color:var(--muted);margin:0 0 18px}
 .doc-h{font-size:15px;font-weight:700;margin:20px 0 8px}
@@ -268,14 +368,14 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
 <body>
 <div id="splash" aria-hidden="true">
   <svg class="sp-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" aria-label="Seeora">
-    <line x1="70" y1="40" x2="90" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
-    <line x1="150" y1="40" x2="170" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
-    <circle cx="40" cy="40" r="30" fill="#2d7a6b"/>
+    <line x1="70" y1="40" x2="90" y2="40" stroke="#00A898" stroke-width="8" stroke-linecap="round"/>
+    <line x1="150" y1="40" x2="170" y2="40" stroke="#00A898" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="40" cy="40" r="30" fill="#00A898"/>
     <path d="M25 40 L35 50 L55 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="120" cy="40" r="30" fill="#2d7a6b"/>
+    <circle cx="120" cy="40" r="30" fill="#00A898"/>
     <path d="M105 40 L115 50 L135 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="200" cy="40" r="30" fill="none" stroke="#2d7a6b" stroke-width="8"/>
-    <ellipse cx="200" cy="40" rx="12" ry="4" fill="#2d7a6b"/>
+    <circle cx="200" cy="40" r="30" fill="none" stroke="#00A898" stroke-width="8"/>
+    <ellipse cx="200" cy="40" rx="12" ry="4" fill="#00A898"/>
   </svg>
   <div class="sp-name">Seeora</div>
   <div class="sp-slogan"></div>
@@ -300,14 +400,14 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
   <div class="brand">
     <div class="brand-row">
       <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" aria-label="Seeora">
-        <line x1="70" y1="40" x2="90" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
-        <line x1="150" y1="40" x2="170" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
-        <circle cx="40" cy="40" r="30" fill="#2d7a6b"/>
+        <line x1="70" y1="40" x2="90" y2="40" stroke="#00A898" stroke-width="8" stroke-linecap="round"/>
+        <line x1="150" y1="40" x2="170" y2="40" stroke="#00A898" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="40" cy="40" r="30" fill="#00A898"/>
         <path d="M25 40 L35 50 L55 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="120" cy="40" r="30" fill="#2d7a6b"/>
+        <circle cx="120" cy="40" r="30" fill="#00A898"/>
         <path d="M105 40 L115 50 L135 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="200" cy="40" r="30" fill="none" stroke="#2d7a6b" stroke-width="8"/>
-        <ellipse cx="200" cy="40" rx="12" ry="4" fill="#2d7a6b"/>
+        <circle cx="200" cy="40" r="30" fill="none" stroke="#00A898" stroke-width="8"/>
+        <ellipse cx="200" cy="40" rx="12" ry="4" fill="#00A898"/>
       </svg>
       <span class="brand-name" id="brandHome"></span>
     </div>
@@ -328,14 +428,14 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
   <div class="brand">
     <div class="brand-row">
       <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" aria-label="Seeora">
-        <line x1="70" y1="40" x2="90" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
-        <line x1="150" y1="40" x2="170" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
-        <circle cx="40" cy="40" r="30" fill="#2d7a6b"/>
+        <line x1="70" y1="40" x2="90" y2="40" stroke="#00A898" stroke-width="8" stroke-linecap="round"/>
+        <line x1="150" y1="40" x2="170" y2="40" stroke="#00A898" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="40" cy="40" r="30" fill="#00A898"/>
         <path d="M25 40 L35 50 L55 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="120" cy="40" r="30" fill="#2d7a6b"/>
+        <circle cx="120" cy="40" r="30" fill="#00A898"/>
         <path d="M105 40 L115 50 L135 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="200" cy="40" r="30" fill="none" stroke="#2d7a6b" stroke-width="8"/>
-        <ellipse cx="200" cy="40" rx="12" ry="4" fill="#2d7a6b"/>
+        <circle cx="200" cy="40" r="30" fill="none" stroke="#00A898" stroke-width="8"/>
+        <ellipse cx="200" cy="40" rx="12" ry="4" fill="#00A898"/>
       </svg>
       <span class="brand-name" id="brandDetail"></span>
     </div>
@@ -375,14 +475,14 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
   <div class="brand">
     <div class="brand-row">
       <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" aria-label="Seeora">
-        <line x1="70" y1="40" x2="90" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
-        <line x1="150" y1="40" x2="170" y2="40" stroke="#2d7a6b" stroke-width="8" stroke-linecap="round"/>
-        <circle cx="40" cy="40" r="30" fill="#2d7a6b"/>
+        <line x1="70" y1="40" x2="90" y2="40" stroke="#00A898" stroke-width="8" stroke-linecap="round"/>
+        <line x1="150" y1="40" x2="170" y2="40" stroke="#00A898" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="40" cy="40" r="30" fill="#00A898"/>
         <path d="M25 40 L35 50 L55 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="120" cy="40" r="30" fill="#2d7a6b"/>
+        <circle cx="120" cy="40" r="30" fill="#00A898"/>
         <path d="M105 40 L115 50 L135 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="200" cy="40" r="30" fill="none" stroke="#2d7a6b" stroke-width="8"/>
-        <ellipse cx="200" cy="40" rx="12" ry="4" fill="#2d7a6b"/>
+        <circle cx="200" cy="40" r="30" fill="none" stroke="#00A898" stroke-width="8"/>
+        <ellipse cx="200" cy="40" rx="12" ry="4" fill="#00A898"/>
       </svg>
       <span class="brand-name" id="brandHonors"></span>
     </div>
@@ -436,8 +536,10 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
   </div>
   <div class="set-group-title" id="grpData"></div>
   <div class="set-list">
-    <div class="set-row" id="rowExport" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="exportLab"></div><div class="t2" id="exportSub"></div></div><span class="arrow">›</span></div>
-    <div class="set-row" id="rowImport" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="importLab"></div><div class="t2" id="importSub"></div></div><span class="arrow">›</span></div>
+    <div class="set-row" id="rowExport" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="exportLab"></div></div><span class="arrow">›</span></div>
+    <div class="set-row" id="rowImport" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="importLab"></div></div><span class="arrow">›</span></div>
+    <!-- ★ 2026-10-07（哥哥定稿）：设置页「数据」组**只保留导出 / 导入**两条；
+         恢复购买入口从设置页**移除**，只在付费墙作为正式按钮出现（一个入口，不重复）。 -->
   </div>
   <div class="set-group-title" id="grpAbout"></div>
   <div class="set-list">
@@ -445,7 +547,7 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
     <div class="set-row" id="rowFaq" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="faqLab"></div></div><span class="arrow">›</span></div>
     <div class="set-row" id="rowPrivacy" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="privacyLab"></div></div><span class="arrow">›</span></div>
     <div class="set-row" id="rowTerms" role="button" tabindex="0"><div class="t1-wrap"><div class="t1" id="termsLab"></div></div><span class="arrow">›</span></div>
-    <div class="set-row" style="cursor:default"><div class="t1-wrap"><div class="t1" id="versionLab"></div></div><span class="val">v8.0</span></div>
+    <div class="set-row is-static"><div class="t1-wrap"><div class="t1" id="versionLab"></div></div><span class="val">v8.0</span></div>
   </div>
   <div class="sheet-actions" style="margin-top:16px"><button class="btn btn-ghost" id="btnSetClose"></button></div>
 </div>
@@ -506,7 +608,19 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
   <div class="sheet-bar"></div>
   <button class="pay-close" id="btnPayClose">✕</button>
   <div class="pay-hero">
-    <svg class="pay-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="var(--brand)"/><path d="M6.5 12.2 L10.2 16 L17.5 8.2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <!-- ★ 2026-10-07：付费墙顶部图标由旧的「绿圈白对号」占位图换成 Seeora 品牌标
+         （三圆串联 ✓✓○），与首页 / 详情 / 成就页三处页标题的品牌标完全同款，
+         画法直接复用 #splash .sp-logo 的那套路径，避免各处跑偏。 -->
+    <svg class="pay-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" role="img" aria-label="Seeora">
+      <line x1="70" y1="40" x2="90" y2="40" stroke="#00A898" stroke-width="8" stroke-linecap="round"/>
+      <line x1="150" y1="40" x2="170" y2="40" stroke="#00A898" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="30" fill="#00A898"/>
+      <path d="M25 40 L35 50 L55 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="120" cy="40" r="30" fill="#00A898"/>
+      <path d="M105 40 L115 50 L135 30" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="200" cy="40" r="30" fill="none" stroke="#00A898" stroke-width="8"/>
+      <ellipse cx="200" cy="40" rx="12" ry="4" fill="#00A898"/>
+    </svg>
     <h2 class="pay-title" id="payTitle"></h2>
     <p class="pay-sub" id="paySub"></p>
   </div>
@@ -522,17 +636,36 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
     <button class="pay-retry" id="payRetry"></button>
   </div>
 
+  <!-- ★ 2026-10-07（按哥哥定稿）：每条权益前统一为「绿圈白对号」徽章。
+       画法直接复用原顶部那枚图标（实心 --brand 圆 + 白色对号），
+       与 App 的绿色主视觉一致，且 20px 下比细线条图标更醒目、更「一眼看清」。 -->
   <ul class="pay-benefits">
-    <li><b id="b1t"></b><span id="b1s"></span></li>
-    <li><b id="b2t"></b><span id="b2s"></span></li>
-    <li><b id="b3t"></b><span id="b3s"></span></li>
-    <li><b id="b4t"></b><span id="b4s"></span></li>
+    <li>
+      <svg class="pay-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="var(--brand)"/><path d="M6.5 12.2 L10.2 16 L17.5 8.2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <b id="b1t"></b>
+    </li>
+    <li>
+      <svg class="pay-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="var(--brand)"/><path d="M6.5 12.2 L10.2 16 L17.5 8.2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <b id="b2t"></b>
+    </li>
+    <li>
+      <svg class="pay-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="var(--brand)"/><path d="M6.5 12.2 L10.2 16 L17.5 8.2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <b id="b3t"></b>
+    </li>
+    <li>
+      <svg class="pay-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="var(--brand)"/><path d="M6.5 12.2 L10.2 16 L17.5 8.2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <b id="b4t"></b>
+    </li>
   </ul>
   <div class="pay-actions">
     <button class="btn btn-primary" id="btnTrial"></button>
     <button class="btn btn-ghost" id="btnBuy"></button>
+    <!-- ★ 2026-10-07（按哥哥要求）：恢复购买由页脚的小灰字改为正式按钮，落在「直接购买」下方。
+         仍留在 .pay-actions 内 → 与两个主 CTA 同为 56px（好点按）；
+         用 btn-restore（透明底 + 品牌色字 + 细描边）压轻视觉，不抢主次。 -->
+    <button class="btn btn-restore" id="btnRestore"></button>
   </div>
-  <div class="pay-foot"><span id="btnRestore"></span><span>·</span><span id="btnPayPrivacy"></span><span>·</span><span id="btnPayTerms"></span></div>
+  <div class="pay-foot"><span id="btnPayPrivacy"></span><span>·</span><span id="btnPayTerms"></span></div>
   <p class="pay-fine" id="payFine"></p>
 </div>
 
@@ -596,7 +729,7 @@ button:focus-visible,.tab:focus-visible,.add-row:focus-visible,.card:focus-visib
    Seeora v8 — 图标已内联，不再依赖 assets 文件夹
    ============================================================ */
 
-var C = { brand:"#2d7a6b", brandRgb:"45,122,107", rest:"#94a8a2",
+var C = { brand:"#00A898", brandRgb:"0,168,152", rest:"#94a8a2",
   missFill:"rgba(0,0,0,0.04)", missStroke:"rgba(0,0,0,0.12)",
   ringGuide:"rgba(0,0,0,0.06)", ringTodayStroke:"#f1ede6",
   gridLine:"rgba(0,0,0,0.06)", axisLine:"rgba(0,0,0,0.12)",
@@ -611,10 +744,10 @@ function refreshColors(){
 }
 
 var NOTIF_ICON = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#2d7a6b"/><path d="M6.5 12.2 L10.2 16 L17.5 8.2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#00A898"/><path d="M6.5 12.2 L10.2 16 L17.5 8.2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 );
 var NOTIF_BADGE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#2d7a6b"/></svg>'
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#00A898"/></svg>'
 );
 function notifSupported(){ return typeof Notification !== "undefined" && "requestPermission" in Notification; }
 function notifPermission(){
@@ -701,7 +834,7 @@ var I18N = {
 en:{
   brand:"Seeora", slogan:"See yourself getting better.",
   today:"Today", honors:"Honors",
-  add:"Add habit", addTitle:"New habit",
+  add:"Add habit", addTitle:"New habit", editTitle:"Edit habit", habitRemoved:"Habit deleted",
   nameLab:"Name", descLab:"Description", freqLab:"Repeat every", goalLab:"Times per day",
   fRemLab:"Reminder", fRemSub:"Push a nudge at the chosen time", fAddTimeLab:"Reminder time",
   save:"Save", cancel:"Cancel",
@@ -726,27 +859,27 @@ en:{
   guide:"7 dots per ring, starting from your first day", guideOk:"Got it",
   newBest:"New longest streak: ", gotBadge:"unlocked",
   habitSub:function(s,f){ var x = f===1?"Daily":("Every "+f+" days"); return s+" "+(s===1?"day":"days")+" · "+x; },
-  pro:"Seeora Pro", proSubFree:"Free · up to 5 habits", proSubPro:"Purchased · Thank you", proSubTrial:"Pro trial · {n} days left",
+  pro:"Seeora Pro", proSubFree:"Free · up to 5 habits", proSubPro:"Purchased · Thank you", proSubTrial:"Pro preview · {n} days left",
   grpGeneral:"GENERAL", grpNotif:"NOTIFICATIONS", grpData:"DATA", grpAbout:"ABOUT",
   langLab:"Language", themeLab:"Appearance", themeTitle:"Appearance",
   themeSystem:"System", themeLight:"Light", themeDark:"Dark",
-  dataExport:"Export data", dataExportSub:"Save a JSON file yourself",
-  dataImport:"Import data", dataImportSub:"Restore from a JSON file",
+  dataExport:"Export data",
+  dataImport:"Import data",
   feedbackLab:"Send feedback", faqLab:"Help & FAQ",
   privacyLab:"Privacy Policy", termsLab:"Terms of Service",
   versionLab:"Version",
   exported:"Data exported", imported:"Data imported", importFail:"Import failed: invalid file",
   importConfirm:"This will replace all current data. Continue?",
   payTitle:"Unlock Seeora Pro", paySub:"One-time purchase · yours forever",
-  b1t:"Unlimited habits", b1s:"No 5-habit cap",
-  b2t:"Watermark-free cards", b2s:"Share a card that's truly yours",
-  b3t:"Data export", b3s:"JSON backup, always in your hands",
-  b4t:"Unlimited imports", b4s:"Bring every streak with you",
-  btnTrial:"Start 7-day free trial", btnBuy:"Buy now · $4.99",
-  restore:"Restore", payFine:"Pay $4.99 once after the 7-day trial to unlock forever.",
-  trialStarted:"7-day Pro trial started", bought:"Pro unlocked · Thank you",
+  b1t:"Unlimited habits",
+  b2t:"Share achievement cards",
+  b3t:"Data export",
+  b4t:"Unlimited imports",
+  btnTrial:"Start 7-day Pro preview", btnBuy:"Buy now · $4.99",
+restorePurchases:"Restore Purchases", payFine:"Pay $4.99 once after the 7-day preview to unlock forever.",
+  trialStarted:"7-day Pro preview started", bought:"Pro unlocked · Thank you",
   payLimitT:"Free plan limit reached", payLimitS:"Up to 5 habits · upgrade to add more",
-  payShareT:"Remove the watermark", payShareS:"Share a card that's truly yours",
+  payShareT:"Share achievement cards", payShareS:"Save & share a card that's truly yours",
   payExportT:"Export your data", payExportS:"JSON backup, take it anywhere",
   payMigrateT:"Unlimited imports", payMigrateS:"Treasure every past streak",
   payHonorsT:"Unlock Seeora Pro", payHonorsS:"One-time purchase · yours forever",
@@ -778,7 +911,7 @@ en:{
 zh:{
   brand:"见好", slogan:"看见自己越来越好",
   today:"今天", honors:"荣誉室",
-  add:"添加习惯", addTitle:"新建习惯",
+  add:"添加习惯", addTitle:"新建习惯", editTitle:"编辑习惯", habitRemoved:"已删除该习惯",
   nameLab:"习惯名称", descLab:"描述", freqLab:"重复周期", goalLab:"每天目标次数",
   fRemLab:"提醒", fRemSub:"到点推送一条提醒", fAddTimeLab:"提醒时间",
   save:"保存", cancel:"取消",
@@ -803,27 +936,27 @@ zh:{
   guide:"每圈 7 个点，从你开始的那天算", guideOk:"知道了",
   newBest:"新的最长连续：", gotBadge:"已解锁",
   habitSub:function(s,f){ var x = f===1?"每天":("每 "+f+" 天"); return s+" 天 · "+x; },
-  pro:"Seeora Pro", proSubFree:"未升级 · 5 条习惯上限", proSubPro:"已购买 · 感谢支持", proSubTrial:"Pro 试用 · 剩 {n} 天",
+  pro:"Seeora Pro", proSubFree:"未升级 · 5 条习惯上限", proSubPro:"已购买 · 感谢支持", proSubTrial:"Pro 体验 · 剩 {n} 天",
   grpGeneral:"通用", grpNotif:"通知", grpData:"数据", grpAbout:"关于",
   langLab:"语言", themeLab:"外观", themeTitle:"外观",
   themeSystem:"跟随系统", themeLight:"浅色", themeDark:"深色",
-  dataExport:"导出数据", dataExportSub:"导出为 JSON 文件，自己保存",
-  dataImport:"导入数据", dataImportSub:"从 JSON 文件恢复",
+  dataExport:"导出数据",
+  dataImport:"导入数据",
   feedbackLab:"意见反馈", faqLab:"帮助与常见问题",
   privacyLab:"隐私政策", termsLab:"用户协议",
   versionLab:"版本",
   exported:"数据已导出", imported:"数据已导入", importFail:"导入失败：文件格式不对",
   importConfirm:"导入会覆盖现有全部数据，确定继续？",
   payTitle:"解锁 Seeora Pro", paySub:"一次性买断 · 永久使用",
-  b1t:"无限习惯", b1s:"不再受 5 条限制",
-  b2t:"无水印成就卡", b2s:"分享属于你自己的时刻",
-  b3t:"数据导出", b3s:"JSON 备份，数据始终在你手里",
-  b4t:"无限迁移记录", b4s:"把别处的坚持都带过来",
-  btnTrial:"开始 7 天免费试用", btnBuy:"直接购买 · $4.99",
-  restore:"恢复购买", payFine:"试用 7 天后一次性支付 $4.99，永久解锁。",
-  trialStarted:"已开启 7 天 Pro 试用", bought:"已购买 Pro · 感谢支持",
+  b1t:"无限习惯",
+  b2t:"成就卡保存与分享",
+  b3t:"数据导出",
+  b4t:"无限迁移记录",
+  btnTrial:"开始 7 天 Pro 体验", btnBuy:"直接购买 · $4.99",
+restorePurchases:"恢复购买", payFine:"7 天体验结束后一次性支付 $4.99，永久解锁。",
+  trialStarted:"已开启 7 天 Pro 体验", bought:"已购买 Pro · 感谢支持",
   payLimitT:"免费版已达上限", payLimitS:"最多 5 条习惯 · 升级解锁更多",
-  payShareT:"去除水印", payShareS:"分享一张只属于你的成就卡",
+  payShareT:"分享成就卡", payShareS:"保存并分享属于你自己的成就卡",
   payExportT:"导出你的数据", payExportS:"JSON 备份，随时带走",
   payMigrateT:"无限迁移记录", payMigrateS:"把每段坚持都珍藏下来",
   payHonorsT:"解锁 Seeora Pro", payHonorsS:"一次性买断 · 永久使用",
@@ -974,16 +1107,22 @@ function miniDots(states){
 }
 
 function renderList(){
-  var box = document.getElementById("list"), html = "";
+  var box = document.getElementById("list"), html = "", T = t();
   HABITS.forEach(function(h,i){
     var done = h.week[6]===1;
-    html += '<div class="card" data-idx="'+i+'" role="button" tabindex="0">'+
+    // ★ 2026-10-07：外面包一层 .h-swipe 承载左滑；编辑/删除按钮复用迁移条的文案键（migEdit/migDel）。
+    html += '<div class="h-swipe" data-idx="'+i+'">'+
+      '<div class="h-actions">'+
+        '<span class="h-act-edit" data-act="edit" data-idx="'+i+'">'+T.migEdit+'</span>'+
+        '<span class="h-act-del" data-act="del" data-idx="'+i+'">'+T.migDel+'</span>'+
+      '</div>'+
+      '<div class="card" data-idx="'+i+'" role="button" tabindex="0">'+
       '<div class="card-main"><div class="h-name">'+tr(h)+'</div>'+
       '<div class="h-sub">'+t().habitSub(h.streak,h.freqDays)+'</div>'+
       '<div class="mini">'+miniDots(h.week)+'</div></div>'+
       '<button class="check'+(done?" on":"")+'" data-i="'+i+'"><svg viewBox="0 0 24 24"><path d="M4 12.5 L9.5 18 L20 6.5"/></svg></button>'+
       '<svg class="chev" viewBox="0 0 8 14" width="8" height="14"><path d="M1.5 1 L6.5 7 L1.5 13" fill="none" stroke="currentColor" opacity="0.35" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
-      '</div>';
+      '</div></div>';
   });
   box.innerHTML = html;
 }
@@ -1192,35 +1331,59 @@ function renderMig(){
     er.addEventListener("keydown", function(e){ if (e.key==="Enter"||e.key===" "){ e.preventDefault(); er.click(); } });
   }
 }
-var swipeRow=null, swipeStartX=0, swipeStartY=0, swipeMoved=false, swipeBaseTx=0, swipeCurTx=0;
-document.getElementById("migRows").addEventListener("pointerdown", function(e){
-  if (e.target.closest(".mig-actions")) return;
-  var row = e.target.closest(".mig-swipe"); if (!row) return;
-  document.querySelectorAll(".mig-swipe.open").forEach(function(r){ if (r!==row) r.classList.remove("open"); });
-  swipeRow = row; swipeStartX = e.clientX; swipeStartY = e.clientY; swipeMoved = false;
-  swipeBaseTx = row.classList.contains("open") ? -120 : 0; swipeCurTx = swipeBaseTx;
+/* ★ 2026-10-07：左滑手势从「只服务迁移条」泛化为「迁移条 + 习惯卡」共用一套。
+   差异只在三处：容器选择器 / 前景元素 / 露出宽度，其余（阈值、跟手、回弹、互斥）完全一致，
+   这样以后再加别的可左滑列表，只要往 SWIPE_SET 里加一行即可。 */
+var SWIPE_SET = [
+  { row:".mig-swipe", front:".mig-front", w:120 },
+  { row:".h-swipe",   front:".card",      w:144 }
+];
+var swipeRow=null, swipeCfg=null, swipeStartX=0, swipeStartY=0, swipeMoved=false, swipeBaseTx=0, swipeCurTx=0;
+// 滑动松手后浏览器会紧跟一次 click；若不吃掉，卡片会「滑一下顺手就进了详情页」
+var suppressCardClick=false;
+function swipeFindRow(el){
+  if (!el || !el.closest) return null;
+  for (var i=0;i<SWIPE_SET.length;i++){ var r = el.closest(SWIPE_SET[i].row); if (r) return r; }
+  return null;
+}
+function swipeCfgOf(row){
+  for (var i=0;i<SWIPE_SET.length;i++){ if (row.classList.contains(SWIPE_SET[i].row.slice(1))) return SWIPE_SET[i]; }
+  return null;
+}
+document.addEventListener("pointerdown", function(e){
+  if (e.target.closest && e.target.closest(".mig-actions,.h-actions")) return;  // 点在操作按钮上不启动手势
+  var row = swipeFindRow(e.target); if (!row) return;
+  var cfg = swipeCfgOf(row); if (!cfg) return;
+  document.querySelectorAll(".mig-swipe.open,.h-swipe.open").forEach(function(r){ if (r!==row) r.classList.remove("open"); });
+  swipeRow = row; swipeCfg = cfg; swipeStartX = e.clientX; swipeStartY = e.clientY; swipeMoved = false;
+  swipeBaseTx = row.classList.contains("open") ? -cfg.w : 0; swipeCurTx = swipeBaseTx;
 }, { passive: true });
 document.addEventListener("pointermove", function(e){
   if (!swipeRow) return;
   var dx = e.clientX-swipeStartX, dy = e.clientY-swipeStartY;
   if (!swipeMoved){
-    if (Math.abs(dx)>6 && Math.abs(dx)>Math.abs(dy)) swipeMoved = true;
-    else if (Math.abs(dy)>6){ swipeRow=null; return; }
+    if (Math.abs(dx)>6 && Math.abs(dx)>Math.abs(dy)){ swipeMoved = true; swipeRow.classList.add("swiping"); }
+    else if (Math.abs(dy)>6){ swipeRow=null; return; }   // 判定为纵向滚动 → 交还给页面
   }
   if (swipeMoved){
     e.preventDefault();
-    var front = swipeRow.querySelector(".mig-front");
-    swipeCurTx = Math.max(-120, Math.min(0, swipeBaseTx+dx));
+    var front = swipeRow.querySelector(swipeCfg.front);
+    swipeCurTx = Math.max(-swipeCfg.w, Math.min(0, swipeBaseTx+dx));
     front.style.transition = "none"; front.style.transform = "translateX("+swipeCurTx+"px)";
   }
 }, { passive: false });
 document.addEventListener("pointerup", function(){
   if (!swipeRow) return;
-  var row = swipeRow, front = row.querySelector(".mig-front");
+  var row = swipeRow, cfg = swipeCfg, front = row.querySelector(cfg.front);
+  if (swipeMoved){
+    row.classList.toggle("open", swipeCurTx < -cfg.w/2);
+    suppressCardClick = true; setTimeout(function(){ suppressCardClick = false; }, 80);
+  } else {
+    row.classList.remove("open");
+  }
+  row.classList.remove("swiping");
   front.style.transition = ""; front.style.transform = "";
-  if (swipeMoved) row.classList.toggle("open", swipeCurTx < -60);
-  else row.classList.remove("open");
-  swipeRow = null; swipeMoved = false;
+  swipeRow = null; swipeCfg = null; swipeMoved = false;
 });
 document.getElementById("migRows").addEventListener("click", function(e){
   var s = e.target.closest ? e.target.closest("[data-act]") : null; if (!s) return;
@@ -1357,26 +1520,36 @@ document.getElementById("maskPay").addEventListener("click", function(){ hideShe
 document.getElementById("btnTrial").addEventListener("click", function(){ startTrial(7); hideSheet("sheetPay","maskPay"); toast(t().trialStarted); });
 document.getElementById("btnBuy").addEventListener("click", function(){ setPro(true); hideSheet("sheetPay","maskPay"); toast(t().bought); });
 
-document.getElementById("btnRestore").addEventListener("click", async function(){
-  var btn = this;
-  var orig = btn.textContent;
-  btn.textContent = t().restoring;
-  btn.style.pointerEvents = "none";
+// ★ 恢复购买：付费墙按钮的**唯一**实现（2026-10-07 哥哥定稿：设置页入口已删除）
+//   busy 防连点 / 失败提示 / 结束归位都收在这一处；将来若再加入口直接复用，避免各写一份跑偏。
+//   labelEl = 承载文案的元素（付费墙的按钮）
+//   key     = 字典里「常态文案」的键名（restorePurchases）
+var restoreBusy = false;
+async function doRestore(labelEl, key, onSuccess){
+  if (restoreBusy || !labelEl) return;
+  restoreBusy = true;
+  labelEl.textContent = t().restoring;
   try {
     var rec = await restorePurchases();
     if (rec){
       setPro(true);
-      hideSheet("sheetPay","maskPay");
       toast(t().restored);
+      if (onSuccess) onSuccess();
     } else {
       toast(t().noPurchase);
     }
   } catch(err){
     toast(t().restoreFailed);
   } finally {
-    btn.textContent = orig;
-    btn.style.pointerEvents = "";
+    restoreBusy = false;
+    labelEl.textContent = t()[key];
   }
+}
+
+// ★ 2026-10-07（哥哥定稿）：设置页那行恢复购买已删除 → 这里是**全站唯一**的恢复购买入口。
+document.getElementById("btnRestore").addEventListener("click", function(){
+  // 成功了才关付费墙
+  doRestore(this, "restorePurchases", function(){ hideSheet("sheetPay","maskPay"); });
 });
 document.getElementById("btnPayPrivacy").addEventListener("click", function(){ openDoc("privacy"); });
 document.getElementById("btnPayTerms").addEventListener("click", function(){ openDoc("terms"); });
@@ -1469,9 +1642,9 @@ function drawBrandIcon(g,cx,cy,r){
   var u = s/1024;
   g.translate(x0 + 63.5*u, y0 + 379.5*u);
   g.lineCap = "round"; g.lineJoin = "round";
-  g.strokeStyle = "#2d7a6b"; g.lineWidth = 25*u;
+  g.strokeStyle = "#00A898"; g.lineWidth = 25*u;
   g.beginPath(); g.moveTo(132*u,132.5*u); g.lineTo(448*u,132.5*u); g.lineTo(640*u,132.5*u); g.stroke();
-  g.fillStyle = "#2d7a6b";
+  g.fillStyle = "#00A898";
   g.beginPath(); g.arc(132*u,132.5*u,132*u,0,Math.PI*2); g.fill();
   g.beginPath(); g.arc(448*u,132.5*u,132*u,0,Math.PI*2); g.fill();
   g.beginPath(); g.arc(764*u,132.5*u,119.5*u,0,Math.PI*2); g.stroke();
@@ -1550,12 +1723,76 @@ function sharePoster(){
   } else savePoster();
 }
 
-function showSheet(s,m){ document.getElementById(s).classList.add("on"); document.getElementById(m).classList.add("on"); }
-function hideSheet(s,m){
-  document.getElementById(s).classList.remove("on");
-  document.getElementById(m).classList.remove("on");
-  if (s === "sheetPay") setPaywallState("idle");
+/* ★ 弹层：右侧滑入的「整页」+ 导航栈（2026-10-07 第二次改版）
+   哥哥反馈：语言/颜色等弹窗从最下方滑出不像 iOS，要改成从右侧滑入的整页（最经典）。
+   - 观感由 CSS 负责：.sheet 铺满 #app，收起时 translateX(100%) 推到右侧屏外（见上方样式）。
+   - 这里负责「层级」：引入 sheetStack。打开新弹层时把上一层压到左侧(.behind)留在背后，
+     关闭时新层滑出右侧、上一层滑回，得到经典 push/pop 手感，并让「设置→语言→返回」回到设置页而非首页。
+   - 同时按栈深动态 z-index：修正 DOM 顺序造成的遮挡
+     （例：sheetDoc 在 DOM 里早于 sheetPay，但从付费页打开隐私页时它必须盖在最上面）。
+   - 与 CSS 的「收起时 pointer-events:none」配合，收起后绝不拦截点击。 */
+var sheetStack = [];
+function _maskOn(m){
+  document.querySelectorAll(".sheet-mask").forEach(function(e){ e.classList.toggle("on", e.id === m); });
 }
+function closeAllSheets(){
+  sheetStack = [];
+  document.querySelectorAll(".sheet").forEach(function(e){ e.classList.remove("on","behind"); });
+  document.querySelectorAll(".sheet-mask").forEach(function(e){ e.classList.remove("on"); });
+}
+function showSheet(s, m){
+  var top = sheetStack.length ? sheetStack[sheetStack.length-1] : null;
+  if (top && top.id === s){ _maskOn(m); return; }        // 已是最上层：只刷新遮罩/内容，不重播动画
+  if (top){ var te = document.getElementById(top.id); if (te) te.classList.add("behind"); }
+  // 兜底：不在栈里、又不是目标的弹层一律收起（防止历史遗留的并列）
+  document.querySelectorAll(".sheet").forEach(function(e){
+    var inStack = sheetStack.some(function(x){ return x.id === e.id; });
+    if (e.id !== s && !inStack) e.classList.remove("on","behind");
+  });
+  sheetStack.push({ id:s, mask:m });
+  var el = document.getElementById(s);
+  el.style.zIndex = String(31 + sheetStack.length);       // 越晚打开，层越高
+  el.classList.add("on");
+  _maskOn(m);
+}
+function hideSheet(s, m){
+  var el = document.getElementById(s);
+  if (el) el.classList.remove("on","behind");
+  if (s === "sheetPay") setPaywallState("idle");
+  var idx = -1;
+  for (var i=0;i<sheetStack.length;i++){ if (sheetStack[i].id === s){ idx = i; break; } }
+  if (idx >= 0) sheetStack.splice(idx);
+  var top = sheetStack.length ? sheetStack[sheetStack.length-1] : null;
+  if (top){
+    var te = document.getElementById(top.id);
+    if (te){ te.classList.add("on"); te.classList.remove("behind"); }
+    _maskOn(top.mask);
+  } else {
+    _maskOn(null);
+  }
+}
+/* 注入顶部导航栏：每个弹层左上角一个返回键（关闭当前层，回到上一层）+ 居中标题。
+   标题复用各弹层原有的 .sheet-title 元素（含 id，文案由原有代码写入），无标题的层就给个空的。 */
+(function upgradeSheetsToPages(){
+  document.querySelectorAll(".sheet").forEach(function(sheet){
+    if (sheet.querySelector(".page-nav")) return;
+    var sid = sheet.id;
+    var mid = "mask" + sid.slice(5);
+    var nav = document.createElement("div");
+    nav.className = "page-nav";
+    var back = document.createElement("button");
+    back.className = "page-back";
+    back.type = "button";
+    back.setAttribute("aria-label", "Back");
+    back.textContent = "\u2039";
+    back.addEventListener("click", function(){ hideSheet(sid, mid); });
+    nav.appendChild(back);
+    var title = sheet.querySelector(".sheet-title");
+    if (!title){ title = document.createElement("div"); title.className = "sheet-title"; }
+    nav.appendChild(title);
+    sheet.insertBefore(nav, sheet.firstChild);
+  });
+})();
 var toastTimer=null;
 function toast(msg){
   var el = document.getElementById("toast");
@@ -1615,25 +1852,25 @@ function docContent(kind){
   if (kind === "faq"){
     var items = zh ? [
       ["我的数据存在哪里？会丢失吗？","所有习惯与打卡数据只存在你自己的设备本地，不上传服务器。卸载应用或清除本地存储会删除数据。建议定期使用「导出数据」保存一份 JSON，再在新设备上「导入数据」即可。"],
-      ["免费版有什么限制？","免费版可创建 5 条习惯，可使用打卡、补签、休息日、连续统计、热力图等全部核心功能。成就卡带一个淡淡的 Seeora 水印。"],
-      ["7 天免费试用怎么算？会自动扣费吗？","试用期内你拥有专业版全部功能，无需绑定支付、不会自动扣费。7 天倒计时结束后自动回退免费版，如需继续使用专业版功能，再手动买断即可。"],
+      ["免费版有什么限制？","免费版可创建 5 条习惯，可使用打卡、补签、休息日、连续统计、热力图等核心功能。导出备份与分享成就卡为专业版功能。"],
+      ["7 天专业版体验怎么算？会自动扣费吗？","体验需要在 App 内手动领取——在专业版页面点「开始 7 天 Pro 体验」，它不会自己开始，无需绑定支付、也不会自动扣费。体验期内你拥有专业版全部功能。7 天结束后自动回到免费版：超出免费版 5 条上限的习惯数据会保留在本机，但变为只读（不能打卡、补签或编辑），一次性买断后即可恢复。体验计时只存在本机，卸载重装会重新计算。"],
       ["换手机 / 重装后，买断的专业版还在吗？","在 App Store 内，可通过应用内「恢复购买」找回专业版权益，无需重复付费。本地解锁标记丢失不影响你在苹果服务器侧的购买记录。"],
       ["可以退款吗？","一次性买断通过 Apple App Store 结算，退款按 Apple 政策处理。如购买异常或对订单有疑问，可邮件 365504860@qq.com 说明。"],
       ["为什么不能超过 5 条习惯？","Seeora 希望帮用户专注在少数几个真正重要的习惯上。5 条足够覆盖大多数人的核心目标。如果你真的需要更多，Pro 版无上限。"],
       ["漏签了会怎样？","连续会中断，但累计记录会保留。你可以在最近 7 天内补签，或者把那天标为「休息日」，连续不断。"],
       ["提醒到点没弹怎么办？","请确认系统设置里 Seeora 的通知权限是开启状态。网页版在页面关闭后无法推送，App 版（原生）由操作系统接管，更可靠。"],
-      ["你们会拿我的数据做广告吗？","不会。Seeora 无账号、无服务端、无第三方追踪与广告 SDK，你的数据从不离开设备。"],
+      ["你们会拿我的数据做广告吗？","不会。Seeora 不投放广告，也不出售你的数据。你的习惯内容保存在你的设备上，不会被上传到任何地方。为处理与恢复购买，我们的第三方内购服务 RevenueCat（支付由 Apple 处理）会接收有限的购买与技术信息，详见「隐私政策」——不涉及你的习惯内容，也不会用于广告。"],
       ["怎么联系你们？","见「意见反馈」，或者发邮件到 365504860@qq.com。"]
     ] : [
       ["Where is my data stored? Can it be lost?","All habit and check-in data is stored only on your own device and never uploaded to a server. Uninstalling the app or clearing local storage deletes the data. Back up regularly with Export (save a JSON copy) and restore it with Import on a new device."],
-      ["What's the free plan limit?","You can create up to 5 habits. Check-ins, backfill, rest days, streaks, and heatmaps are all unlimited. Free cards carry a faint Seeora watermark."],
-      ["How does the 7-day free trial work? Will it auto-charge?","During the trial you have all Pro features, no payment method required, and no automatic charge. After the 7-day countdown ends, you revert to the free plan; to keep using Pro features, purchase the one-time unlock manually."],
+      ["What's the free plan limit?","You can create up to 5 habits. Check-ins, backfill, rest days, streaks, and heatmaps are all included. Exporting backups and sharing achievement cards are Pro features."],
+      ["How does the 7-day Pro preview work? Will it auto-charge?","The preview is claimed manually in the app — tap \"Start 7-day Pro preview\" on the Pro screen. It never starts by itself, no payment method is required, and there is no automatic charge. While it runs you get every Pro feature. When the 7 days are up the app returns to the free plan: habits beyond the free 5-habit limit are kept on your device but become read-only (no check-in, backfill or editing) until you unlock Pro with the one-time purchase. The preview timer is stored only on your device, so reinstalling the app resets it."],
       ["After changing phones / reinstalling, is my Pro purchase still there?","In the App Store, you can find your Pro entitlement again via the restore purchases feature in the app — no need to pay twice. Losing a local unlock flag does not affect your purchase record on Apple's servers."],
       ["Can I get a refund?","The one-time purchase is settled through the Apple App Store, and refunds follow Apple policy. If a purchase went wrong or you have questions about an order, email 365504860@qq.com."],
       ["Why 5 habits?","Seeora is designed for focus — a few habits that truly matter. 5 covers most people's core goals. Pro removes the cap."],
       ["What happens if I miss a day?","Your streak breaks, but your total is preserved. You can backfill within the last 7 days, or mark that day as a rest day to keep the streak going."],
       ["Reminders don't fire — why?","Check that Seeora has notification permission in system settings. In the web version, reminders can only fire while the page is open. In the packaged native app, the OS handles scheduling, which is much more reliable."],
-      ["Will you use my data for ads?","No. Seeora has no accounts, no backend, and no third-party tracking or ad SDKs; your data never leaves your device."],
+      ["Will you use my data for ads?","No. Seeora shows no ads and we do not sell your data. Your habit content stays on your device and is not uploaded anywhere. To process and restore purchases, our third-party purchase service RevenueCat (with Apple handling payment) receives limited purchase and technical information, as described in the Privacy Policy — not your habit content, and not for advertising."],
       ["How do I reach you?","Use Send feedback, or email 365504860@qq.com."]
     ];
     return { title: zh?"帮助与常见问题":"Help & FAQ", updated:"",
@@ -1642,33 +1879,37 @@ function docContent(kind){
   if (kind === "privacy"){
     return {
       title: zh?"隐私政策":"Privacy Policy",
-      updated: zh?"生效日期：2026 年 10 月 1 日":"Effective date: October 1, 2026",
+      updated: zh?"生效日期：2026 年 10 月 7 日":"Effective date: October 7, 2026",
       body: zh ?
-        '<div class="doc-h">一句话总结：我们不收集你的数据</div><p class="doc-p">Seeora 没有账号系统、没有服务器、没有第三方追踪与广告 SDK。你记录的所有习惯、打卡、备注，都只存在你自己的设备本地。</p>'+
-        '<div class="doc-h">1. 我们收集的信息</div><p class="doc-p">我们不会主动收集任何个人信息。Seeora 完全在设备本地运行，不要求注册、不登录、不上传任何使用数据。你创建的习惯、打卡记录、连续天数、备注说明等，均仅存储于本机（浏览器 / 应用的本地存储）。我们服务端无副本、无后台、无分析埋点。</p>'+
-        '<div class="doc-h">2. 本地数据存储</div><p class="doc-p">所有应用数据通过设备本地存储保存。卸载应用或清除本地存储会删除这些数据，且我们无法为你恢复——因为数据从未离开你的设备。我们不设置任何追踪 Cookie，也不使用第三方广告或分析 SDK。</p>'+
-        '<div class="doc-h">3. 应用内购买（IAP）</div><p class="doc-p">Seeora 专业版为一次性买断，通过 Apple App Store（苹果应用商店）完成支付，并由 RevenueCat（内购封装层）处理购买凭证。支付由 Apple 处理，付款相关的账户与交易信息由 Apple 按其隐私政策管理，我们不接收你的付款卡号等支付凭据；RevenueCat 会按苹果回传处理与「已购权益」相关的必要记录，以支撑「恢复购买」功能。我们自身不存储你的购买账户或支付信息。</p>'+
-        '<div class="doc-h">4. 我们不会做的事</div><p class="doc-p">不会出售、出租或共享你的个人数据给第三方；不会向第三方发送广告或行为追踪；不会在未经你同意的情况下上传你的任何内容。</p>'+
-        '<div class="doc-h">5. 儿童隐私</div><p class="doc-p">Seeora 不面向 13 岁以下儿童设计，我们也不主动收集任何年龄用户的个人信息。如家长发现儿童误使用了本应用，可通过卸载或清除本地存储删除相关内容。</p>'+
-        '<div class="doc-h">6. 你的权利与联系方式</div><p class="doc-p">由于我们不持有你的任何云端个人数据，你无需申请「数据导出 / 删除」——数据本就只属于你的设备。如对隐私政策有疑问，或就应用内购买相关事宜需要联系，请邮件至：365504860@qq.com</p>'+
-        '<div class="doc-h">7. 政策变更</div><p class="doc-p">若本政策更新，我们会在应用内或官网页面发布最新版本，并以「生效日期」标注。持续使用即视为接受更新后的政策。</p>' :
-        '<div class="doc-h">In short: we don\'t collect your data</div><p class="doc-p">Seeora has no accounts, no servers, and no third-party tracking or ad SDKs. Every habit, check-in, and note you record lives only on your own device.</p>'+
-        '<div class="doc-h">1. Information we collect</div><p class="doc-p">We do not proactively collect any personal information. Seeora runs entirely on your device — no registration, no login, and no usage data uploaded. Your habits, check-ins, streaks, and notes are stored only in local storage on your machine. We keep no copies on any server, no backend, and no analytics.</p>'+
-        '<div class="doc-h">2. Local data storage</div><p class="doc-p">All app data is saved using device-local storage. Uninstalling the app or clearing local storage deletes this data, and we cannot restore it — because it never leaves your device. We do not set any tracking cookies or use third-party ad or analytics SDKs.</p>'+
-        '<div class="doc-h">3. In-app purchases (IAP)</div><p class="doc-p">Seeora Pro is a one-time purchase completed through the Apple App Store, with RevenueCat handling purchase receipts as a wrapper. Payment is handled by Apple; account and transaction details are managed by Apple under its privacy policy. We do not receive your payment card number or other payment credentials. RevenueCat processes the records necessary to support restore purchases as returned by Apple. We do not store your purchase account or payment information.</p>'+
-        '<div class="doc-h">4. What we do not do</div><p class="doc-p">We do not sell, rent, or share your personal data with third parties. We do not send ads or behavioral tracking to third parties. We do not upload any of your content without your consent.</p>'+
-        '<div class="doc-h">5. Children\'s privacy</div><p class="doc-p">Seeora is not designed for children under 13, and we do not proactively collect personal information from users of any age.</p>'+
-        '<div class="doc-h">6. Your rights and how to contact us</div><p class="doc-p">Because we hold no cloud data about you, there is no need to request data export or deletion — your data already belongs solely to your device. Questions about this policy or in-app purchases: 365504860@qq.com</p>'+
-        '<div class="doc-h">7. Changes to this policy</div><p class="doc-p">If this policy is updated, we will publish the latest version in the app or on this page, marked with an effective date. Continued use is deemed acceptance of the updated policy.</p>'
+        '<div class="doc-h">一句话总结：你的习惯数据保存在你自己的设备上</div><p class="doc-p">Seeora 是一款「本地优先」的习惯打卡应用。你记录的习惯、打卡、连续天数与备注保存在你自己的设备上。本应用不需要注册账号，我们也不收集你的姓名、邮箱或电话等可直接识别身份的信息。为处理应用内购买并支持「恢复购买」，我们使用第三方内购服务 RevenueCat，它会接收有限的购买与技术信息。</p>'+
+        '<div class="doc-h">1. 我们收集什么、不收集什么</div><p class="doc-p">为准确起见，我们把「本应用自身」与「内购服务商」分开说明。<br>· <strong>你的内容留在本地</strong>：习惯、打卡、连续天数、备注、归档项与迁移记录仅存储在你的设备上。我们没有为这些内容运营服务器，也无法读取它们（若你在 iPhone 上开启了 iCloud 备份，该设备备份由 Apple 依其自身隐私政策管理，并非由我们运营）。<br>· <strong>无需注册账号</strong>：由于本应用没有注册流程，我们不收集你的姓名、邮箱地址、电话号码、通讯录、精确位置或麦克风内容。<br>· <strong>保存成就卡</strong>：当你选择把成就卡保存为图片时，该图片在你的设备上生成，并由 iOS 按你的请求写入相册；本应用不会读取你的其他照片，卡片本身也不会发送给我们。<br>· <strong>无广告、无追踪 SDK</strong>：本应用不含第三方广告 SDK，也不会使用你的数据在其他应用或网站之间追踪你。</p>'+
+        '<div class="doc-h">2. 应用内购买与第三方服务（RevenueCat）</div><p class="doc-p">Seeora 专业版为一次性买断，通过 Apple App Store 完成支付；支付由 Apple 处理，我们不接收、也不存储你的支付卡号。我们使用 RevenueCat, Inc. 验证购买凭据、解锁专业版权益并支持「恢复购买」。在此过程中，RevenueCat 会接收：购买历史与交易记录（商品标识、购买日期、权益状态）、与你购买相关的 Apple 收据信息，以及完成验证所需的基础技术信息（平台、系统版本、应用版本、国家或语言地区）。这些信息与一个随机生成的匿名标识符关联，不包含你的姓名或邮箱，也无法据以确定你的真实身份。详见 RevenueCat 隐私政策。<br><strong>第三方保护</strong>：我们要求并确认，与我们共享用户数据的第三方（Apple 与 RevenueCat）会依照本政策所述标准及 App Store 审核指南的要求，为该数据提供同等或同等级别的保护。</p>'+
+        '<div class="doc-h">3. 诊断信息</div><p class="doc-p">本应用不含任何第三方崩溃上报、统计分析或归因 SDK，我们不会收集、也不会上传你设备上的崩溃日志、诊断信息或使用统计。只有当您主动联系我们并自行发送时，我们才会收到与问题有关的诊断信息。（若你在 iOS 系统设置中开启了「与 App 开发者共享」，Apple 可能依据其自身隐私政策收集崩溃与使用数据；该收集由 Apple 执行，与我们无关。）</p>'+
+        '<div class="doc-h">4. 我们如何使用信息</div><p class="doc-p">仅用于：验证你的专业版购买状态并解锁相应功能；支持「恢复购买」，使已购权益在更换设备后继续可用；排查与预防购买环节的故障或异常交易。我们不会将其用于跨 App 或跨网站的广告追踪。</p>'+
+        '<div class="doc-h">5. 数据保留与删除</div><p class="doc-p"><strong>本地内容</strong>：由你完全掌控，卸载应用或在应用内「抹掉数据」即会从设备删除，我们不保留副本，也无法为你恢复。<strong>购买与交易记录</strong>：由 Apple 与 RevenueCat 按其各自隐私政策保留，通常为完成购买验证与履行法定义务所必需的期限。<strong>你自己做的备份</strong>：使用「导出数据」时会在应用文件夹内生成备份文件，并打开 iOS 分享面板，你可以把副本另存到任意位置（包括你自己的 iCloud 云盘）或发送到其他 App；它由你创建与保管，我们不会收到。</p>'+
+        '<div class="doc-h">6. 你的权利与控制</div><p class="doc-p">你可随时通过下方邮箱联系我们，请求查询、更正或删除你的数据，或撤回你此前给出的同意。由于本应用不设账号，你的内容始终由你在设备上自行管理，卸载应用或使用「抹掉数据」即可删除。我们将在适用法律要求的期限内回应你的请求。</p>'+
+        '<div class="doc-h">7. 儿童隐私</div><p class="doc-p">本应用不面向 13 岁以下儿童设计，我们不会在知情的情况下收集儿童的个人信息。如家长或监护人发现儿童使用了本应用，可通过卸载应用或使用应用内「抹掉数据」删除全部本地内容。</p>'+
+        '<div class="doc-h">8. 联系方式</div><p class="doc-p">如对本政策有任何疑问，或需要行使上述权利，请邮件联系：365504860@qq.com</p>'+
+        '<div class="doc-h">9. 政策变更</div><p class="doc-p">若本政策发生更新，我们会在本页面发布最新版本并更新顶部的「生效日期」。对于重大变更，我们还会在应用内作出提示。继续使用本应用即表示你接受更新后的政策。</p>' :
+        '<div class="doc-h">In short: your habit data stays on your device</div><p class="doc-p">Seeora is a local-first habit tracker. The habits, check-ins, streaks and notes you record are stored on your own device. The app does not require an account, and we do not collect directly identifying information such as your name, email address or phone number. To process in-app purchases and support restore purchases, we use a third-party purchase service, RevenueCat, which receives limited purchase and technical information.</p>'+
+        '<div class="doc-h">1. What we collect &mdash; and what we do not</div><p class="doc-p">To be precise, we separate what the App itself does from what our purchase service provider does.<br>· <strong>Your content stays local:</strong> habits, check-ins, streaks, notes, archived items and migration records are stored only on your device. We operate no server for this content and cannot read it (if you use iCloud Backup on your iPhone, that device backup is managed by Apple under Apple\'s privacy policy, not by us).<br>· <strong>No account is required:</strong> because the App has no sign-up, we do not collect your name, email address, phone number, contacts, precise location or microphone content.<br>· <strong>Saving an achievement card:</strong> when you ask the App to save an achievement card, the image is generated on your device and written to your photo library by iOS at your request; the App does not read your other photos, and the card itself is not sent to us.<br>· <strong>No advertising or tracking SDKs:</strong> the App contains no third-party advertising SDKs and does not use your data to track you across other apps or websites.</p>'+
+        '<div class="doc-h">2. In-app purchases and our third-party service (RevenueCat)</div><p class="doc-p">Seeora Pro is a one-time purchase completed through the Apple App Store; payment is handled by Apple, and we do not receive or store your payment card number. We use RevenueCat, Inc. to validate purchase receipts, unlock Pro entitlements and support restore purchases. In that role, RevenueCat receives: purchase history and transaction information (product identifier, date of purchase, entitlement status); the Apple receipt associated with your purchase; and the basic technical context needed to validate the purchase (platform, OS version, app version, country/locale). This information is associated with a randomly generated anonymous identifier. It does not include your name or email address, and it cannot be used to determine who you are.<br><strong>Third-party protection:</strong> we require, and confirm, that any third party with whom we share user data (here, Apple and RevenueCat) provides the same or equal protection of that data as described in this policy and as required by the App Store Review Guidelines.</p>'+
+        '<div class="doc-h">3. Diagnostics</div><p class="doc-p">The App contains no third-party crash-reporting, analytics or attribution SDK, and we do not collect or upload crash logs, diagnostics or usage statistics from your device. We receive diagnostic information about a problem only if you choose to contact us and send it to us yourself. (If you have enabled the system setting "Share with App Developers" in iOS, Apple may collect crash and usage data under its own privacy policy; that collection is performed by Apple and is independent of us.)</p>'+
+        '<div class="doc-h">4. How we use information</div><p class="doc-p">Only to: verify your Pro purchase status and unlock the corresponding features; support restore purchases so your entitlement carries over to a new device; and detect and prevent purchase-related errors or fraudulent transactions. We do not use it for cross-app or cross-website advertising tracking.</p>'+
+        '<div class="doc-h">5. Data retention and deletion</div><p class="doc-p"><strong>Local content:</strong> you control it entirely. Uninstalling the App, or using "Erase data" inside the App, removes it from your device; we keep no copy and cannot recover it for you. <strong>Purchase and transaction records:</strong> retained by Apple and by RevenueCat under their respective privacy policies, generally for as long as needed to validate purchases and to meet legal obligations. <strong>Backups you make yourself:</strong> if you use "Export data", a backup file is written into the App\'s own folder on your device and the iOS share sheet opens, so you can save that copy wherever you like (including to your own iCloud Drive) or send it to another app; it is created and kept by you and we do not receive it.</p>'+
+        '<div class="doc-h">6. Your rights and choices</div><p class="doc-p">You may contact us at any time using the email below to request access to, correction of, or deletion of your data, or to withdraw consent you previously gave. Because the App has no account system, your content is always under your own control on your device. We will respond within the time required by applicable law.</p>'+
+        '<div class="doc-h">7. Children\'s privacy</div><p class="doc-p">The App is not directed to children under 13, and we do not knowingly collect personal information from children. If a parent or guardian discovers that a child has used the App, all local content can be removed by uninstalling the App or using "Erase data" inside it.</p>'+
+        '<div class="doc-h">8. Contact us</div><p class="doc-p">For any question about this policy, or to exercise those rights, email: 365504860@qq.com</p>'+
+        '<div class="doc-h">9. Changes to this policy</div><p class="doc-p">If this policy is updated, we will publish the latest version on this page and update the effective date at the top. For material changes we will also provide notice in the App. Continued use of the App means you accept the updated policy.</p>'
     };
   }
   return {
     title: zh?"用户协议":"Terms of Service",
-    updated: zh?"生效日期：2026 年 10 月 1 日":"Effective date: October 1, 2026",
+    updated: zh?"生效日期：2026 年 10 月 7 日":"Effective date: October 7, 2026",
     body: zh ?
       '<div class="doc-h">1. 接受条款</div><p class="doc-p">欢迎使用 Seeora（以下简称「本应用」）。本应用由个人开发者 张新华 提供。你下载、访问或使用本应用，即表示你同意受本条款约束。若不同意，请勿使用。</p>'+
       '<div class="doc-h">2. 使用许可</div><p class="doc-p">我们授予你一项个人的、非独占的、不可转让的、可撤销的许可，按本条款使用本应用。免费版供个人日常习惯管理使用；专业版为一次性买断，解锁相应功能。</p>'+
-      '<div class="doc-h">3. 你的责任</div><p class="doc-p">你应对自己在本应用中录入的内容负责，并保证不录入违法、侵权或有害信息。本应用数据仅存于你的设备本地，清除本地存储或卸载应用可能导致数据不可恢复，请自行做好备份（专业版支持数据导出）。</p>'+
+      '<div class="doc-h">3. 你的责任</div><p class="doc-p">你应对自己在本应用中录入的内容负责，并保证不录入违法、侵权或有害信息。本应用数据仅存于你的设备本地，清除本地存储或卸载应用可能导致数据不可恢复，请自行做好备份（专业版支持数据导出）。使用本应用即表示你知悉《隐私政策》所述的数据处理方式：你的习惯内容保存在你的设备上；为验证与恢复你的购买，我们的第三方内购服务（Apple / RevenueCat）会接收有限的购买与技术信息。你可以随时通过《隐私政策》中的邮箱，请求查询、更正或删除你的数据，或撤回你的同意。</p>'+
       '<div class="doc-h">4. 应用内购买</div><p class="doc-p">专业版通过 Apple App Store 完成一次性买断，价格为 $4.99（或当地等价），价格、税费以 App Store 结算页为准。依据 Apple 政策，已完成的数字商品购买通常不予退款；如发生购买异常，请通过 App Store 或本应用「恢复购买」功能处理，亦可邮件联系 365504860@qq.com。</p>'+
       '<div class="doc-h">5. 知识产权</div><p class="doc-p">本应用的名称、标识、界面与代码等知识产权归开发者所有。你不得对本应用进行反向工程、反编译、再分发或用于商业转售，除非获得书面授权。</p>'+
       '<div class="doc-h">6. 免责声明（按当地法律允许的最大范围）</div><p class="doc-p">本应用按「现状」提供，不对其可用性、准确性或适用性作任何明示或暗示担保，也不构成医疗、心理或专业建议。因使用或无法使用本应用（含本地数据丢失）造成的任何损失，开发者不承担责任，法律强制规定除外。</p>'+
@@ -1676,7 +1917,7 @@ function docContent(kind){
       '<div class="doc-h">8. 联系</div><p class="doc-p">有关本条款的疑问，请邮件至 365504860@qq.com。</p>' :
       '<div class="doc-h">1. Acceptance of these terms</div><p class="doc-p">Welcome to Seeora (the "App"). The App is provided by individual developer Zhang Xinhua. By downloading, accessing, or using the App, you agree to be bound by these terms. If you do not agree, do not use the App.</p>'+
       '<div class="doc-h">2. License to use</div><p class="doc-p">We grant you a personal, non-exclusive, non-transferable, revocable license to use the App under these terms. The free plan is for personal habit tracking; Pro is a one-time purchase that unlocks additional features.</p>'+
-      '<div class="doc-h">3. Your responsibilities</div><p class="doc-p">You are responsible for the content you enter in the App and warrant that it is lawful and non-infringing. All app data is stored locally on your device; clearing local storage or uninstalling may make data unrecoverable — please back up regularly (Pro supports data export).</p>'+
+      '<div class="doc-h">3. Your responsibilities</div><p class="doc-p">You are responsible for the content you enter in the App and warrant that it is lawful and non-infringing. All app data is stored locally on your device; clearing local storage or uninstalling may make data unrecoverable — please back up regularly (Pro supports data export). By using the App you acknowledge the handling of data described in the Privacy Policy: your habit content stays on your device, and our third-party purchase service (Apple / RevenueCat) receives limited purchase and technical information solely to validate and restore your purchase. You may ask us about, correct or delete your data, or withdraw your consent, at any time by emailing the address in the Privacy Policy.</p>'+
       '<div class="doc-h">4. In-app purchases</div><p class="doc-p">Pro is a one-time purchase completed through the Apple App Store at $4.99 (or local equivalent); prices and taxes are as shown on the App Store checkout page. Under Apple policy, completed digital product purchases are generally non-refundable; if a purchase goes wrong, handle it through the App Store or the App\'s "restore purchases" feature, or email 365504860@qq.com.</p>'+
       '<div class="doc-h">5. Intellectual property</div><p class="doc-p">The name, logo, interface, and code of the App are owned by the developer. You may not reverse engineer, decompile, redistribute, or commercially resell the App without written authorization.</p>'+
       '<div class="doc-h">6. Disclaimer (to the maximum extent permitted by applicable law)</div><p class="doc-p">The App is provided "as is" without warranties of any kind, and is not medical, psychological, or professional advice. To the extent permitted by law, the developer is not liable for any loss arising from use of or inability to use the App (including local data loss).</p>'+
@@ -1738,9 +1979,7 @@ function renderAll(){
   document.getElementById("langLab").textContent = T.langLab;
   document.getElementById("themeLab").textContent = T.themeLab;
   document.getElementById("exportLab").textContent = T.dataExport;
-  document.getElementById("exportSub").textContent = T.dataExportSub;
   document.getElementById("importLab").textContent = T.dataImport;
-  document.getElementById("importSub").textContent = T.dataImportSub;
   document.getElementById("feedbackLab").textContent = T.feedbackLab;
   document.getElementById("faqLab").textContent = T.faqLab;
   document.getElementById("privacyLab").textContent = T.privacyLab;
@@ -1757,15 +1996,20 @@ function renderAll(){
   updateThemeUI(); updateLangUI(); updateNotifUI();
   document.getElementById("payTitle").textContent = T.payTitle;
   document.getElementById("paySub").textContent = T.paySub;
-  document.getElementById("b1t").textContent = T.b1t; document.getElementById("b1s").textContent = T.b1s;
-  document.getElementById("b2t").textContent = T.b2t; document.getElementById("b2s").textContent = T.b2s;
-  document.getElementById("b3t").textContent = T.b3t; document.getElementById("b3s").textContent = T.b3s;
-  document.getElementById("b4t").textContent = T.b4t; document.getElementById("b4s").textContent = T.b4s;
+  document.getElementById("b1t").textContent = T.b1t;
+  document.getElementById("b2t").textContent = T.b2t;
+  document.getElementById("b3t").textContent = T.b3t;
+  document.getElementById("b4t").textContent = T.b4t;
   document.getElementById("btnTrial").textContent = T.btnTrial;
   document.getElementById("btnBuy").textContent = T.btnBuy;
-  document.getElementById("btnRestore").textContent = T.restore;
+  document.getElementById("btnRestore").textContent = T.restorePurchases;
+  // ★ 2026-10-07 修：付费墙页脚的「隐私政策 / 用户协议」两个 span 一直没赋文案 → 宽度为 0、看不见也点不到。
+  document.getElementById("btnPayPrivacy").textContent = T.privacyLab;
+  document.getElementById("btnPayTerms").textContent = T.termsLab;
   document.getElementById("payFine").textContent = T.payFine;
-  document.getElementById("addTitle").textContent = T.addTitle;
+  // 表单标题随当前状态走（编辑态显示「编辑习惯」）。editHabitIdx 用 var 提升，
+  // 这里用松散比较 == null 同时兜住 undefined（applyLang 早于 openHabitForm 首次执行的情况）。
+  document.getElementById("addTitle").textContent = (editHabitIdx == null) ? T.addTitle : T.editTitle;
   document.getElementById("fNameLab").textContent = T.nameLab;
   document.getElementById("fDescLab").textContent = T.descLab;
   document.getElementById("fRemLab").textContent = T.fRemLab;
@@ -1787,7 +2031,7 @@ function renderAll(){
     document.getElementById("proCardT").textContent = m==="free" ? (isZh()?"升级 Seeora Pro":"Upgrade to Seeora Pro") : T.pro;
     document.getElementById("proCardS").textContent = m==="permanent" ? T.proSubPro
       : m==="trial" ? T.proSubTrial.replace("{n}", trialDaysLeft())
-      : (isZh()?"无限习惯 · 无水印分享 · 数据导出":"Unlimited habits · Watermark-free · Data export");
+      : (isZh()?"无限习惯 · 成就卡分享 · 数据导出":"Unlimited habits · Card sharing · Data export");
     document.getElementById("proCardA").textContent = m==="free" ? (isZh()?"了解更多 →":"Learn more →") : "✓";
   })();
 
@@ -1809,6 +2053,25 @@ function renderAll(){
 }
 
 document.getElementById("list").addEventListener("click", function(e){
+  // ★ 2026-10-07：习惯卡的左滑操作（编辑 / 删除）—— 与迁移条行为对齐（删除不弹二次确认，直接删 + toast）
+  var s = e.target.closest ? e.target.closest(".h-actions [data-act]") : null;
+  if (s){
+    e.preventDefault();
+    var act = s.getAttribute("data-act"), i = +s.getAttribute("data-idx");
+    if (act === "edit"){ openHabitForm(i); return; }
+    if (act === "del"){
+      if (!HABITS[i]) return;
+      HABITS.splice(i, 1);
+      // 删掉后 curIdx 可能越界（详情页下次打开时用），这里是纯粹的防御
+      if (curIdx >= HABITS.length) curIdx = Math.max(0, HABITS.length - 1);
+      saveHabits(); renderList(); renderUsage(); renderHonors();
+      toast(t().habitRemoved);
+      return;
+    }
+  }
+});
+document.getElementById("list").addEventListener("click", function(e){
+  if (suppressCardClick) return;   // 刚结束左滑 → 吃掉这次 click，别顺手进详情
   var btn = e.target.closest ? e.target.closest(".check") : null; if (!btn) return;
   e.stopPropagation();
   var i = +btn.getAttribute("data-i"), h = HABITS[i];
@@ -1823,7 +2086,11 @@ document.getElementById("list").addEventListener("click", function(e){
   saveHabits(); renderDetail(); renderUsage(); renderHonors();
 });
 document.getElementById("list").addEventListener("click", function(e){
+  if (suppressCardClick){ suppressCardClick = false; return; }   // 消费掉左滑后的那一次 click
   var card = e.target.closest ? e.target.closest(".card") : null; if (!card) return;
+  // ★ 已经左滑露开按钮的行：第一次点按应该「先收起」，而不是直接进详情（iOS 的通用行为）
+  var sw = card.closest(".h-swipe");
+  if (sw && sw.classList.contains("open")){ sw.classList.remove("open"); return; }
   if (e.target.closest(".check")) return;
   curIdx = +card.getAttribute("data-idx"); animatedArcs = {};
   document.getElementById("view-detail").classList.add("on"); renderDetail();
@@ -1944,23 +2211,38 @@ document.getElementById("swAddRem").addEventListener("click", async function(){
   showPermIntro();
 });
 
-document.getElementById("btnAdd").addEventListener("click", function(){
-  addFreq = 1; addGoal = 1;
+/* ★ 2026-10-07：新增与编辑**共用同一个表单**（此前只有新增入口）。
+   idx == null → 新建；传索引 → 预填该习惯并进入编辑态，保存时原地改而不是 push。
+   这样两端不会出现「字段对不上」的漂移，也不用维护第二个表单。 */
+var editHabitIdx = null;
+function openHabitForm(idx){
+  editHabitIdx = (idx === undefined || idx === null) ? null : idx;
+  var T = t(), h = (editHabitIdx === null) ? null : HABITS[editHabitIdx];
+  document.getElementById("addTitle").textContent = h ? T.editTitle : T.addTitle;
+
+  addFreq = h ? h.freqDays : 1;
+  addGoal = h ? h.goal : 1;
+  var segF = document.getElementById("segFreq").children, segG = document.getElementById("segGoal").children;
   [1,2,3,7].forEach(function(v,i){
-    document.getElementById("segFreq").children[i].classList.toggle("on", v===1);
-    document.getElementById("segFreq").children[i].textContent = isZh()?("每 "+v+" 天"):(v+"d");
+    segF[i].classList.toggle("on", v === addFreq);
+    segF[i].textContent = isZh()?("每 "+v+" 天"):(v+"d");
   });
   [1,2,3,8].forEach(function(v,i){
-    document.getElementById("segGoal").children[i].classList.toggle("on", v===1);
-    document.getElementById("segGoal").children[i].textContent = String(v);
+    segG[i].classList.toggle("on", v === addGoal);
+    segG[i].textContent = String(v);
   });
-  document.getElementById("inpName").value = "";
-  document.getElementById("inpDesc").value = "";
-  document.getElementById("swAddRem").classList.remove("on");
-  document.getElementById("addTimeWrap").style.display = "none";
-  document.getElementById("inpAddTime").value = "20:00";
+
+  document.getElementById("inpName").value = h ? (isZh()?h.zh:h.en) : "";
+  document.getElementById("inpDesc").value = (h && h.desc) ? (isZh()?h.desc.zh:h.desc.en) : "";
+
+  var remOn = (h && h.reminder) ? !!h.reminder.on : false;
+  document.getElementById("swAddRem").classList.toggle("on", remOn);
+  document.getElementById("addTimeWrap").style.display = remOn ? "block" : "none";
+  document.getElementById("inpAddTime").value = (h && h.reminder && h.reminder.time) ? h.reminder.time : "20:00";
+
   showSheet("sheetAdd","maskAdd");
-});
+}
+document.getElementById("btnAdd").addEventListener("click", function(){ openHabitForm(null); });
 document.getElementById("btnAddClose").addEventListener("click", function(){ hideSheet("sheetAdd","maskAdd"); });
 document.getElementById("btnAddCancel").addEventListener("click", function(){ hideSheet("sheetAdd","maskAdd"); });
 document.getElementById("maskAdd").addEventListener("click", function(){ hideSheet("sheetAdd","maskAdd"); });
@@ -1977,15 +2259,30 @@ document.getElementById("segGoal").addEventListener("click", function(e){
 document.getElementById("btnAddSave").addEventListener("click", function(){
   var name = document.getElementById("inpName").value.trim();
   if (!name){ toast(isZh()?"请先填写习惯名称":"Please enter a name"); return; }
-  if (!isPro() && HABITS.length >= 5){ hideSheet("sheetAdd","maskAdd"); showPaywall("limit"); return; }
 
   var remOn = document.getElementById("swAddRem").classList.contains("on");
   var remTime = document.getElementById("inpAddTime").value || "20:00";
+  var descVal = document.getElementById("inpDesc").value.trim();
+
+  // ★ 编辑态：原地修改，不 push、不占用新的免费额度（所以不做 5 条上限检查）
+  if (editHabitIdx !== null){
+    var h0 = HABITS[editHabitIdx];
+    if (!h0){ hideSheet("sheetAdd","maskAdd"); return; }
+    h0.zh = name; h0.en = name;
+    h0.desc = { zh: descVal||name, en: descVal||name };
+    h0.freqDays = addFreq; h0.goal = addGoal;
+    h0.reminder = { on: remOn, time: remTime };
+    if (remOn) scheduleReminder(h0);
+    saveHabits(); hideSheet("sheetAdd","maskAdd");
+    renderList(); renderDetail(); renderUsage(); renderHonors();
+    return;
+  }
+
+  if (!isPro() && HABITS.length >= 5){ hideSheet("sheetAdd","maskAdd"); showPaywall("limit"); return; }
 
   var newHabit = {
     id:"h"+Date.now(), zh:name, en:name,
-    desc:{ zh:document.getElementById("inpDesc").value.trim()||name,
-           en:document.getElementById("inpDesc").value.trim()||name },
+    desc:{ zh:descVal||name, en:descVal||name },
     freqDays:addFreq, goal:addGoal, streak:0, best:0, total:0,
     week:[0,0,0,0,0,0,0],
     curve:(function(){ var a=[]; for (var i=0;i<21;i++) a.push({v:0,ok:0}); return a; })(),
