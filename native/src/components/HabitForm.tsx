@@ -23,7 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Text as T } from "@/components/ui/text";
 import { Icon } from "@/components/ui/icon";
-import { Trash2, CalendarClock } from "lucide-react-native";
+import { Trash2, CalendarClock, Archive } from "lucide-react-native";
 import { habitColors } from "@/lib/tokens";
 
 const EMOJIS = ["🔥", "✅", "🏃", "📚", "🧘", "💧", "🌙", "☀️", "💪", "🎯", "🌟", "🥗"];
@@ -31,8 +31,11 @@ const EMOJIS = ["🔥", "✅", "🏃", "📚", "🧘", "💧", "🌙", "☀️",
 export function HabitForm() {
   const {
     dict: d, colors: c, habitFormVisible, editingHabitId, habitForm, setHabitForm, saveHabit, closeHabitForm,
-    openBackfill, deleteHabitNow,
+    openBackfill, deleteHabitNow, habits, archiveHabit,
   } = useApp();
+  // 当前编辑中的习惯（用于显示归档/取消归档的当前态，归档后就地翻转标签、不关表单）
+  const editing = habits.find((h) => h.id === editingHabitId);
+  const isArchived = editing?.isArchived ?? false;
   /* ★ 删除改为**表单内联第二步确认**（2026-10-06，替代原「关表单 → 再开确认弹层」）：
    *   原路径会让两个原生 Modal 在退场 270ms 内并存（RN 0.83 会留下全屏透明层，
    *   关掉后整页失去响应），且要多一次弹层切换。内联确认后这条路彻底不存在。
@@ -77,7 +80,9 @@ export function HabitForm() {
           numOnly={numOnly}
           onBackfill={() => { if (editingHabitId) { const id = editingHabitId; closeHabitForm(); openBackfill(id); } }}
           onAskDelete={() => setConfirmDel(true)}
+          onArchive={() => { if (editingHabitId) archiveHabit(editingHabitId, !isArchived); }}
           onSave={saveHabit}
+          isArchived={isArchived}
         />
       )}
     </Sheet>
@@ -86,7 +91,7 @@ export function HabitForm() {
 
 /* ===================== 表单主体 ===================== */
 function HabitFields({
-  colors: c, dict: d, habitForm, setHabitForm, editingHabitId, numOnly, onBackfill, onAskDelete, onSave,
+  colors: c, dict: d, habitForm, setHabitForm, editingHabitId, numOnly, onBackfill, onAskDelete, onArchive, onSave, isArchived,
 }: {
   colors: ReturnType<typeof useApp>["colors"];
   dict: ReturnType<typeof useApp>["dict"];
@@ -96,7 +101,9 @@ function HabitFields({
   numOnly: (t: string) => number;
   onBackfill: () => void;
   onAskDelete: () => void;
+  onArchive: () => void;
   onSave: () => void;
+  isArchived: boolean;
 }) {
   return (
     <>
@@ -208,6 +215,12 @@ function HabitFields({
           <Button variant="outline" className="flex-1" onPress={onBackfill}>
             <Icon as={CalendarClock} color={c.ink} size={16} />
             <T className="text-sm font-medium" style={{ color: c.ink }}>{d.backfillTitle}</T>
+          </Button>
+        )}
+        {editingHabitId && (
+          <Button variant="outline" className="flex-1" onPress={onArchive}>
+            <Icon as={Archive} color={c.ink} size={16} />
+            <T className="text-sm font-medium" style={{ color: c.ink }}>{isArchived ? d.unarchive : d.archive}</T>
           </Button>
         )}
         {editingHabitId && (

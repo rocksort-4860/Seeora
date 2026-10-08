@@ -32,6 +32,8 @@ export interface Dict {
 
   // 通用
   save: string; cancel: string; delete: string; close: string;
+  /** 子页面导航栏的返回按钮（iOS 规范：显示父级名称，故为「‹ 设置」） */
+  back: string;
   yes: string; no: string; confirmDelTitle: string; confirmDelBody: string;
 
   // 7 天补录
@@ -57,20 +59,29 @@ export interface Dict {
   // Settings
   setGeneral: string; setLang: string; setTheme: string; setOnboarding: string;
   setNotif: string; setBadge: string;
-  setDevice: string; setHaptics: string; setIcloud: string; setWeekStart: string;
+  setDevice: string; setHaptics: string; setWeekStart: string;
   weekMon: string; weekSun: string;
   setExt: string; extHealth: string; extHealthSub: string; extSiri: string; extSiriSub: string; extWidget: string; extWidgetSub: string;
   setData: string; dataBuyout: string; dataExport: string; dataWipe: string;
   about: string; version: string; privacy: string; privacyText: string; localPromise: string;
   themeSystem: string; themeLight: string; themeDark: string;
+  // Archive / Restore（习惯可删除或归档，设置页新增「恢复购买」）
+  archive: string; unarchive: string; archived: string;
+  restorePurchases: string; dataPrivacyNote: string;
+  impConfirmTitle: string; impConfirmMsg: string;
 
   // Pro / Pay Sheet
   proTitle: string; proLifetime: string; proPermanent: string; proNoSub: string;
   proNoAccount: string; proDataYours: string; proBuy: string; proRestore: string;
   proRetry: string; proLoading: string; proOwned: string; payTitle: string; payStore: string;
   payUnavailable: string; buyoutTitle: string; buyoutBody: string;
-  /* 试用改为**手动领取**（不再装完自动开启）：proTrialStart = 领取入口按钮文案 */
+  /* 体验改为**手动领取**（不再装完自动开启）：proTrialStart = 领取入口按钮文案。
+   * ★ 2026-10-07 措辞合规：本 App 是**买断制**（Non-Consumable），不是自动续期订阅。
+   *   "free trial" 是订阅专属术语（苹果 3.1.2 语境），买断制宣传 free trial 易被 3.1.1 打回。
+   *   统一改口径为 "Pro preview / Pro 体验"，并用 proTrialNote 明确「不会自动扣费、一次性买断」。 */
   proTrialLeft: string; proTrialOver: string; proTrialStart: string;
+  /* 体验按钮下方的澄清小字（消除「点了会被订阅扣费」的误解） */
+  proTrialNote: string;
   habitLimitTitle: string; habitLimitBody: string; habitLimitToast: string;
   /* 试用结束后超限的习惯被冻结（数据保留、不可操作） */
   habitFrozen: string; habitFrozenTip: string; habitFrozenToast: string;
@@ -98,7 +109,7 @@ export interface Dict {
 
 export const I18N: Record<Lang, Dict> = {
   zh: {
-    brand: "Seeora", slogan: "记录习惯，允许休息，所有坚持永久留存",
+    brand: "Seeora", slogan: "看见自己越来越好",
     historyTitle: "历史", settingsTitle: "设置",
     tabHistory: "历史", tabToday: "今天", tabSettings: "设置",
 
@@ -117,7 +128,7 @@ export const I18N: Record<Lang, Dict> = {
     fReminder: "每日提醒", fReminderOn: "已开启", fReminderOff: "已关闭", fReminderTime: "提醒时间",
     fMigrated: "从其它 App 导入的坚持", fMigratedDays: "导入总天数", fMigratedStreak: "当前连续", fMigratedStart: "开始日期", fMigratedSource: "来源",
 
-    save: "保存", cancel: "取消", delete: "删除", close: "关闭",
+    save: "保存", cancel: "取消", delete: "删除", close: "关闭", back: "返回",
     yes: "确定", no: "取消", confirmDelTitle: "删除习惯", confirmDelBody: "删除后该习惯的全部打卡记录将一并移除，且不可恢复。",
 
     backfillTitle: "补录打卡", backfillSub: "可对近 8 天补打或撤销；超过 7 天的日期已锁定。", backfillLocked: "已锁定",
@@ -139,14 +150,17 @@ export const I18N: Record<Lang, Dict> = {
 
     setGeneral: "通用", setLang: "语言", setTheme: "外观", setOnboarding: "重看引导",
     setNotif: "通知", setBadge: "应用角标",
-    setDevice: "设备偏好", setHaptics: "触感反馈", setIcloud: "iCloud 同步", setWeekStart: "一周起始日",
+    setDevice: "设备偏好", setHaptics: "触感反馈", setWeekStart: "一周起始日",
     weekMon: "周一", weekSun: "周日",
     setExt: "扩展集成", extHealth: "Apple Health", extHealthSub: "只读摘要（即将支持）", extSiri: "Siri 与快捷指令", extSiriSub: "用语音打卡（即将支持）", extWidget: "主屏组件", extWidgetSub: "在桌面查看今日进度",
     setData: "数据安全", dataBuyout: "买断说明", dataExport: "导出备份", dataWipe: "抹掉数据",
-    about: "关于", version: "版本 {v}", privacy: "隐私政策", privacyText: "Seeora 不收集任何个人数据。所有习惯、打卡与迁移记录仅存储于你的本机（或你自己的私有 iCloud），永远不会上传到我们的服务器。无账号、无追踪、无广告。", localPromise: "数据仅存于本机 / 私有 iCloud，永远归你。",
+    about: "关于", version: "版本 {v}", privacy: "隐私政策", privacyText: "Seeora 是一款本地优先的习惯打卡应用：你的习惯、打卡与连续天数保存在你自己的设备上，我们不会上传这些内容。本应用无需注册账号，我们不收集你的姓名、邮箱或电话等可直接识别身份的信息。为验证购买并支持「恢复购买」，我们使用第三方内购服务 RevenueCat，它会接收有限的购买记录与基础技术信息（如平台、系统版本、应用版本），并与一个随机匿名标识符关联，不含你的姓名或邮箱。详见《隐私政策》。", localPromise: "数据仅存于本机，由你掌控。",
     themeSystem: "跟随系统", themeLight: "浅色", themeDark: "深色",
+    archive: "归档", unarchive: "取消归档", archived: "已归档",
+    restorePurchases: "恢复购买", dataPrivacyNote: "你的数据仅存储于本机。导出的备份文件请自行妥善保存。",
+    impConfirmTitle: "导入备份", impConfirmMsg: "导入将合并覆盖当前数据，且不可撤销。确定继续吗？",
 
-    proTitle: "永久买断", proLifetime: "Seeora 终身版", proPermanent: "一次付费，永久使用", proNoSub: "无订阅，无自动续费", proNoAccount: "无账号，无需注册", proDataYours: "数据归你，本地存储", proBuy: "买断永久使用", proRestore: "恢复购买", proRetry: "重试", proLoading: "价格加载中…", proOwned: "你已拥有永久版", payTitle: "买断 Seeora 终身版", payStore: "App Store", payUnavailable: "当前无法读取商品信息，请检查网络后重试。", buyoutTitle: "一次买断，永久属于你", buyoutBody: "支付后解锁全部数据权益：导出与导入备份、成就卡导出图片并分享到社交平台，以及未来所有功能更新。无订阅、无账号。", proTrialLeft: "免费试用中 · 剩 {n} 天", proTrialOver: "试用已结束，购买解锁永久版", proTrialStart: "开始 7 天免费试用", habitLimitTitle: "已达免费版上限 {n} 个习惯", habitLimitBody: "买断终身版即可解除数量限制，习惯数量永久不限。", habitLimitToast: "免费版最多 {n} 个习惯。买断后无限添加。", habitFrozen: "已冻结", habitFrozenTip: "免费版最多 {n} 个习惯可用。此习惯已冻结，你的记录完整保留；升级后可继续打卡。", habitFrozenToast: "此习惯已冻结。升级终身版后可继续打卡。", payBuyFail: "购买未完成。请检查网络或 App Store 付款设置后重试。", payRestoreNone: "本机没有找到可恢复的购买。如果用新设备登录，请先在同一 App Store 账号下购买。", payRestoreFail: "恢复购买失败，请检查网络连接后重试。", payProcessing: "处理中…", payRestoring: "正在恢复…", dCheckToday: "当日打卡", dUndoToday: "取消当日打卡",
+    proTitle: "永久买断", proLifetime: "Seeora 终身版", proPermanent: "一次付费，永久使用", proNoSub: "无订阅，无自动续费", proNoAccount: "无账号，无需注册", proDataYours: "数据归你，本地存储", proBuy: "买断永久使用", proRestore: "恢复购买", proRetry: "重试", proLoading: "价格加载中…", proOwned: "你已拥有永久版", payTitle: "买断 Seeora 终身版", payStore: "App Store", payUnavailable: "当前无法读取商品信息，请检查网络后重试。", buyoutTitle: "一次买断，永久属于你", buyoutBody: "支付后解锁全部数据权益：导出与导入备份、成就卡导出图片并分享到社交平台，以及未来所有功能更新。无订阅、无账号。", proTrialLeft: "Pro 体验中 · 剩 {n} 天", proTrialOver: "体验已结束，购买解锁永久版", proTrialStart: "开始 7 天 Pro 体验", proTrialNote: "体验到期后不会自动扣费。继续使用专业版，一次性买断即可。", habitLimitTitle: "已达免费版上限 {n} 个习惯", habitLimitBody: "买断终身版即可解除数量限制，习惯数量永久不限。", habitLimitToast: "免费版最多 {n} 个习惯。买断后无限添加。", habitFrozen: "已冻结", habitFrozenTip: "免费版最多 {n} 个习惯可用。此习惯已冻结，你的记录完整保留；升级后可继续打卡。", habitFrozenToast: "此习惯已冻结。升级终身版后可继续打卡。", payBuyFail: "购买未完成。请检查网络或 App Store 付款设置后重试。", payRestoreNone: "本机没有找到可恢复的购买。如果用新设备登录，请先在同一 App Store 账号下购买。", payRestoreFail: "恢复购买失败，请检查网络连接后重试。", payProcessing: "处理中…", payRestoring: "正在恢复…", dCheckToday: "当日打卡", dUndoToday: "取消当日打卡",
 
     shareTitle: "分享成就", shareMainTitle: "自定义主标题", shareNote: "一句话备注（可选）", shareSave: "保存到相册", shareShare: "分享图片", shareSavedImg: "已保存到相册", shareSaveFail: "保存失败，请重试", shareImgFail: "生成图片失败，请重试", shareShareFail: "分享失败，请重试", shareNoPerm: "未获得相册权限，已改为打开分享面板", shareSaving: "正在保存…", sharePreparing: "正在生成…",
     quoteLabel: "备选文案", quote1: "越坚持，越成长", quote2: "越记录，越看见", quote3: "越沉淀，越发光", quote4: "越前行，越向好", signLabel: "底部签名（自定义一句话）",
@@ -156,7 +170,7 @@ export const I18N: Record<Lang, Dict> = {
 
   },
   en: {
-    brand: "Seeora", slogan: "Record habits. Rest is allowed. Every day stays.",
+    brand: "Seeora", slogan: "See yourself getting better.",
     historyTitle: "History", settingsTitle: "Settings",
     tabHistory: "History", tabToday: "Today", tabSettings: "Settings",
 
@@ -175,7 +189,7 @@ export const I18N: Record<Lang, Dict> = {
     fReminder: "Daily reminder", fReminderOn: "On", fReminderOff: "Off", fReminderTime: "Reminder time",
     fMigrated: "Carried over from another app", fMigratedDays: "Total days", fMigratedStreak: "Current streak", fMigratedStart: "Start date", fMigratedSource: "Source",
 
-    save: "Save", cancel: "Cancel", delete: "Delete", close: "Close",
+    save: "Save", cancel: "Cancel", delete: "Delete", close: "Close", back: "Back",
     yes: "Confirm", no: "Cancel", confirmDelTitle: "Delete habit", confirmDelBody: "All check-ins for this habit will be removed too, and cannot be recovered.",
 
     backfillTitle: "Backfill check-ins", backfillSub: "Toggle any of the last 8 days. Dates older than 7 days are locked.", backfillLocked: "Locked",
@@ -197,14 +211,17 @@ export const I18N: Record<Lang, Dict> = {
 
     setGeneral: "General", setLang: "Language", setTheme: "Appearance", setOnboarding: "Replay intro",
     setNotif: "Notifications", setBadge: "App badge",
-    setDevice: "Device", setHaptics: "Haptics", setIcloud: "iCloud sync", setWeekStart: "Week starts on",
+    setDevice: "Device", setHaptics: "Haptics", setWeekStart: "Week starts on",
     weekMon: "Monday", weekSun: "Sunday",
     setExt: "Integrations", extHealth: "Apple Health", extHealthSub: "Read-only summary (soon)", extSiri: "Siri & Shortcuts", extSiriSub: "Check in by voice (soon)", extWidget: "Home widget", extWidgetSub: "See today's progress on your Home Screen",
     setData: "Data & safety", dataBuyout: "Buyout info", dataExport: "Export backup", dataWipe: "Erase data",
-    about: "About", version: "Version {v}", privacy: "Privacy Policy", privacyText: "Seeora collects no personal data. All habits, check-ins and migrated records live only on your device (or your private iCloud) and are never uploaded to our servers. No account, no tracking, no ads.", localPromise: "Data stays on your device / private iCloud. Always yours.",
+    about: "About", version: "Version {v}", privacy: "Privacy Policy", privacyText: "Seeora is a local-first habit tracker: your habits, check-ins and streaks are stored on your own device and are not uploaded by us. No account is required, and we do not collect directly identifying information such as your name, email address or phone number. To validate purchases and support restore purchases we use a third-party purchase service, RevenueCat, which receives limited purchase records and basic technical information (such as platform, OS and app version) tied to a random anonymous identifier - never your name or email. See the Privacy Policy for details.", localPromise: "Data stays on your device, under your control.",
     themeSystem: "System", themeLight: "Light", themeDark: "Dark",
+    archive: "Archive", unarchive: "Unarchive", archived: "Archived",
+    restorePurchases: "Restore Purchases", dataPrivacyNote: "Your data lives only on your device. Keep the exported backup file safe.",
+    impConfirmTitle: "Import backup", impConfirmMsg: "Importing merges with and overwrites your current data and cannot be undone. Continue?",
 
-    proTitle: "Lifetime", proLifetime: "Seeora Lifetime", proPermanent: "Pay once, yours forever", proNoSub: "No subscription, no auto-renew", proNoAccount: "No account, no sign-up", proDataYours: "Your data, local only", proBuy: "Buy lifetime", proRestore: "Restore purchase", proRetry: "Retry", proLoading: "Loading price…", proOwned: "You own the lifetime edition", payTitle: "Buy Seeora Lifetime", payStore: "App Store", payUnavailable: "Couldn't load the product. Check your connection and retry.", buyoutTitle: "One buyout, forever yours", buyoutBody: "Unlock every data perk: export & import backups, achievement cards exported as images you can share anywhere, and all future updates. No subscription, no account.", proTrialLeft: "Free trial · {n} days left", proTrialOver: "Trial ended — buy to keep Pro", proTrialStart: "Start 7-day free trial", habitLimitTitle: "Free plan is full ({n} habits)", habitLimitBody: "Buy the lifetime edition to lift the cap — unlimited habits, forever.", habitLimitToast: "Free plan allows up to {n} habits. Buy to add unlimited.", habitFrozen: "Frozen", habitFrozenTip: "The free plan keeps up to {n} habits active. This one is frozen — your records are safe; unlock to check in again.", habitFrozenToast: "This habit is frozen. Unlock the lifetime edition to check in again.", payBuyFail: "Purchase didn't go through. Check your connection or App Store payment settings and try again.", payRestoreNone: "No purchase to restore on this device. If you're on a new device, buy again with the same App Store account.", payRestoreFail: "Couldn't restore the purchase. Check your connection and try again.", payProcessing: "Processing…", payRestoring: "Restoring…", dCheckToday: "Check in for today", dUndoToday: "Undo today's check-in",
+    proTitle: "Lifetime", proLifetime: "Seeora Lifetime", proPermanent: "Pay once, yours forever", proNoSub: "No subscription, no auto-renew", proNoAccount: "No account, no sign-up", proDataYours: "Your data, local only", proBuy: "Buy lifetime", proRestore: "Restore purchase", proRetry: "Retry", proLoading: "Loading price…", proOwned: "You own the lifetime edition", payTitle: "Buy Seeora Lifetime", payStore: "App Store", payUnavailable: "Couldn't load the product. Check your connection and retry.", buyoutTitle: "One buyout, forever yours", buyoutBody: "Unlock every data perk: export & import backups, achievement cards exported as images you can share anywhere, and all future updates. No subscription, no account.", proTrialLeft: "Pro preview · {n} days left", proTrialOver: "Preview ended — buy to keep Pro", proTrialStart: "Start 7-day Pro preview", proTrialNote: "No automatic charge when the preview ends. Unlock forever with a one-time purchase.", habitLimitTitle: "Free plan is full ({n} habits)", habitLimitBody: "Buy the lifetime edition to lift the cap — unlimited habits, forever.", habitLimitToast: "Free plan allows up to {n} habits. Buy to add unlimited.", habitFrozen: "Frozen", habitFrozenTip: "The free plan keeps up to {n} habits active. This one is frozen — your records are safe; unlock to check in again.", habitFrozenToast: "This habit is frozen. Unlock the lifetime edition to check in again.", payBuyFail: "Purchase didn't go through. Check your connection or App Store payment settings and try again.", payRestoreNone: "No purchase to restore on this device. If you're on a new device, buy again with the same App Store account.", payRestoreFail: "Couldn't restore the purchase. Check your connection and try again.", payProcessing: "Processing…", payRestoring: "Restoring…", dCheckToday: "Check in for today", dUndoToday: "Undo today's check-in",
 
     shareTitle: "Share achievement", shareMainTitle: "Custom title", shareNote: "One-line note (optional)", shareSave: "Save to Photos", shareShare: "Share image", shareSavedImg: "Saved to Photos", shareSaveFail: "Couldn't save the image. Try again.", shareImgFail: "Couldn't create the image. Try again.", shareShareFail: "Couldn't share. Try again.", shareNoPerm: "Photos access was denied — opening the share sheet instead.", shareSaving: "Saving…", sharePreparing: "Preparing…",
     quoteLabel: "Quote options", quote1: "The more you keep going, the more you grow", quote2: "The more you record, the more you see", quote3: "The more you settle, the brighter you shine", quote4: "The further you go, the better you feel", signLabel: "Signature line (custom)",

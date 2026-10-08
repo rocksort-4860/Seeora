@@ -20,6 +20,10 @@ AuthKey_*
 deepseek_svg_*.svg
 # Expo / Metro 等工具在 native/ 根留下的 0 字节临时文件（实测出现过 _tmp_8636_xxx）
 native/_tmp_*
+# 一次性调试产物：归档目录 + 下划线开头的调试截图（_shot_/_s2_/_s3_/_cmp_/_sw_ 等一律覆盖）。
+# ★ _verify_fix.js / _verify_swipe.js / _check_pages.cjs 是**常驻守卫**，必须保留 —— 它们是 .js/.cjs，不受本行影响
+_临时产物_*/
+_*.png
 
 # ── 系统 ──
 .DS_Store

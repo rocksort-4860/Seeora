@@ -28,6 +28,7 @@ export default function HabitDetailScreen() {
     colors: c, dict: d, lang, habits, streakOf, bestOf, nodesOf, curveOf,
     nodeIdxOf, nodeStateOf, freqOf, canRestOf, canMakeupOf,
     toggleToday, toggleRest, toggleBackfillDate, openShare, openHabitForm,
+    deleteHabitNow, archiveHabit,
     frozenIds, openPro,
   } = useApp();
   const insets = useSafeAreaInsets();
@@ -39,6 +40,7 @@ export default function HabitDetailScreen() {
   const [haloNonce, setHaloNonce] = useState(0);
   const [bestTip, setBestTip] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
   const tipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hintLoaded = useRef(false);
 
@@ -271,6 +273,59 @@ export default function HabitDetailScreen() {
           className="mt-5"
         />
       </ScrollView>
+
+      {/* 底部操作栏：删除 / 归档（iOS 经典「破坏性操作就地二次确认」）。
+          这两个是显式的管理动作，不计入「打卡 / 补签 / 标休息 / 编辑」的冻结拦截。 */}
+      <View
+        className="flex-row gap-2 px-4 pt-3"
+        style={{ paddingBottom: insets.bottom + 12, borderTopWidth: 1, borderTopColor: c.line }}
+      >
+        {confirmDel ? (
+          <>
+            <Pressable
+              onPress={() => setConfirmDel(false)}
+              accessibilityRole="button"
+              accessibilityLabel={d.no}
+              className="flex-1 items-center justify-center rounded-pill py-3"
+              style={{ backgroundColor: c.surface2 }}
+            >
+              <Text style={{ color: c.ink, fontSize: 16, fontWeight: "600" }}>{d.no}</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => { deleteHabitNow(habit.id); router.back(); }}
+              accessibilityRole="button"
+              accessibilityLabel={d.yes}
+              className="flex-1 items-center justify-center rounded-pill py-3"
+              style={{ backgroundColor: c.danger }}
+            >
+              <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>{d.yes}</Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <Pressable
+              onPress={() => archiveHabit(habit.id, !habit.isArchived)}
+              accessibilityRole="button"
+              accessibilityLabel={habit.isArchived ? d.unarchive : d.archive}
+              className="flex-1 items-center justify-center rounded-pill py-3"
+              style={{ backgroundColor: c.surface2 }}
+            >
+              <Text style={{ color: c.ink, fontSize: 16, fontWeight: "600" }}>
+                {habit.isArchived ? d.unarchive : d.archive}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setConfirmDel(true)}
+              accessibilityRole="button"
+              accessibilityLabel={d.delete}
+              className="flex-1 items-center justify-center rounded-pill py-3"
+              style={{ backgroundColor: c.danger }}
+            >
+              <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>{d.delete}</Text>
+            </Pressable>
+          </>
+        )}
+      </View>
     </View>
   );
 }

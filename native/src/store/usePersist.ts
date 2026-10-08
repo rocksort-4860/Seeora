@@ -81,7 +81,7 @@ export function useHydration(d: HydrationSetters) {
         Array.isArray(v) ? (v as Honor[]).filter((x) => x && typeof x === "object") : [];
       const snap = g;
       const defSettings: SettingsState = {
-        weekStartOn: "mon", haptics: true, icloudSync: false, badge: false, dailyReminder: false,
+        weekStartOn: "mon", haptics: true, badge: false,
       };
       const mergedSettings: SettingsState = {
         ...defSettings,

@@ -51,6 +51,8 @@ export interface Habit {
   rests?: Record<string, true>;
   /** 历史最长连续（永久保存，永不消失） */
   bestStreak?: number;
+  /** 已撒花庆祝过的里程碑天数（避免同档位反复撒花）；老数据无此字段 → 视为空 */
+  celebratedMilestones?: number[];
 }
 
 export interface Honor {
@@ -70,9 +72,7 @@ export type WeekStartOn = "mon" | "sun";
 export interface SettingsState {
   weekStartOn: WeekStartOn;
   haptics: boolean;
-  icloudSync: boolean;
   badge: boolean;
-  dailyReminder: boolean;
 }
 
 export interface HabitFormState {
@@ -106,7 +106,6 @@ interface AppCtx {
   habits: Habit[]; honors: Honor[]; settings: SettingsState;
   setWeekStartOn: (w: WeekStartOn) => void;
   setHaptics: (v: boolean) => void;
-  setIcloudSync: (v: boolean) => void;
   setBadge: (v: boolean) => void;
 
   pro: boolean;            // 有效 Pro：买断 或 试用未到期
@@ -148,6 +147,8 @@ interface AppCtx {
   openExport: () => void; closeExport: () => void;
   /** 删除习惯：由 HabitForm 内联二次确认后直接调用（不再有独立的确认弹层） */
   deleteHabitNow: (id: string) => void;
+  /** 归档 / 取消归档：就地切换 isArchived，数据完整保留；归档不释放免费版 5 条上限额度 */
+  archiveHabit: (id: string, value: boolean) => void;
   openWipe: () => void; closeWipe: () => void; doWipe: () => void;
 
   /** ms：可选展示时长（失败类长文案需要比默认 2200ms 更久，否则一闪而过等于没提示） */
@@ -192,7 +193,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [honors, setHonors] = useState<Honor[]>([]);
   const [settings, setSettings] = useState<SettingsState>({
-    weekStartOn: "mon", haptics: true, icloudSync: false, badge: false, dailyReminder: false,
+    weekStartOn: "mon", haptics: true, badge: false,
   });
 
   const [purchased, setPurchased] = useState(false);
@@ -323,7 +324,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     toggleToday, toggleRest, openBackfill, closeBackfill, toggleBackfillDate,
     openHabitForm, closeHabitForm, setHabitForm, saveHabit,
     openHonorForm, closeHonorForm, setHonorForm, saveHonor,
-    deleteHabitNow, importBackup,
+    deleteHabitNow, archiveHabit, importBackup,
   } = useHabitActions({
     habits, honors, settings, pro, frozenIds, openPro, setHabits, setHonors, persist, snapshotNow,
     dict, lang, showToast, fireBurst, fireConfetti, hapticsOn,
@@ -359,7 +360,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setWeekStartOn = useCallback((w: WeekStartOn) => patchSettings({ weekStartOn: w }), [patchSettings]);
   const setHaptics = useCallback((v: boolean) => patchSettings({ haptics: v }), [patchSettings]);
-  const setIcloudSync = useCallback((v: boolean) => patchSettings({ icloudSync: v }), [patchSettings]);
   const setBadge = useCallback((v: boolean) => {
     patchSettings({ badge: v });
     if (!v) void setAppBadge(0);
@@ -436,7 +436,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value: AppCtx = useMemo(() => ({
     hydrated, lang, dict, t, setLang, theme, setTheme, dark, colors,
     visited, enterApp, openOnboarding,
-    habits, honors, settings, setWeekStartOn, setHaptics, setIcloudSync, setBadge,
+    habits, honors, settings, setWeekStartOn, setHaptics, setBadge,
     pro, purchased, trialActive, trialDaysLeft, trialUntil, startTrial, frozenIds, openPro, closePro, openPay, closePay, payDone, payRestore,
     habitFormVisible, editingHabitId, habitForm, honorFormVisible, editingHonorId, honorForm,
     backfillHabitId, payVisible, exportVisible, wipeVisible,
@@ -444,7 +444,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     openHonorForm, closeHonorForm, setHonorForm, saveHonor,
     openBackfill, closeBackfill, toggleBackfillDate, toggleToday, toggleRest,
     openShare, closeShare, openExport, closeExport,
-    deleteHabitNow, openWipe, closeWipe, doWipe,
+    deleteHabitNow, archiveHabit, openWipe, closeWipe, doWipe,
     showToast, confettiNonce, toastMsg, burst,
     streakOf, bestOf, nodesOf, curveOf, miniOf, nodeStateOf, nodeIdxOf, freqOf: freqOfH, canRestOf, canMakeupOf,
     importedTotalAll,
@@ -453,7 +453,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }), [
     hydrated, lang, dict, t, setLang, theme, setTheme, dark, colors,
     visited, enterApp, openOnboarding,
-    habits, honors, settings, setWeekStartOn, setHaptics, setIcloudSync, setBadge,
+    habits, honors, settings, setWeekStartOn, setHaptics, setBadge,
     pro, purchased, trialActive, trialDaysLeft, trialUntil, startTrial, frozenIds, openPro, closePro, openPay, closePay, payDone, payRestore,
     habitFormVisible, editingHabitId, habitForm, honorFormVisible, editingHonorId, honorForm,
     backfillHabitId, payVisible, exportVisible, wipeVisible,
@@ -461,7 +461,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     openHonorForm, closeHonorForm, setHonorForm, saveHonor,
     openBackfill, closeBackfill, toggleBackfillDate, toggleToday, toggleRest,
     openShare, closeShare, openExport, closeExport,
-    deleteHabitNow, openWipe, closeWipe, doWipe,
+    deleteHabitNow, archiveHabit, openWipe, closeWipe, doWipe,
     showToast, confettiNonce, toastMsg, burst,
     streakOf, bestOf, nodesOf, curveOf, miniOf, nodeStateOf, nodeIdxOf, freqOfH, canRestOf, canMakeupOf,
     importedTotalAll, exportJson, importJson,

@@ -9,10 +9,11 @@
       "autoIncrement": true,
       "ios": {
         "credentialsSource": "remote",
-        "image": "macos-sequoia-15.6-xcode-26.2"
+        "image": "sdk-55"
       },
       "env": {
-        "EAS_USE_PRECOMPILED_MODULES": "0"
+        "EAS_USE_PRECOMPILED_MODULES": "0",
+        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "appl_EtIsUNicLeNbKBdNIDcLkvoGxrO"
       }
     }
   },

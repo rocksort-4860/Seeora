@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seeora · App Store 上架前填写清单</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      max-width: 880px; margin: 0 auto; padding: 24px 20px 80px;
+      line-height: 1.65; background: #f1ede6; color: #2a2a2a;
+    }
+    h1 { font-size: 26px; margin: 0 0 4px; }
+    .sub { color: #8a8a85; font-size: 14px; margin-bottom: 22px; }
+    .bar-wrap { position: sticky; top: 0; z-index: 10; background: #f1ede6; padding: 12px 0 14px; margin-bottom: 8px; }
+    .bar { height: 8px; background: #ddd8ce; border-radius: 99px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; width: 0; background: #2d7a6b; transition: width .25s ease; }
+    .bar-txt { font-size: 13px; color: #5f5e5a; margin-top: 6px; }
+    .card { background: #fff; border: 1px solid rgba(0,0,0,.07); border-radius: 14px; padding: 18px 20px; margin: 14px 0; }
+    .card > h2 { font-size: 17px; margin: 0 0 4px; }
+    .card > .note { font-size: 13px; color: #8a8a85; margin-bottom: 12px; }
+    .card.blocked { border-color: #e0a800; background: #fffbf0; }
+    .card.blocked > h2 { color: #8a6100; }
+    .card.key { border-color: rgba(45,122,107,.35); background: #f4faf8; }
+    .card.key > h2 { color: #245f54; }
+    label.item { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; cursor: pointer; font-size: 15px; border-bottom: 1px solid rgba(0,0,0,.04); }
+    label.item:last-child { border-bottom: 0; }
+    label.item input { margin-top: 4px; width: 17px; height: 17px; accent-color: #2d7a6b; flex: 0 0 auto; }
+    label.item.done > span { color: #9a9a95; text-decoration: line-through; }
+    .kv { display: flex; flex-wrap: wrap; gap: 6px 10px; font-size: 14px; padding: 5px 0; }
+    .kv b { font-weight: 600; }
+    code { background: #eee9e0; padding: 1px 6px; border-radius: 5px; font-size: 13px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .warn { background: #fdf2f2; border-left: 3px solid #c0392b; padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 14px; margin: 10px 0; }
+    .tip { background: #eef5f2; border-left: 3px solid #2d7a6b; padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 14px; margin: 10px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,.08); vertical-align: top; }
+    th { font-weight: 600; background: #faf8f4; }
+    .yes { color: #1a7a4a; font-weight: 600; }
+    .no { color: #a33; font-weight: 600; }
+    .divider { height: 1px; background: rgba(0,0,0,.08); margin: 30px 0 24px; }
+    .footnote { font-size: 13px; color: #8a8a85; margin-top: 26px; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #1c1b19; color: #ebe8e2; }
+      .bar-wrap { background: #1c1b19; }
+      .bar { background: #33312d; }
+      .card { background: #24231f; border-color: rgba(255,255,255,.1); }
+      .card.blocked { background: #2c2718; border-color: #7a6100; }
+      .card.blocked > h2 { color: #e0b84a; }
+      .card.key { background: #1d2a26; border-color: rgba(45,122,107,.5); }
+      .card.key > h2 { color: #7fc0b0; }
+      .kv b, .sub { color: #9a9a95; }
+      label.item { border-bottom-color: rgba(255,255,255,.06); }
+      code { background: #33312d; }
+      th { background: #2a2926; }
+      th, td { border-bottom-color: rgba(255,255,255,.1); }
+      .warn { background: #2e2020; }
+      .tip { background: #1d2a26; }
+      a { color: #7fc0b0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Seeora · App Store 上架前填写清单</h1>
+  <p class="sub">按 App Store Connect 提交流程逐项列出。勾选进度会保存在本机浏览器，关掉再打开仍在。</p>
+
+  <div class="bar-wrap">
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="bar-txt" id="barTxt">已完成 0 / 0</div>
+  </div>
+
+  <div class="card blocked">
+    <h2>第 0 步 · 唯一的硬阻塞：正式域名</h2>
+    <p class="note">不解决这一项，后面全部无法提交。</p>
+    <div class="warn">
+      苹果要求隐私政策必须挂在<strong>可公网访问的 HTTPS 地址</strong>上，且 App Store Connect 的「隐私政策 URL」字段必填。目前项目里只有四个本地 .html 文件（privacy / terms / support / landing），<strong>没有任何已上线的域名</strong>。
+    </div>
+    <label class="item"><input type="checkbox" data-k="d1"><span>注册并解析一个域名（例如 seeora.app 或你已有的域名）</span></label>
+    <label class="item"><input type="checkbox" data-k="d2"><span>把这四个页面部署上去，确保 HTTPS 可访问、无需登录、手机浏览器能打开</span></label>
+    <label class="item"><input type="checkbox" data-k="d3"><span>逐个实测以下地址能打开：<code>/privacy.html</code>　<code>/terms.html</code>　<code>/support.html</code>　<code>/landing.html</code></span></label>
+  </div>
+
+  <div class="card">
+    <h2>第 1 步 · App 信息（App Information）</h2>
+    <p class="note">ASC 左侧「App 信息」页</p>
+    <div class="kv"><b>名称（30 字符内）：</b>Seeora</div>
+    <div class="kv"><b>副标题（30 字符内）：</b>建议 "Build habits that stick"（中文可留空，仅影响展示）</div>
+    <div class="kv"><b>主类别：</b>健康健美（Health &amp; Fitness）</div>
+    <div class="kv"><b>副类别：</b>效率（Productivity）</div>
+    <div class="kv"><b>内容版权：</b>© 2026 张新华</div>
+    <div class="kv"><b>Bundle ID：</b><code>com.seeora.app</code>（必须与工程 app.json 一致，不要改）</div>
+    <div class="kv"><b>SKU：</b><code>seeora-ios-1</code>（内部编号，随便定，不可改）</div>
+    <label class="item"><input type="checkbox" data-k="a1"><span>名称与副标题已填</span></label>
+    <label class="item"><input type="checkbox" data-k="a2"><span>类别、版权、SKU 已填</span></label>
+  </div>
+
+  <div class="card">
+    <h2>第 2 步 · 年龄分级（Age Rating）</h2>
+    <p class="note">全部问题选「无 / 否」即可</p>
+    <label class="item"><input type="checkbox" data-k="r1"><span>完成年龄分级问卷（结果应为 4+）</span></label>
+  </div>
+
+  <div class="card">
+    <h2>第 3 步 · 定价与销售范围</h2>
+    <div class="kv"><b>下载价格：</b>免费（收入来自 App 内购买）</div>
+    <div class="kv"><b>销售范围：</b>建议先选「全部国家/地区」，或按你的计划只选北美</div>
+    <label class="item"><input type="checkbox" data-k="p1"><span>价格设为免费，销售范围已选</span></label>
+    <label class="item"><input type="checkbox" data-k="p2"><span><strong>协议、税务、银行信息</strong>已填好并通过审核（在「协议、税务和银行业务」页，未完成则无法收费）</span></label>
+  </div>
+
+  <div class="card key">
+    <h2>第 4 步 · App 隐私问卷（App Privacy）★ 最容易拒审的一步</h2>
+    <p class="note">ASC 左侧「App 隐私」页。问卷结果会以「隐私标签」形式展示在商店页，必须与你的隐私政策和实际代码三者一致。</p>
+
+    <div class="tip">
+      <strong>本 App 的实际数据情况（已核对代码）：</strong><br>
+      · 习惯、打卡、备注：<strong>仅存本机</strong>，不上传<br>
+      · 崩溃信息：写入本机文件，<strong>不自动上传</strong><br>
+      · 购买信息：由第三方内购服务 <strong>RevenueCat</strong> 接收（Apple 负责收款）<br>
+      · 无广告 SDK、无埋点、不使用 IDFA
+    </div>
+
+    <div class="kv"><b>隐私政策 URL：</b><code>https://你的域名/privacy.html</code></div>
+
+    <p style="font-size:14px;margin:14px 0 6px;"><b>问卷怎么填（依 RevenueCat 官方指引）：</b></p>
+    <table>
+      <tr><th>数据类别</th><th>是否勾选</th><th>说明</th></tr>
+      <tr><td>Purchases → Purchase History（购买历史）</td><td class="yes">勾选</td><td>使用 RevenueCat 必须声明</td></tr>
+      <tr><td>　└ 用途</td><td class="yes">App Functionality + Analytics</td><td>前者用于解锁权益与防欺诈，后者用于后台统计图表</td></tr>
+      <tr><td>　└ 是否关联身份</td><td class="no">No</td><td>用的是随机匿名 ID</td></tr>
+      <tr><td>　└ 是否用于追踪</td><td class="no">No</td><td>不做跨 App 广告追踪</td></tr>
+      <tr><td>Identifiers → Device ID / User ID</td><td class="no">不勾</td><td>未使用 IDFA、未设自定义用户 ID</td></tr>
+      <tr><td>Diagnostics → Crash Data</td><td class="no">不勾</td><td>崩溃日志只写本机、不上传</td></tr>
+      <tr><td>Financial Info / Usage Data / Location / Contacts …</td><td class="no">不勾</td><td>一概不涉及</td></tr>
+    </table>
+    <div class="warn">
+      <strong>三处必须一致：</strong>代码行为 ↔ 隐私政策文字 ↔ 这份问卷。任何一处说「收集」而另一处说「不收集」，都可能被判为不准确声明。
+    </div>
+    <label class="item"><input type="checkbox" data-k="v1"><span>隐私政策 URL 已填入并通过实测</span></label>
+    <label class="item"><input type="checkbox" data-k="v2"><span>Purchases → Purchase History 已勾，用途选 App Functionality + Analytics</span></label>
+    <label class="item"><input type="checkbox" data-k="v3"><span>关联身份选 No，追踪选 No，其余类别全部不勾</span></label>
+  </div>
+
+  <div class="card key">
+    <h2>第 5 步 · 内购商品（In-App Purchases）</h2>
+    <p class="note">ASC「功能 → App 内购买项目」新建</p>
+    <div class="kv"><b>类型：</b>非消耗型（Non-Consumable）</div>
+    <div class="kv"><b>产品 ID：</b><code>seeora_pro_lifetime</code>（必须与 RevenueCat 后台完全一致）</div>
+    <div class="kv"><b>参考名称：</b>Seeora Pro Lifetime</div>
+    <div class="kv"><b>显示名称：</b>Seeora Lifetime（顾客可见）</div>
+    <div class="kv"><b>价格：</b>美国 $4.99（其他国家由苹果自动换算）</div>
+    <label class="item"><input type="checkbox" data-k="i1"><span>商品已创建，产品 ID 与工程 / RevenueCat 一致</span></label>
+    <label class="item"><input type="checkbox" data-k="i2"><span>已填本地化信息（至少一种语言：显示名称 + 描述）</span></label>
+    <label class="item"><input type="checkbox" data-k="i3"><span>已上传内购审核截图（用 App 内付费页截图即可）</span></label>
+    <label class="item"><input type="checkbox" data-k="i4"><span>RevenueCat 后台：商品已挂到 Offering，Entitlement <code>seeora_pro</code> 已关联</span></label>
+    <label class="item"><input type="checkbox" data-k="i5"><span>内购已与 App 版本一起提交审核（内购不单独提审）</span></label>
+  </div>
+
+  <div class="card">
+    <h2>第 6 步 · 商店页面素材</h2>
+    <p class="note">ASC 左侧「App Store」→ 版本信息</p>
+    <label class="item"><input type="checkbox" data-k="s1"><span>截图 6.7 英寸（iPhone 15 Pro Max 等）至少 3 张，且无模板占位图</span></label>
+    <label class="item"><input type="checkbox" data-k="s2"><span>若保留 iPad 支持：需另备 iPad 13 英寸截图（工程里 <code>supportsTablet: true</code>）；若不打算做 iPad，需在工程里关掉并重新构建</span></label>
+    <label class="item"><input type="checkbox" data-k="s3"><span>宣传文本（170 字符内）已填</span></label>
+    <label class="item"><input type="checkbox" data-k="s4"><span>描述（4000 字符内）已填</span></label>
+    <label class="item"><input type="checkbox" data-k="s5"><span>关键词（100 字符内，逗号分隔）已填</span></label>
+    <label class="item"><input type="checkbox" data-k="s6"><span>支持 URL 填 <code>/support.html</code>；营销 URL 可填 <code>/landing.html</code></span></label>
+    <label class="item"><input type="checkbox" data-k="s7"><span>App 图标为正式图标（非 Expo 模板占位），1024×1024 无圆角无透明</span></label>
+  </div>
+
+  <div class="card">
+    <h2>第 7 步 · 构建版本（Build）</h2>
+    <p class="note">需要先打包并上传，这一步我不会擅自动手——等你明确说「可以打包」。</p>
+    <label class="item"><input type="checkbox" data-k="b1"><span>已打包并上传构建版本到 ASC（EAS Build + 上传）</span></label>
+    <label class="item"><input type="checkbox" data-k="b2"><span>在版本页选中该构建包，等待其处理为「可供提交」</span></label>
+  </div>
+
+  <div class="card">
+    <h2>第 8 步 · App 审核信息</h2>
+    <div class="kv"><b>联系人：</b>姓名 + 电话 + 邮箱（会用于审核沟通）</div>
+    <div class="kv"><b>演示账号：</b>不需要（本 App 无需登录）</div>
+    <p style="font-size:14px;margin:10px 0 6px;"><b>审核备注（App Review Notes）建议写明：</b></p>
+    <div class="tip">
+      1. 本 App 无需注册或登录，所有核心功能可直接使用。<br>
+      2. 专业版为<strong>一次性买断</strong>（非订阅），无自动续费。<br>
+      3. 7 天试用需在专业版页面<strong>手动点按领取</strong>，不会自动开始、不会自动扣费。<br>
+      4. 用户数据仅存于本机 / 私有 iCloud；第三方内购服务商为 RevenueCat。<br>
+      5. 隐私政策地址：<code>https://你的域名/privacy.html</code>
+    </div>
+    <label class="item"><input type="checkbox" data-k="n1"><span>联系人与备注已填</span></label>
+  </div>
+
+  <div class="card">
+    <h2>第 9 步 · 提交前自查</h2>
+    <label class="item"><input type="checkbox" data-k="c1"><span>隐私政策 URL 用手机浏览器实测可打开（不要有登录墙、不要跳转首页）</span></label>
+    <label class="item"><input type="checkbox" data-k="c2"><span>App 内有隐私政策入口（当前「关于」页只显示说明文字；域名确定后需接上可点链接）</span></label>
+    <label class="item"><input type="checkbox" data-k="c3"><span>内购商品状态为「准备提交」</span></label>
+    <label class="item"><input type="checkbox" data-k="c4"><span>确认工程内不含任何调试用弹窗 / 剪贴板输出 / 屏幕提示类诊断代码</span></label>
+    <label class="item"><input type="checkbox" data-k="c5"><span>出口合规：工程已声明不使用非豁免加密（<code>ITSAppUsesNonExemptEncryption: false</code>），无需再答</span></label>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="card">
+    <h2>需要你拍板的两个问题</h2>
+    <label class="item"><input type="checkbox" data-k="q1"><span><b>域名</b>：你有现成域名吗？没有的话，用什么域名（这决定隐私政策 URL）</span></label>
+    <label class="item"><input type="checkbox" data-k="q2"><span><b>iPad</b>：要不要支持 iPad？支持则必须补 iPad 截图；不支持则需改工程配置并重新构建</span></label>
+  </div>
+
+  <p class="footnote">
+    本清单由工程代码实况 + 苹果审核指南 5.1.1 + RevenueCat 官方隐私标签指引三方核对生成。<br>
+    工程侧对应的文案改动（隐私政策、用户协议、App 内文案）已全部完成并通过门禁与单测，未打包、未提交。
+  </p>
+
+  <script>
+    var KEY = "seeora_asc_checklist_v1";
+    var boxes = Array.prototype.slice.call(document.querySelectorAll("input[type=checkbox][data-k]"));
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+
+    function refresh() {
+      var done = 0;
+      boxes.forEach(function (b) {
+        var label = b.closest("label");
+        if (b.checked) { done++; label.classList.add("done"); }
+        else { label.classList.remove("done"); }
+      });
+      var pct = boxes.length ? Math.round((done / boxes.length) * 100) : 0;
+      document.getElementById("barFill").style.width = pct + "%";
+      document.getElementById("barTxt").textContent = "已完成 " + done + " / " + boxes.length + "（" + pct + "%）";
+    }
+
+    boxes.forEach(function (b) {
+      if (saved[b.getAttribute("data-k")]) b.checked = true;
+      b.addEventListener("change", function () {
+        saved[b.getAttribute("data-k")] = b.checked;
+        try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+        refresh();
+      });
+    });
+    refresh();
+  </script>
+</body>
+</html>

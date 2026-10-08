@@ -9,6 +9,7 @@ import { FREE_HABIT_LIMIT } from "@/lib/limits";
 import { todayStr } from "@/lib/dates";
 import {
   currentStreak, bestStreakOf, canMakeupOn, canRestOn,
+  shouldCelebrate, celebratedMilestonesOf,
 } from "@/lib/habitLogic";
 import { habitColors } from "@/lib/tokens";
 import { cancelTaskReminder, scheduleTaskReminder } from "@/lib/notify";
@@ -127,17 +128,44 @@ export function useHabitActions(d: HabitActionsDeps) {
       const prevBest = bestStreakOf(h);
       const newBest = streak > prevBest;
       if (newBest) nh.bestStreak = streak;
+
+      /* ===== 里程碑 / 破纪录 → 撒花（2026-10-06 新增）=====
+       * 走 habitLogic.shouldCelebrate 纯函数判定，两条通道：
+       *   A. 首次跨过 7/14/30/60/90/180/365 天
+       *   B. 刷新了一个「有分量」的纪录（同样那几个档位）
+       * ★ 1~6 天的「新纪录」**不撒花**（newBest 在第 1 天就为真，
+       *   不设闸门会导致开局天天撒花，奖励立刻贬值）。
+       * ★ 命中的档位要写回习惯对象持久化 —— 否则 App 重启后
+       *   celebratedMilestones 丢失，同一里程碑会重复庆祝。 */
+      const celebrate = shouldCelebrate({
+        streak,
+        prevBest,
+        doneMilestones: celebratedMilestonesOf(h),
+      });
+      if (celebrate.celebrate) {
+        nh.celebratedMilestones = [...celebratedMilestonesOf(h), celebrate.days];
+        fireConfetti();
+        showToast(
+          celebrate.reason === "milestone"
+            ? lang === "zh" ? `连续 ${celebrate.days} 天，达成里程碑！` : `${celebrate.days}-day streak — milestone reached!`
+            : lang === "zh" ? `新纪录！连续 ${celebrate.days} 天` : `New record! ${celebrate.days}-day streak`,
+        );
+      }
+
       applyHabit(nh);
 
       /* ===== 全部完成 → 顶部撒花（设计文档 §M7「完成庆祝动效」）=====
        * 此前由恒为 false 的 celVisible 驱动，从未真正播放过（死功能）。
        * 判定口径：**可操作的习惯**（排除冻结 —— 它们无法打卡，算进去就永远不可能全部完成）
        * 全部满足「今日已打卡」或「今天被标记为计划休息日」时撒花。
-       * 一次只撒一轮：从「差一个」到「全完成」的这一步才触发。 */
+       * 一次只撒一轮：从「差一个」到「全完成」的这一步才触发。
+       * ★ 若本次打卡已因里程碑/破纪录撒过花，则跳过 —— 否则单习惯用户首次到 7 天
+       *   会连播两轮（里程碑 + 全部完成），且后一轮会把前一轮的彩纸提前清掉。 */
       const all = habits
-        .filter((x) => !frozenIds.has(x.id))
+        .filter((x) => !frozenIds.has(x.id) && !x.isArchived)
         .map((x) => (x.id === nh.id ? nh : x));
-      if (all.length > 0 && all.every((x) => x.checkIns[t] || !!x.rests?.[t])) fireConfetti();
+      const allDone = all.length > 0 && all.every((x) => x.checkIns[t] || !!x.rests?.[t]);
+      if (allDone && !celebrate.celebrate) fireConfetti();
 
       return { newBest, streak };
     },
@@ -327,6 +355,18 @@ export function useHabitActions(d: HabitActionsDeps) {
     showToast(lang === "zh" ? "已删除" : "Deleted");
   }, [habits, lang, showToast, persist, snapshotNow, setHabits]);
 
+  /* ===================== 归档 / 取消归档 =====================
+   * ★ 归档**不释放**免费版 5 条上限的额度：frozenIds 按 createdAt 统计「全部」习惯
+   *   （含已归档），所以归档一条后它仍占位、总数不变 —— 避免「归档→新建→再归档」式
+   *   无限绕过上限（用户明确要求的铁律）。归档只是把习惯移出今日主列表，
+   *   数据完整保留，可在「已归档」区或编辑表单里随时取消归档。 */
+  const archiveHabit = useCallback((id: string, value: boolean) => {
+    const nl = habits.map((x) => (x.id === id ? { ...x, isArchived: value } : x));
+    setHabits(nl);
+    persist(snapshotNow({ habits: nl }));
+    showToast(value ? (lang === "zh" ? "已归档" : "Archived") : (lang === "zh" ? "已取消归档" : "Unarchived"));
+  }, [habits, lang, showToast, persist, snapshotNow, setHabits]);
+
   /* ===================== 导入备份（JSON） ===================== */
   // 解析 Seeora 备份 JSON；合并 habits/honors（按 id 覆盖）；破坏或非 JSON → 抛错
   const importBackup = useCallback((raw: string): number => {
@@ -357,6 +397,6 @@ export function useHabitActions(d: HabitActionsDeps) {
     toggleToday, toggleRest, openBackfill, closeBackfill, toggleBackfillDate,
     openHabitForm, closeHabitForm, setHabitForm, saveHabit,
     openHonorForm, closeHonorForm, setHonorForm, saveHonor,
-    deleteHabitNow, importBackup,
+    deleteHabitNow, archiveHabit, importBackup,
   };
 }

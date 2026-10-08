@@ -203,7 +203,7 @@ export default function ProScreen() {
               </View>
             )}
             <Button
-              className={trialActive || trialEnded ? "mt-3 h-12" : "mt-5 h-12"}
+              className={trialActive || trialEnded ? "mt-3 h-14" : "mt-5 h-14"}
               style={{ backgroundColor: c.accentInk }}
               onPress={openPay}
             >
@@ -213,9 +213,14 @@ export default function ProScreen() {
                 用 outline 次要样式 —— 主 CTA 仍是买断（本页是买断页），
                 同时给暂时不想付费的用户一条完整功能的低门槛路径。 */}
             {trialFresh && (
-              <Button variant="outline" className="mt-2 h-12" onPress={startTrial}>
-                <Text className="text-base font-medium" style={{ color: c.ink }}>{d.proTrialStart}</Text>
-              </Button>
+              <>
+                <Button variant="outline" className="mt-2 h-14" onPress={startTrial}>
+                  <Text className="text-base font-medium" style={{ color: c.ink }}>{d.proTrialStart}</Text>
+                </Button>
+                {/* ★ 2026-10-07 合规澄清：说明「体验 ≠ 订阅」——到期不会自动扣费，
+                    想继续用才一次性买断（价格由后台商品提供，文案不硬编码）。 */}
+                <T className="mt-2 text-center text-xs leading-5" style={{ color: c.ink3 }}>{d.proTrialNote}</T>
+              </>
             )}
           </>
         )}
@@ -298,7 +303,7 @@ export default function ProScreen() {
           ) : null}
 
           <Button
-            className="mt-4 h-12 w-full"
+            className="mt-4 h-14 w-full"
             style={{ backgroundColor: c.accentInk, opacity: payBlocked ? 0.7 : 1 }}
             /* ★ 第二层保护：价格还没取到时不可提交订单（用户不该在没看到价格时下单）。
              *   这不是竞态修复的替代 —— 竞态已在 iap.ts 用 Promise 缓存根治（见该文件）。

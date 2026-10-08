@@ -58,4 +58,31 @@ describe("i18n：zh / en 必须严格一一对应", () => {
       }
     }
   });
+
+  /**
+   * ★ 2026-10-07 新增：买断制不得使用订阅专属术语（Guideline 3.1.1 / 3.1.2）。
+   *   Seeora 是 **Non-Consumable 一次性买断**，不是自动续期订阅。
+   *   "free trial" 是订阅语境的标准术语，买断制宣传 free trial 会被审核误判为
+   *   「订阅描述不实」而打回。全站文案已统一为 "Pro preview / Pro 体验"。
+   */
+  it("★ 文案不得出现订阅术语（free trial / 免费试用 / Pro trial）", () => {
+    const forbidden = [/free[\s-]*trial/i, /免费试用/, /pro[\s-]*trial/i, /Pro\s*试用/];
+    const hits: string[] = [];
+    for (const l of LANGS) {
+      for (const [k, v] of Object.entries(bag(l))) {
+        if (typeof v !== "string") continue;
+        for (const re of forbidden) if (re.test(v)) hits.push(`${l}.${k} 命中 ${re}`);
+      }
+    }
+    expect(hits).toEqual([]);
+  });
+
+  it("★ proTrialNote 必须写明「不会自动扣费」（澄清体验 ≠ 订阅）", () => {
+    for (const l of LANGS) {
+      expect(typeof bag(l).proTrialNote).toBe("string");
+      expect(bag(l).proTrialNote.length).toBeGreaterThan(10);
+    }
+    expect(bag("zh").proTrialNote).toMatch(/不会自动扣费/);
+    expect(bag("en").proTrialNote).toMatch(/No automatic charge/i);
+  });
 });

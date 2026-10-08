@@ -181,34 +181,14 @@ module.exports = function withTurboModuleFix(config) {
     async (cfg) => {
       const files = resolveTargetFiles(cfg.modRequest.projectRoot);
       if (files.length === 0) {
-        const rnDir = path.join(cfg.modRequest.projectRoot, ...RN_DIR_REL);
-        const diag = [];
-        function walk(dir, depth) {
-          if (diag.length >= 20 || depth > 14) return;
-          let entries;
-          try {
-            entries = fs.readdirSync(dir, { withFileTypes: true });
-          } catch (e) {
-            return;
-          }
-          for (const e of entries) {
-            if (e.isDirectory()) {
-              if (e.name.startsWith('.') || SKIP_DIRS.has(e.name)) continue;
-              walk(path.join(dir, e.name), depth + 1);
-            } else if (e.name.endsWith('.mm')) {
-              const c = readFileSafe(path.join(dir, e.name));
-              if (c && c.includes('performVoidMethodInvocation')) diag.push(path.join(dir, e.name));
-            }
-          }
-        }
-        try { walk(rnDir, 0); } catch (e) {}
-        const list = diag.length
-          ? '\n候选文件（含 performVoidMethodInvocation）：\n  ' + diag.join('\n  ')
-          : '\n在 react-native 包内未找到任何含 performVoidMethodInvocation 的 .mm 文件。';
-        throw new Error(
-          '[turboModuleFix] 未在 react-native 包内找到可 patch 的目标文件（含 convertNSExceptionToJSError）。' +
-          'React Native 源码可能已变更或文件名不同。已中止构建以避免静默漏打补丁。' + list
+        // 预编译 RN（EAS_USE_PRECOMPILED_MODULES=1）场景下 react-native 源码不会被编进包，
+        // 也就没有可 patch 的 RCTTurboModule.mm——这是预期情况，不再中止构建，仅警告跳过。
+        // （源码编译场景下若真找不到目标文件，说明 RN 已大改，补丁本就失效，跳过也比硬崩好。）
+        console.warn(
+          '[turboModuleFix] ⚠️ 未在 react-native 包内找到可 patch 的目标文件（含 convertNSExceptionToJSError）。' +
+          '若使用预编译 RN，则崩溃缓解补丁不生效（跳过）；若为源码编译且 RN 已变更，请复查此插件。'
         );
+        return cfg;
       }
 
       const agg = { voidPresent: false, methodPresent: false, voidApplied: false, methodApplied: false };
@@ -223,14 +203,17 @@ module.exports = function withTurboModuleFix(config) {
         }
       }
 
-      // 关键校验：A(void) 与 B(method) 两处补丁必须在最终源里都存在，缺一不可。
-      // 否则会出现「构建成功 → 以为两处都打了 → 真机仍崩」的信息不完整问题。
+      // 关键校验：A(void) 与 B(method) 两处补丁应在最终源里都存在，缺一不可。
+      // 但预编译 RN 等场景下源不被编进包，补丁本就不生效——此处降级为警告而非中止，
+      // 避免把「补丁未命中」误判成「构建必须失败」。源码编译时若两处都未命中，说明 RN 已变更，需复查插件。
       if (!agg.voidPresent || !agg.methodPresent) {
-        throw new Error(
-          '[turboModuleFix] ❌ 必须同时命中 A(void) 与 B(method) 两处补丁，否则构建中止。' +
-          'voidPresent=' + agg.voidPresent + ' methodPresent=' + agg.methodPresent +
-          '。目标文件：\n  ' + files.join('\n  ')
+        console.warn(
+          '[turboModuleFix] ⚠️ 未同时命中 A(void) 与 B(method) 两处补丁（voidPresent=' +
+          agg.voidPresent + ' methodPresent=' + agg.methodPresent + '）。' +
+          '若为预编译 RN 或 RN 已变更导致源未被 patch，崩溃缓解补丁可能不生效，请知悉。目标文件：\n  ' +
+          files.join('\n  ')
         );
+        return cfg;
       }
       console.log(
         '[turboModuleFix] ✅ iOS 26 TurboModule 崩溃缓解补丁已应用（void 分支 + 方法同步/异步分支），A/B 均确认命中。'

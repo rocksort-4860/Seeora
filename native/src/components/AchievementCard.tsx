@@ -194,8 +194,8 @@ export function AchievementCard({
   const noteLines = note ? wrapText(note, 12, INNER, 2) : [];
 
   const footer = lang === "zh"
-    ? "Seeora · 记录坚持，允许休息，所有坚持永不止步"
-    : "Seeora · Track habits. Rest is allowed. Every day stays.";
+    ? "Seeora · 看见自己越来越好"
+    : "Seeora · See yourself getting better.";
 
   const statCells = habit
     ? [
@@ -331,7 +331,7 @@ export function AchievementCard({
             fontSize={14}
             fill={c.ink3}
           >
-            {lang === "zh" ? "每一天都被记住" : "Every day stays"}
+            {lang === "zh" ? "越来越好" : "Getting better."}
           </SvgText>
         </>
       )}

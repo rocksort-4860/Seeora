@@ -28,6 +28,10 @@ import {
   miniWeek,
   canRestOn,
   canMakeupOn,
+  /* === 庆祝里程碑（撒花触发） === */
+  shouldCelebrate,
+  celebratedMilestonesOf,
+  MILESTONES,
   type NodeState,
   type HabitLike,
 } from "../habitLogic";
@@ -288,5 +292,69 @@ describe("v0.2 可视化数据（圆环 / 曲线 / 迷你条）", () => {
     ]);
     expect(m[4].done).toBe(true); // 09-20 打卡
     expect(m[3].done).toBe(false); // 09-19 未打卡
+  });
+});
+
+/* ===================== 庆祝里程碑（撒花触发） ===================== */
+describe("shouldCelebrate — 撒花触发条件", () => {
+  it("★ 1~6 天的「新纪录」绝不撒花（否则开局天天撒，奖励立刻贬值）", () => {
+    for (let s = 1; s <= 6; s++) {
+      const r = shouldCelebrate({ streak: s, prevBest: s - 1 });
+      // 反向断言：钉住「不撒花」，防止将来有人把闸门删掉
+      expect(r.celebrate).toBe(false);
+      expect(r.reason).toBeNull();
+    }
+  });
+
+  it("首次达到 7 天 → 撒花，原因是 milestone", () => {
+    const r = shouldCelebrate({ streak: 7, prevBest: 6 });
+    expect(r.celebrate).toBe(true);
+    expect(r.reason).toBe("milestone");
+    expect(r.days).toBe(7);
+  });
+
+  it("同一里程碑不重复撒花（doneMilestones 已含 7）", () => {
+    const r = shouldCelebrate({ streak: 7, prevBest: 6, doneMilestones: [7] });
+    expect(r.celebrate).toBe(false);
+  });
+
+  it("同时命中里程碑与破纪录时只撒一轮（streak=7, prevBest=3）", () => {
+    const r = shouldCelebrate({ streak: 7, prevBest: 3 });
+    expect(r.celebrate).toBe(true);
+    expect(r.reason).toBe("milestone"); // 里程碑优先，语义更明确
+  });
+
+  it("非里程碑但破了一个有分量的纪录 → reason=record", () => {
+    // prevBest=29、当前 30 既是里程碑也是纪录；这里用 31 验证纯 record 分支
+    const r = shouldCelebrate({ streak: 31, prevBest: 30, doneMilestones: [7, 14, 30] });
+    expect(r.celebrate).toBe(false); // 31 不在任何闸门上
+    const r2 = shouldCelebrate({ streak: 30, prevBest: 29, doneMilestones: [7, 14] });
+    expect(r2.celebrate).toBe(true);
+    expect(r2.reason).toBe("milestone");
+  });
+
+  it("没有刷新纪录（streak ≤ prevBest）时，即便达到闸门也不撒花", () => {
+    // 已连续 100 天、断签后重新连回 7 天：7 是里程碑但已庆祝过 → 不撒
+    const r = shouldCelebrate({ streak: 7, prevBest: 100, doneMilestones: [7] });
+    expect(r.celebrate).toBe(false);
+  });
+
+  it("streak=0 或负数不触发（撤销打卡等边界）", () => {
+    expect(shouldCelebrate({ streak: 0, prevBest: 5 }).celebrate).toBe(false);
+    expect(shouldCelebrate({ streak: -1, prevBest: 5 }).celebrate).toBe(false);
+  });
+
+  it("全部里程碑档位都恰好命中（7/14/30/60/90/180/365）", () => {
+    expect([...MILESTONES]).toEqual([7, 14, 30, 60, 90, 180, 365]);
+    for (const m of MILESTONES) {
+      const r = shouldCelebrate({ streak: m, prevBest: m - 1 });
+      expect(r.celebrate).toBe(true);
+      expect(r.days).toBe(m);
+    }
+  });
+
+  it("celebratedMilestonesOf：老数据无该字段时返回空数组（降级不崩）", () => {
+    expect(celebratedMilestonesOf({} as never)).toEqual([]);
+    expect(celebratedMilestonesOf({ celebratedMilestones: [7, 30] } as never)).toEqual([7, 30]);
   });
 });

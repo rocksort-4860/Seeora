@@ -23,6 +23,8 @@ export interface HabitLike {
   rests?: Record<string, true>;
   /** 历史最长连续（永久保存，永不消失） */
   bestStreak?: number;
+  /** 已撒花庆祝过的里程碑（避免同档位反复触发）；老数据无此字段 → 视为空 */
+  celebratedMilestones?: number[];
 }
 
 /* ===================== 累计 / 导入 ===================== */
@@ -229,6 +231,87 @@ export function currentStreak(h: HabitLike, now: Date = new Date()): number {
 /** 历史最长连续（永久保存，永不消失） */
 export function bestStreakOf(h: HabitLike): number {
   return Math.max(0, Math.round(h.bestStreak ?? 0));
+}
+
+/* ===================== 庆祝里程碑（撒花触发条件） =====================
+ * ★ 为什么需要这一层
+ *   `newBest`（刷新历史最长连续）在**第 1 天就会为真**（streak=1 > best=0）——
+ *   若直接拿它当撒花条件，用户前 10 天会天天看到彩纸，奖励迅速贬值，
+ *   而且会挤掉「全部完成」那一刻的仪式感（撒花必须是稀缺资源）。
+ *   所以拆成两条独立通道：
+ *     1) 里程碑：跨过固定档位（7/14/30/60/90/180/365 天）—— 稀疏、明确、可预期。
+ *     2) 破纪录：只在超越一个**已有分量**的纪录时庆祝（见 BEST_STREAK_GATES），
+ *        1~6 天的「新纪录」不撒花，交给原有的文字提示（d.newBest）。
+ */
+
+/** 连续天数里程碑（天）。只在**首次跨过**时庆祝一次。 */
+export const MILESTONES = [7, 14, 30, 60, 90, 180, 365] as const;
+
+/**
+ * 破纪录的「分量闸门」：只有当**刷新后的纪录**达到这些值之一才算值得庆祝。
+ * 作用是过滤掉 1~6 天这段「每天都是新纪录」的蜜月期，避免开局就天天撒花。
+ */
+export const BEST_STREAK_GATES = [7, 14, 30, 60, 90, 180, 365] as const;
+
+export type CelebrateReason = "milestone" | "record";
+
+export interface CelebrateInput {
+  /** 本次打卡后的当前连续天数 */
+  streak: number;
+  /** 本次打卡前的历史最长连续 */
+  prevBest: number;
+  /** 已经庆祝过的里程碑（避免同一年第 7 天反复撒花）；老数据缺失时视为空 */
+  doneMilestones?: number[];
+}
+
+export interface CelebrateResult {
+  /** 是否应当撒花 */
+  celebrate: boolean;
+  reason: CelebrateReason | null;
+  /** 触发原因对应的天数（用于 UI 提示；无则为 0） */
+  days: number;
+}
+
+/**
+ * 判定本次打卡是否值得撒花。**纯函数，无副作用**，可直接单测。
+ *
+ * 判定口径（两条通道任一命中即撒花，同一次只撒一轮）：
+ *   A. 里程碑：streak 恰好落在 MILESTONES 上，且不在 doneMilestones 里（首次达成）。
+ *   B. 破纪录：streak > prevBest（真刷新了纪录）**且** streak 达到某个分量闸门
+ *      ——「首次到 30 天」会同时命中 A 和 B，但只撒一次。
+ *
+ * @param doneMilestones 已庆祝过的里程碑数组；函数**不会**修改它，
+ *        调用方需把返回的 days 追加进去后再持久化（见 useHabitActions.celebrateMilestone）。
+ */
+export function shouldCelebrate(input: CelebrateInput): CelebrateResult {
+  const { streak, prevBest, doneMilestones } = input;
+  if (streak <= 0) return { celebrate: false, reason: null, days: 0 };
+
+  const done = doneMilestones ?? [];
+  // ★ 该档位是否已经被庆祝过。两条通道都必须查它 ——
+  //   漏查会让「连续到 7 天 → 断签 → 重新连回 7 天」再次撒花，
+  //   而 7 天的里程碑对用户来说只值得庆祝一次。
+  const alreadyDone = done.includes(streak);
+
+  // 通道 A：首次跨过里程碑
+  const isMilestone = (MILESTONES as readonly number[]).includes(streak);
+  if (isMilestone && !alreadyDone) {
+    return { celebrate: true, reason: "milestone", days: streak };
+  }
+
+  // 通道 B：刷新了有分量的历史纪录
+  const beatRecord = streak > prevBest;
+  const hitGate = (BEST_STREAK_GATES as readonly number[]).includes(streak);
+  if (beatRecord && hitGate && !alreadyDone) {
+    return { celebrate: true, reason: "record", days: streak };
+  }
+
+  return { celebrate: false, reason: null, days: 0 };
+}
+
+/** 把 HabitLike 读成「已庆祝里程碑」数组（老数据无此字段 → 空数组，降级不报错） */
+export function celebratedMilestonesOf(h: HabitLike): number[] {
+  return h.celebratedMilestones ?? [];
 }
 
 /** 窗口内已打卡次数与目标次数（节点旁显示如 3/8；实心只看 ≥1） */

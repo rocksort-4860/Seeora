@@ -34,6 +34,7 @@
 import { spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -97,19 +98,63 @@ runWithNode(
 /* ---- 3. tsc（不受 targets 影响：类型检查必须全量，否则等于没查） ---- */
 runWithNode("tsc --noEmit", resolveEntry("typescript", "bin/tsc"), ["--noEmit"], ROOT);
 
-/* ---- 4. expo 配置可解析性 ---- */
+/* ---- 4. expo 配置可解析性 ----
+ * ★ 为什么这一步不能用 `encoding: "utf8"` 捕获 stdout（2026-10-06 实测踩坑）
+ *   本机上 `spawnSync` 一旦用**管道**捕获子进程输出就必定抛 EBUSY（1~3ms 启动即失败），
+ *   而前三步用 `stdio: "inherit"` 却一切正常。已用单变量对照排除其它可能：
+ *     A 组 encoding:utf8（管道）      → EBUSY ×3
+ *     B 组 stdio:inherit              → 成功 ×3
+ *     C 组 管道 + maxBuffer           → EBUSY ×3   （不是缓冲区太小）
+ *     D 组 管道 + CI=1                → EBUSY ×3   （不是 Expo 的 TTY/遥测行为）
+ *   → 根因是**本机 Node + 管道**的兼容问题，与被测代码无关。
+ *   修法：把 stdout 指向一个**真实文件描述符**，需要的内容事后从文件读回，
+ *         既拿到输出（可解析 JSON 做断言），又完全不碰管道。已验证 4/4 成功。
+ */
 {
   process.stdout.write(`\n\x1b[2m── expo config ─────────────────────────────────────\x1b[0m\n`);
   const entry = resolveEntry("expo", "bin/cli");
-  const r = spawnSync(process.execPath, [entry, "config", "--type", "public", "--json"], {
-    cwd: ROOT,
-    encoding: "utf8",
-  });
-  const ok = r.status === 0;
-  results.push({ name: "expo-config", ok, status: r.status, error: r.error });
-  if (ok) {
+  const tmpOut = path.join(os.tmpdir(), `_seeora_expocfg_${process.pid}.json`);
+  let cfgText = "";
+  let status = null;
+  let spawnErr = null;
+  try {
+    const fd = fs.openSync(tmpOut, "w");
     try {
-      const cfg = JSON.parse(r.stdout);
+      const r = spawnSync(process.execPath, [entry, "config", "--type", "public", "--json"], {
+        cwd: ROOT,
+        stdio: ["ignore", fd, "pipe"],
+        encoding: "utf8",
+      });
+      status = r.status;
+      spawnErr = r.error ?? null;
+      if (r.stderr && r.stderr.trim()) {
+        console.error(`\x1b[2m[expo-config stderr]\x1b[0m\n${r.stderr.trim().split("\n").slice(-12).join("\n")}`);
+      }
+    } finally {
+      fs.closeSync(fd);
+    }
+    cfgText = fs.readFileSync(tmpOut, "utf8");
+  } catch (e) {
+    spawnErr = e;
+  } finally {
+    try {
+      fs.unlinkSync(tmpOut);
+    } catch {
+      /* 临时文件删除失败不影响结论 */
+    }
+  }
+
+  const ok = status === 0;
+  results.push({ name: "expo-config", ok, status, error: spawnErr });
+
+  if (spawnErr) {
+    // ★ 这一分支曾经缺失：EBUSY 时 r.status 为 null、r.stderr 为空，
+    //   于是走进 else 打印一个空行，只说「未通过」而不给任何原因 ——
+    //   那正是本脚本开头批评 devkit-lint「FAILED 却零诊断」的同一种病，不能自己也犯。
+    console.error(`\x1b[31m[expo-config] 启动失败：${spawnErr.code ?? ""} ${spawnErr.message}\x1b[0m`);
+  } else if (ok) {
+    try {
+      const cfg = JSON.parse(cfgText);
       const sdk = cfg.sdkVersion ?? "?";
       const id = cfg.ios?.bundleIdentifier ?? "?";
       console.log(`配置解析成功：name=${cfg.name} slug=${cfg.slug} sdk=${sdk} bundleId=${id}`);
@@ -117,7 +162,62 @@ runWithNode("tsc --noEmit", resolveEntry("typescript", "bin/tsc"), ["--noEmit"],
       console.log("配置解析成功（输出非 JSON，已忽略）");
     }
   } else {
-    console.error((r.stderr || r.stdout || "").trim().split("\n").slice(-12).join("\n"));
+    console.error(`\x1b[31m[expo-config] 退出码 ${status}，未产出可解析配置\x1b[0m`);
+    if (cfgText.trim()) console.error(cfgText.trim().split("\n").slice(-12).join("\n"));
+  }
+}
+
+/* ---- 5. 打包用环境变量（RevenueCat key）----
+ * ★ 为什么必须做成门禁：这是一条**本地永远测不出来**的故障。
+ *   `native/.env` 被 .gitignore 忽略，而 EAS 云端构建默认按 .gitignore 排除上传的文件：
+ *     · 官方 build-reference/easignore：「By default, the EAS CLI refers to the .gitignore file
+ *       (if it exists) to determine which files to ignore」；
+ *     · 官方 eas/environment-variables：被 gitignore / 未提交的 .env「are not available for jobs
+ *       that run on a remote server, for example, EAS Build」。
+ *   → 只在 .env 里配 key 时，本地 `npx expo start` 一切正常，**云端打的包却拿不到 key**：
+ *     `hasRcKey()` 为 false → 价格位显示「—」、买断按钮点了回「购买未完成」。
+ *   没有这道检查，只能等「打完包上 TestFlight 才发现内购页是坏的」，代价是一整轮构建。
+ *   检查两件事：① eas.json 的 production.env 里确有格式合法的 key；
+ *              ② 与 .env 的值一致（防止只改一处、两边漂移）。
+ *   .env 缺失或留空不算错（新克隆的机器本来就没有真 key）。
+ */
+{
+  process.stdout.write(`\n\x1b[2m── 打包环境变量（RevenueCat key）────────────────────\x1b[0m\n`);
+  const KEY_NAME = "EXPO_PUBLIC_REVENUECAT_IOS_KEY";
+  const problems = [];
+  let prodKey = "";
+
+  try {
+    const easJson = JSON.parse(fs.readFileSync(path.join(ROOT, "eas.json"), "utf8"));
+    const raw = easJson?.build?.production?.env?.[KEY_NAME];
+    prodKey = typeof raw === "string" ? raw.trim() : "";
+    if (!prodKey) {
+      problems.push(`eas.json 的 build.production.env 里没有 ${KEY_NAME} —— 云端包会拿不到内购 key`);
+    } else if (!/^appl_[A-Za-z0-9_-]{20,}$/.test(prodKey)) {
+      problems.push(`${KEY_NAME} 格式不像 RevenueCat 公开 key（应为 appl_ 开头）：${JSON.stringify(prodKey)}`);
+    }
+  } catch (e) {
+    problems.push(`eas.json 读取/解析失败：${e.message}`);
+  }
+
+  const envPath = path.join(ROOT, ".env");
+  if (fs.existsSync(envPath)) {
+    // 注意：.env 是 CRLF，`(.*)$` 会吃掉 \r —— 必须 trim 后再比，否则会误报「不一致」
+    const m = fs.readFileSync(envPath, "utf8").match(/^\s*EXPO_PUBLIC_REVENUECAT_IOS_KEY\s*=\s*(.*)$/m);
+    const localKey = m ? m[1].trim() : "";
+    if (localKey && prodKey && localKey !== prodKey) {
+      problems.push(
+        `.env 与 eas.json 的 ${KEY_NAME} 不一致（本地/线上表现会不同）\n      .env     = ${localKey}\n      eas.json = ${prodKey}`,
+      );
+    }
+  }
+
+  const ok5 = problems.length === 0;
+  results.push({ name: "eas-env", ok: ok5, status: ok5 ? 0 : 1, error: undefined });
+  if (ok5) {
+    console.log(`生产环境变量就绪：${KEY_NAME}=${prodKey.slice(0, 10)}…（已与 .env 逐字比对）`);
+  } else {
+    for (const p of problems) console.error(`\x1b[31m[eas-env] ${p}\x1b[0m`);
   }
 }
 

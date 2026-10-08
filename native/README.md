@@ -86,7 +86,17 @@ npx eas submit --platform ios --profile production
 ```
 - 提交前在 `eas.json` 的 `submit.production.ios.appleId` 填入你的 Apple ID（当前为占位符）。
 - App Store Connect 后台建**一个**内购商品 `seeora_pro_lifetime`（买断，价格 $4.99，在苹果后台设，代码零硬编码）。
-- `.env` 填真实 `EXPO_PUBLIC_RC_IOS_KEY`（RevenueCat iOS key）。**切勿在 `.env` 写 `EXPO_PUBLIC_DIAG`**（会变成诊断包）。
+- ★ **打包用的 RevenueCat key 写在 `eas.json` → `build.production.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY`**（已填真实值）。
+  原因：`native/.env` 被 `.gitignore` 忽略，而 EAS 云端构建默认按 `.gitignore` 排除上传的文件
+  （Expo 官方 `build-reference/easignore`：*"By default, the EAS CLI refers to the .gitignore file (if it exists)
+  to determine which files to ignore"*；`eas/environment-variables` 也明说被 gitignore 的 `.env`
+  *"are not available for jobs that run on a remote server, for example, EAS Build"*）。
+  → **只在 `.env` 里配 key，本地 `npx expo start` 一切正常，线上包却拿不到 key**：价格位显示「—」、买断点了回失败。
+  `.env` 仅服务于本地开发，**两处必须保持一致**（`npm run lint` 已加门禁自动比对）。
+- ★ RevenueCat 后台还需三项，缺任一项都会表现成「价格出不来」（代码按 `offerings.current` 取价）：
+  ① 建 iOS App 且 Bundle ID = `com.seeora.app`；② 建 Entitlement `seeora_pro` 并挂上该商品；
+  ③ 建**当前（Default）Offering**，把 `seeora_pro_lifetime` 作为 Lifetime 包挂进去。
+- **切勿在 `.env` 写 `EXPO_PUBLIC_DIAG`**（本地包会变成诊断包）。
 - 云端诊断构建：`eas build --env EXPO_PUBLIC_DIAG=1 --env EXPO_PUBLIC_DIAG_STAGE=0`；发版前删掉这两个 env。
 
 ---

@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "1",
+      "buildNumber": "10",
       "bundleIdentifier": "com.seeora.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -76,6 +76,7 @@
       "./plugins/crashReason/withCrashReason",
       "./plugins/turboModuleFix/withTurboModuleFix",
       "./plugins/withFmtConstevalFix",
+      "./plugins/withExpoModulesCoreWerrorFix",
       [
         "expo-build-properties",
         {

@@ -30,11 +30,10 @@ import { Sheet, SheetHeader } from "@/components/Sheet";
 import { Button } from "@/components/ui/button";
 import { Text as T } from "@/components/ui/text";
 import { Icon } from "@/components/ui/icon";
-import { Check, Lock, Trash2 } from "lucide-react-native";
+import { Check, Lock } from "lucide-react-native";
 import { fmtDate } from "@/lib/dates";
 import { HabitForm } from "@/components/HabitForm";
 import { HonorForm } from "@/components/HonorForm";
-import { ExportSheet } from "@/components/ExportSheet";
 
 const WK = ["日", "一", "二", "三", "四", "五", "六"];
 
@@ -43,9 +42,14 @@ export function ModalHost() {
     <>
       <HabitForm />
       <HonorForm />
-      <ExportSheet />
+      {/* ★ 2026-10-06：ExportSheet 已改为「紧贴触发行原地展开」（settings.tsx 内的
+            InlineExpand），承载方式从原生 Modal 换成页内 View。
+            若这里继续挂 <ExportSheet />，它与设置页的展开面板会读**同一个
+            exportVisible** → 点一下会同时冒出「底部抽屉 + 原地展开」两处。
+            故不再挂载。导入逻辑（importJson）仍在 store 内，未受影响。 */}
       <Backfill />
-      <WipeDialog />
+      {/* ★ WipeDialog 同样改为设置页内就地展开（抹除确认就地做，关闭按钮就在手边）。
+            与 InlineExpand 共用 wipeVisible，必须二选一，这里移除。 */}
     </>
   );
 }
@@ -113,26 +117,9 @@ function Backfill() {
   );
 }
 
-/* ===================== 抹除二次确认 ===================== */
-function WipeDialog() {
-  const { dict: d, colors: c, wipeVisible, closeWipe, doWipe } = useApp();
-  return (
-    <Sheet visible={wipeVisible} onClose={closeWipe} center>
-      <SheetHeader
-        icon={<Icon as={Trash2} color={c.danger} size={20} />}
-        title={d.wipeTitle}
-        onClose={closeWipe}
-        closeLabel={d.wipeCancel}
-      />
-      <T className="text-sm leading-6" style={{ color: c.ink3 }}>{d.wipeBody}</T>
-      <View className="mt-4 flex-row gap-2">
-        <Button variant="outline" className="flex-1" onPress={closeWipe}>
-          <Text className="text-base font-medium" style={{ color: c.ink }}>{d.wipeCancel}</Text>
-        </Button>
-        <Button variant="destructive" className="flex-1" onPress={doWipe}>
-          <Text className="text-base font-bold" style={{ color: "#fff" }}>{d.wipeConfirm}</Text>
-        </Button>
-      </View>
-    </Sheet>
-  );
-}
+/* ★ 抹除二次确认（WipeDialog）已删除，2026-10-06：
+ *   改为设置页「抹除数据」那一行下方就地展开（settings.tsx 的 InlineExpand）。
+ *   原因：底部抽屉的关闭按钮离触发点很远、盖住大半屏；
+ *   而抹除只有一步确认，就地展开后「确认 / 取消」都在手指下方。
+ *   ⚠️ 若将来要恢复成弹层，记住它与 InlineExpand 共用 store 的 wipeVisible，
+ *      两者不能同时挂载（会一起响应）。 */
