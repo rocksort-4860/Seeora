@@ -367,8 +367,84 @@ export function useHabitActions(d: HabitActionsDeps) {
     showToast(value ? (lang === "zh" ? "已归档" : "Archived") : (lang === "zh" ? "已取消归档" : "Unarchived"));
   }, [habits, lang, showToast, persist, snapshotNow, setHabits]);
 
-  /* ===================== 导入备份（JSON） ===================== */
-  // 解析 Seeora 备份 JSON；合并 habits/honors（按 id 覆盖）；破坏或非 JSON → 抛错
+  /* ===================== 导入备份（JSON） =====================
+   * ★ 对应 RockSort 审查 🟡2：原实现直接把 `as Habit[]` 的未校验数组写盘，
+   *   畸形字段（如 checkIns 是字符串、frequency 是字符串）会被原样存进去，
+   *   既无逐字段校验、也无导入前回滚 —— 一次坏备份就能污染/破坏用户数据。
+   * 修法：**先全量校验 + 归一化，再一次性提交**。校验在 setHabits 之前完成，
+   *   任一字段非法 → 整段抛错、状态零改动（等价于「原子回滚」，无需额外快照）。 */
+
+  /** 把任意值夹成 [lo,hi] 整数；非数字退回默认 d */
+  const clampInt = useCallback((v: unknown, d: number, lo: number, hi: number): number => {
+    const n = typeof v === "number" ? v : Number(v);
+    if (!Number.isFinite(n)) return d;
+    return Math.min(hi, Math.max(lo, Math.trunc(n)));
+  }, []);
+
+  /** 校验并归一化一条导入 habit；非法返回 null（该条丢弃、整段随之抛错）。*/
+  const sanitizeHabit = useCallback((raw: unknown): Habit | null => {
+    if (!raw || typeof raw !== "object") return null;
+    const h = raw as Record<string, unknown>;
+    if (typeof h.id !== "string" || !h.id) return null;
+    const checkIns: Record<string, true> = {};
+    if (h.checkIns && typeof h.checkIns === "object" && !Array.isArray(h.checkIns)) {
+      for (const [k, v] of Object.entries(h.checkIns as Record<string, unknown>)) {
+        if (v === true || v === 1 || v === "true") checkIns[k] = true;
+      }
+    }
+    const rests: Record<string, true> | undefined =
+      h.rests && typeof h.rests === "object" && !Array.isArray(h.rests)
+        ? (Object.fromEntries(
+            Object.entries(h.rests as Record<string, unknown>)
+              .filter(([, v]) => v === true || v === 1 || v === "true")
+              .map(([k]) => [k, true])
+          ) as Record<string, true>)
+        : undefined;
+    const celebrated: number[] | undefined = Array.isArray(h.celebratedMilestones)
+      ? (h.celebratedMilestones.filter((x) => typeof x === "number") as number[])
+      : undefined;
+    return {
+      id: h.id,
+      name: typeof h.name === "string" ? h.name : "",
+      nameZh: typeof h.nameZh === "string" ? h.nameZh : "",
+      emoji: typeof h.emoji === "string" && h.emoji ? h.emoji : "🔥",
+      color: typeof h.color === "string" && h.color ? h.color : habitColors[0],
+      createdAt: typeof h.createdAt === "string" ? h.createdAt : "",
+      isArchived: h.isArchived === true,
+      reminderEnabled: h.reminderEnabled === true,
+      reminderTime: typeof h.reminderTime === "string" ? h.reminderTime : "20:00",
+      migratedTotalDays: clampInt(h.migratedTotalDays, 0, 0, 1_000_000),
+      migratedCurrentStreak: clampInt(h.migratedCurrentStreak, 0, 0, 1_000_000),
+      migratedStartDate: typeof h.migratedStartDate === "string" ? h.migratedStartDate : "",
+      migrationImportedAt: typeof h.migrationImportedAt === "string" ? h.migrationImportedAt : "",
+      checkIns,
+      detail: typeof h.detail === "string" ? h.detail : "",
+      migratedSource: typeof h.migratedSource === "string" ? h.migratedSource : "",
+      frequency: clampInt(h.frequency, 1, 1, 30),
+      timesPerWindow: clampInt(h.timesPerWindow, 1, 1, 20),
+      rests,
+      bestStreak: typeof h.bestStreak === "number" && Number.isFinite(h.bestStreak) ? h.bestStreak : undefined,
+      celebratedMilestones: celebrated,
+    };
+  }, [clampInt]);
+
+  /** 校验并归一化一条导入 honor；非法返回 null。*/
+  const sanitizeHonor = useCallback((raw: unknown): Honor | null => {
+    if (!raw || typeof raw !== "object") return null;
+    const h = raw as Record<string, unknown>;
+    if (typeof h.id !== "string" || !h.id) return null;
+    return {
+      id: h.id,
+      title: typeof h.title === "string" ? h.title : "",
+      titleZh: typeof h.titleZh === "string" ? h.titleZh : "",
+      source: typeof h.source === "string" ? h.source : "",
+      type: typeof h.type === "string" ? h.type : "",
+      days: clampInt(h.days, 0, 0, 1_000_000),
+      details: typeof h.details === "string" ? h.details : "",
+      category: typeof h.category === "string" ? h.category : "",
+    };
+  }, [clampInt]);
+
   const importBackup = useCallback((raw: string): number => {
     let obj: unknown;
     try {
@@ -378,20 +454,37 @@ export function useHabitActions(d: HabitActionsDeps) {
     }
     if (!obj || typeof obj !== "object") throw new Error("format");
     const o = obj as Record<string, unknown>;
-    const inHabits = Array.isArray(o.habits) ? (o.habits as Habit[]) : [];
-    const inHonors = Array.isArray(o.honors) ? (o.honors as Honor[]) : [];
-    if (!inHabits.length && !inHonors.length) throw new Error("empty");
+    const rawHabits = Array.isArray(o.habits) ? o.habits : [];
+    const rawHonors = Array.isArray(o.honors) ? o.honors : [];
+    if (!rawHabits.length && !rawHonors.length) throw new Error("empty");
+
+    // ★ 全量校验 + 归一化（先算后写，任一非法即抛错，状态零改动）
+    const inHabits: Habit[] = [];
+    for (const r of rawHabits) {
+      const s = sanitizeHabit(r);
+      if (!s) throw new Error("format");
+      inHabits.push(s);
+    }
+    const inHonors: Honor[] = [];
+    for (const r of rawHonors) {
+      const s = sanitizeHonor(r);
+      if (!s) throw new Error("format");
+      inHonors.push(s);
+    }
+
+    // 按 id 合并（导入覆盖同 id，保留既有未导入项）
     const hMap = new Map(habits.map((h) => [h.id, h]));
-    for (const h of inHabits) if (h && h.id) hMap.set(h.id, { ...h, checkIns: h.checkIns || {} });
+    for (const h of inHabits) hMap.set(h.id, h);
     const nlH = Array.from(hMap.values());
     const hrMap = new Map(honors.map((x) => [x.id, x]));
-    for (const x of inHonors) if (x && x.id) hrMap.set(x.id, x);
+    for (const x of inHonors) hrMap.set(x.id, x);
     const nlHr = Array.from(hrMap.values());
+
     setHabits(nlH);
     setHonors(nlHr);
     persist(snapshotNow({ habits: nlH, honors: nlHr }));
     return nlH.length + nlHr.length;
-  }, [habits, honors, setHabits, setHonors, persist, snapshotNow]);
+  }, [habits, honors, setHabits, setHonors, persist, snapshotNow, sanitizeHabit, sanitizeHonor]);
 
   return {
     toggleToday, toggleRest, openBackfill, closeBackfill, toggleBackfillDate,
