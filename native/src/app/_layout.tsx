@@ -14,6 +14,7 @@ import { AppProvider, useApp } from "@/store/app";
 import { ToastHost } from "@/components/Toast";
 import { ConfettiHost } from "@/components/Confetti";
 import { ModalHost } from "@/components/ModalHost";
+import { TurboModuleErrorSurface } from "@/components/TurboModuleErrorSurface";
 
 // ── 崩溃红线 #4：Linking 兜底 ──
 // 裸 scheme URL（seeora://... 无后续路径）在 expo-router 启动期会触发崩溃；中性化为 null
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ConfettiHost />
           <ModalHost />
           <PortalHost />
+          <TurboModuleErrorSurface />
         </AppProvider>
       </GestureHandlerRootView>
     );

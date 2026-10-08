@@ -40,6 +40,15 @@
  *   未经用户操作写剪贴板，本身可能引入新的崩溃。
  *   修复逻辑完全不需要诊断代码 —— 只保留 RCTLogError 即可（日志走系统 console，
  *   不弹窗、不写剪贴板、不落沙盒文件）。
+ *
+ * ★★ 2026-10-08 增补（诊断用，上线前移除或保持 gated）：
+ *   为把「被吞掉的 NSException」从 Windows 上看不到的 RCTLogError 黑洞里捞出来，
+ *   补丁在 RCTLogError 旁把 `exception.name / reason / callStackSymbols` 写入
+ *   `NSUserDefaults["swallowed_tm_error"]` 与 `Documents/seeora_tm_error.txt`
+ *   （沿用 crashReason 插件的落盘写法）。此写盘**无 UI、无弹窗、不碰剪贴板**，
+ *   不触发 Guideline 2.3.1；JS 端仅在诊断构建（`EXPO_PUBLIC_TM_SURFACE=1`）下读取并展示，
+ *   正常构建不挂载该浮层。若上架前想彻底干净，可在正式包里把 NEW_VOID/NEW_METHOD 的
+ *   写盘两行删掉（保留 RCTLogError 即可），但当前默认保留以便下次复现抓取。
  * ---------------------------------------------------------------------------
  */
 const fs = require('fs');
@@ -60,8 +69,14 @@ const OLD_VOID = `    @try {
 const NEW_VOID = `    @try {
       [inv invokeWithTarget:strongModule];
     } @catch (NSException *exception) {
-      RCTLogError(@"[TurboModule] Swallowed NSException in void method of module %@: %@",
-                  NSStringFromClass([strongModule class]), exception);
+      NSString *tmErr = [NSString stringWithFormat:@"[TurboModule VOID] module=%@\\nname=%@\\nreason=%@\\n%@",
+                  NSStringFromClass([strongModule class]), exception.name, exception.reason, exception.callStackSymbols];
+      RCTLogError(@"[TurboModule] Swallowed NSException: %@", tmErr);
+      NSArray<NSString *> *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+      NSString *dir = paths.firstObject ?: NSTemporaryDirectory();
+      NSString *errPath = [dir stringByAppendingPathComponent:@"seeora_tm_error.txt"];
+      [tmErr writeToFile:errPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+      [[NSUserDefaults standardUserDefaults] setObject:tmErr forKey:@"swallowed_tm_error"];
       return;
     } @finally {`;
 
@@ -79,14 +94,18 @@ const NEW_VOID = `    @try {
 const METHOD_RE = /@catch \(NSException \*exception\) \{[^@]*?if \(isSync\) \{[^@]*?throw convertNSExceptionToJSError\(runtime, exception, std::string\{moduleName\}, methodNameStr\);[^@]*?@throw exception;\s*\}\s*\}/;
 
 const NEW_METHOD = `  @catch (NSException *exception) {
+    NSString *tmErr = [NSString stringWithFormat:@"[TurboModule METHOD] module=%s.%s\\nname=%@\\nreason=%@\\n%@",
+                  moduleName, methodNameStr.c_str(), exception.name, exception.reason, exception.callStackSymbols];
+    RCTLogError(@"[TurboModule] Swallowed NSException: %@", tmErr);
+    NSArray<NSString *> *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *dir = paths.firstObject ?: NSTemporaryDirectory();
+    NSString *errPath = [dir stringByAppendingPathComponent:@"seeora_tm_error.txt"];
+    [tmErr writeToFile:errPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    [[NSUserDefaults standardUserDefaults] setObject:tmErr forKey:@"swallowed_tm_error"];
     if (isSync) {
-      RCTLogError(@"[TurboModule] Swallowed NSException in sync method %s.%s: %@",
-                  moduleName, methodNameStr.c_str(), exception);
       result = nil;
       return;
     } else {
-      RCTLogError(@"[TurboModule] Swallowed NSException in async method %s.%s: %@",
-                  moduleName, methodNameStr.c_str(), exception);
       return;
     }
   }`;
@@ -150,6 +169,15 @@ function resolveTargetFiles(root) {
 function patchFile(filePath) {
   let contents = readFileSafe(filePath);
   const status = { voidPresent: false, methodPresent: false, voidApplied: false, methodApplied: false };
+
+  // 幂等：已带 surfacing 标记（seeora_tm_error）视为已打好，跳过（避免重复写盘/重复替换）。
+  if (contents.includes('seeora_tm_error')) {
+    status.voidPresent = true;
+    status.methodPresent = true;
+    status.voidApplied = true;
+    status.methodApplied = true;
+    return status;
+  }
 
   if (contents.includes(NEW_VOID)) {
     status.voidPresent = true;

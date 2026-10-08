@@ -15,6 +15,12 @@
         "EAS_USE_PRECOMPILED_MODULES": "0",
         "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "appl_EtIsUNicLeNbKBdNIDcLkvoGxrO"
       }
+    },
+    "diagnose": {
+      "extends": "production",
+      "env": {
+        "EXPO_PUBLIC_TM_SURFACE": "1"
+      }
     }
   },
   "submit": {
