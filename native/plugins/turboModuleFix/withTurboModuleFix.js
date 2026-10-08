@@ -41,19 +41,46 @@
  *   修复逻辑完全不需要诊断代码 —— 只保留 RCTLogError 即可（日志走系统 console，
  *   不弹窗、不写剪贴板、不落沙盒文件）。
  *
- * ★★ 2026-10-08 增补（诊断用，上线前移除或保持 gated）：
+ * ★★ 2026-10-08 增补（诊断用，全环境变量门控，生产包零冗余）：
  *   为把「被吞掉的 NSException」从 Windows 上看不到的 RCTLogError 黑洞里捞出来，
  *   补丁在 RCTLogError 旁把 `exception.name / reason / callStackSymbols` 写入
  *   `NSUserDefaults["swallowed_tm_error"]` 与 `Documents/seeora_tm_error.txt`
  *   （沿用 crashReason 插件的落盘写法）。此写盘**无 UI、无弹窗、不碰剪贴板**，
  *   不触发 Guideline 2.3.1；JS 端仅在诊断构建（`EXPO_PUBLIC_TM_SURFACE=1`）下读取并展示，
- *   正常构建不挂载该浮层。若上架前想彻底干净，可在正式包里把 NEW_VOID/NEW_METHOD 的
- *   写盘两行删掉（保留 RCTLogError 即可），但当前默认保留以便下次复现抓取。
+ *   正常构建不挂载该浮层。
+ *
+ *   门控方式（关键，回应「包不要变大」诉求）：
+ *     - 原生写盘代码由 `SURFACE = process.env.EXPO_PUBLIC_TM_SURFACE === '1'` 控制，
+ *       仅在 diagnose 构建拼接进 RCTTurboModule.mm；**生产构建完全不含**这段写盘逻辑，
+ *       原生二进制零诊断冗余（只剩真正有用的 RCTLogError + return 崩溃修复）。
+ *     - JS 端两个诊断组件（TurboModuleErrorSurface / DiagnosticErrorBoundary）由
+ *       `process.env.EXPO_PUBLIC_TM_SURFACE === '1'` 控制是否挂载，生产构建该值为
+ *       undefined → 打包器摇树（tree-shake）完全剔除，生产 JS 包零诊断字节。
+ *   清理步骤（确认无问题后）：eas.json 删 diagnose profile + 删两个 tsx 文件 +
+ *   还原 _layout.tsx 挂载 + 把本文件 NEW_VOID/NEW_METHOD 还原为仅 RCTLogError 即可；
+ *   或直接 `git revert` 这两个诊断提交。无论哪种，生产包都不含任何诊断代码。
  * ---------------------------------------------------------------------------
  */
 const fs = require('fs');
 const path = require('path');
 const { withDangerousMod } = require('@expo/config-plugins');
+
+// 诊断落盘开关：仅 diagnose 构建（EXPO_PUBLIC_TM_SURFACE=1）注入写盘代码。
+// 生产构建不设这个变量 → 原生补丁只保留「RCTLogError + return」崩溃修复，
+// 完全不含 seeora_tm_error.txt / NSUserDefaults 写盘逻辑（生产二进制零诊断冗余）。
+const SURFACE = process.env.EXPO_PUBLIC_TM_SURFACE === '1';
+
+// 注入到 @catch 内的诊断落盘代码（仅在 SURFACE 时拼接）：
+// 把被吞掉的 NSException name/reason/callStackSymbols 写入沙盒文件 + NSUserDefaults，
+// 供 JS 端 TurboModuleErrorSurface 在诊断构建里读出并全屏展示。无 UI、无弹窗、不碰剪贴板。
+const TM_SURFACE_BLOCK = SURFACE
+  ? `
+      NSArray<NSString *> *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+      NSString *dir = paths.firstObject ?: NSTemporaryDirectory();
+      NSString *errPath = [dir stringByAppendingPathComponent:@"seeora_tm_error.txt"];
+      [tmErr writeToFile:errPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+      [[NSUserDefaults standardUserDefaults] setObject:tmErr forKey:@"swallowed_tm_error"];`
+  : '';
 
 const RN_DIR_REL = ['node_modules', 'react-native'];
 const CANDIDATE_NAMES = ['RCTTurboModule.mm', 'ObjCTurboModule.mm'];
@@ -71,12 +98,7 @@ const NEW_VOID = `    @try {
     } @catch (NSException *exception) {
       NSString *tmErr = [NSString stringWithFormat:@"[TurboModule VOID] module=%@\\nname=%@\\nreason=%@\\n%@",
                   NSStringFromClass([strongModule class]), exception.name, exception.reason, exception.callStackSymbols];
-      RCTLogError(@"[TurboModule] Swallowed NSException: %@", tmErr);
-      NSArray<NSString *> *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-      NSString *dir = paths.firstObject ?: NSTemporaryDirectory();
-      NSString *errPath = [dir stringByAppendingPathComponent:@"seeora_tm_error.txt"];
-      [tmErr writeToFile:errPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-      [[NSUserDefaults standardUserDefaults] setObject:tmErr forKey:@"swallowed_tm_error"];
+      RCTLogError(@"[TurboModule] Swallowed NSException: %@", tmErr);${TM_SURFACE_BLOCK}
       return;
     } @finally {`;
 
@@ -96,12 +118,7 @@ const METHOD_RE = /@catch \(NSException \*exception\) \{[^@]*?if \(isSync\) \{[^
 const NEW_METHOD = `  @catch (NSException *exception) {
     NSString *tmErr = [NSString stringWithFormat:@"[TurboModule METHOD] module=%s.%s\\nname=%@\\nreason=%@\\n%@",
                   moduleName, methodNameStr.c_str(), exception.name, exception.reason, exception.callStackSymbols];
-    RCTLogError(@"[TurboModule] Swallowed NSException: %@", tmErr);
-    NSArray<NSString *> *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *dir = paths.firstObject ?: NSTemporaryDirectory();
-    NSString *errPath = [dir stringByAppendingPathComponent:@"seeora_tm_error.txt"];
-    [tmErr writeToFile:errPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    [[NSUserDefaults standardUserDefaults] setObject:tmErr forKey:@"swallowed_tm_error"];
+    RCTLogError(@"[TurboModule] Swallowed NSException: %@", tmErr);${TM_SURFACE_BLOCK}
     if (isSync) {
       result = nil;
       return;
