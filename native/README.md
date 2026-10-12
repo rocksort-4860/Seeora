@@ -40,7 +40,7 @@ seeora/
     │   ├── _layout.tsx       # 根布局：GestureHandler + AppProvider + Tabs + Linking 兜底 + 崩溃诊断开关
     │   ├── index.tsx         # Tabs 容器（History 左 / Today 中默认 / Settings 右）
     │   ├── today.tsx / history.tsx / settings.tsx
-    │   ├── onboarding.tsx / pro.tsx（Pay Sheet）/ share.tsx（分享卡）
+    │   ├── pro.tsx（Pay Sheet）/ share.tsx（分享卡）
     ├── components/           # HabitRow / HonorRoom / Leaderboard / WeekGrid / Heatmap / HabitForm / HonorForm / ExportSheet / BuyoutCard / ModalHost / Toast / Confetti
     ├── components/ui/        # shadcn-RN 组件库（32 个，与基线一致）
     ├── store/                # app.tsx（Context 状态机）+ usePersist / usePro / useHabitActions
