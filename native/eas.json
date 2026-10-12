@@ -21,6 +21,14 @@
       "env": {
         "EXPO_PUBLIC_TM_SURFACE": "1"
       }
+    },
+    "diag-bare": {
+      "extends": "diagnose",
+      "comment": "二分诊断档：绕过 expo-router Tabs，裸渲染 Today 页（STAGE=2.5）。有内容=Tabs/react-native-screens 问题；仍黑=Today 页或配色问题。仅排查用，禁止提审。",
+      "env": {
+        "EXPO_PUBLIC_DIAG": "1",
+        "EXPO_PUBLIC_DIAG_STAGE": "2.5"
+      }
     }
   },
   "submit": {

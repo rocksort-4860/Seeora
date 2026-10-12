@@ -18,6 +18,7 @@ import { ModalHost } from "@/components/ModalHost";
 import { TurboModuleErrorSurface } from "@/components/TurboModuleErrorSurface";
 import { DiagnosticErrorBoundary } from "@/components/DiagnosticErrorBoundary";
 import { DiagProbe } from "@/components/DiagProbe";
+import TodayScreen from "@/app/today";
 
 // ── 崩溃红线 #4：Linking 兜底 ──
 // 裸 scheme URL（seeora://... 无后续路径）在 expo-router 启动期会触发崩溃；中性化为 null
@@ -91,6 +92,22 @@ export default function RootLayout() {
   const withStatusBar = STAGE >= 1;
   const withGesture = STAGE >= 3;
   const withOverlay = STAGE >= 4;
+
+  /* ★★ 二分诊断专用（STAGE === 2.5 用小数区分）：裸渲染 today 页，不经过 expo-router Tabs。
+   * 现象（build 12 真机）：走 Tabs 时主界面全黑，但 JS 活着、Pressable 可点。
+   * 这里直接渲染 TodayScreen 组件本体（绕过 Tabs / react-native-screens 那一层）：
+   *   · 裸渲染有内容 → 问题在 Tabs / react-native-screens（iOS 26 + Fabric 已知失灵族）
+   *   · 裸渲染仍黑   → 问题在 Today 页自身或配色层（看 DiagProbe 的 THEME / VIEW 行）
+   * 仅在 EXPO_PUBLIC_DIAG=1 且 DIAG_STAGE=2.5 时命中，生产构建永不进入。 */
+  if (STAGE === 2.5) {
+    return (
+      <AppProvider>
+        <ThemedStatusBar />
+        <TodayScreen />
+        {SURFACE && <DiagProbe />}
+      </AppProvider>
+    );
+  }
 
   const inner = (
     <>
