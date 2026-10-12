@@ -14,7 +14,7 @@
  * 由 TurboModuleErrorSurface 的角落徽标提示「DIAG ON」辅助判断方向。
  */
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 
 const ENABLED = process.env.EXPO_PUBLIC_TM_SURFACE === "1";
 
@@ -39,9 +39,9 @@ export class DiagnosticErrorBoundary extends React.Component<Props, State> {
       <View style={styles.overlay}>
         <View style={styles.bar}>
           <Text style={styles.barTitle}>⚠️ React Render Error (Diagnostic)</Text>
-          <TouchableOpacity onPress={this.dismiss} hitSlop={12}>
-            <Text style={styles.close}>✕</Text>
-          </TouchableOpacity>
+<Pressable onPress={this.dismiss} hitSlop={12}>
+          <Text style={styles.close}>✕</Text>
+        </Pressable>
         </View>
         <ScrollView style={styles.body}>
           <Text selectable style={styles.mono}>

@@ -18,7 +18,7 @@
  *     点一下消失；用于区分「白屏但非 TurboModule 吞弹」→ 指向 splash/router 方向。
  */
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { File as FSFile, Paths } from "expo-file-system";
 
 const ENABLED = process.env.EXPO_PUBLIC_TM_SURFACE === "1";
@@ -58,9 +58,9 @@ export function TurboModuleErrorSurface() {
       <View style={styles.overlay} pointerEvents="box-none">
         <View style={styles.bar}>
           <Text style={styles.barTitle}>⚠️ Swallowed TurboModule NSException</Text>
-          <TouchableOpacity onPress={() => setText(null)} hitSlop={12}>
+          <Pressable onPress={() => setText(null)} hitSlop={12}>
             <Text style={styles.close}>✕</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <ScrollView style={styles.body}>
           <Text selectable style={styles.mono}>
@@ -74,13 +74,12 @@ export function TurboModuleErrorSurface() {
   // 未捕获到吞弹错误，但诊断构建已激活 → 角落徽标（点一下消失，不挡功能验证）
   if (badge && !dismissed) {
     return (
-      <TouchableOpacity
+      <Pressable
         style={styles.badge}
         onPress={() => setDismissed(true)}
-        activeOpacity={0.8}
       >
         <Text style={styles.badgeText}>DIAG ON · no TM error captured（点此关闭）</Text>
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 
