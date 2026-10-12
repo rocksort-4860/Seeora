@@ -12,7 +12,7 @@
 ## 结构
 
 ```
-习惯927/
+seeora/
 ├── native/           ← 【上架主体】Expo SDK 55 + RN 0.83 工程，当前 build 10
 │   ├── app.json               bundle id com.seeora.app / 权限文案 / 插件 / 隐私声明
 │   ├── eas.json               production profile：sdk-55 镜像 + RC key env 注入 + submit 配置
