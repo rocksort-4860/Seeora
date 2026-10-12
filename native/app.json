@@ -8,9 +8,13 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true,
+      "appleTeamId": "ZFVWH8644U",
+      "supportsTablet": false,
       "buildNumber": "10",
       "bundleIdentifier": "com.seeora.app",
+      "entitlements": {
+        "com.apple.security.application-groups": ["group.com.seeora.app"]
+      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIFileSharingEnabled": true,
@@ -33,6 +37,7 @@
     },
     "web": {
       "bundler": "metro",
+      "output": "static",
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
@@ -40,6 +45,7 @@
       "expo-font",
       "expo-system-ui",
       "expo-image",
+      "@bacons/apple-targets",
       [
         "expo-notifications",
         {

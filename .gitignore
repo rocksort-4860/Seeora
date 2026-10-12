@@ -25,6 +25,11 @@ native/_tmp_*
 _临时产物_*/
 _*.png
 
+# ── 构建产物（可再生，不入库）──
+# dist-web 是 expo export 的静态导出输出，由 _shot_real.js 截图流水线生成，随时可重跑
+native/dist-web/
+native/.pnpm-store/
+
 # ── 系统 ──
 .DS_Store
 Thumbs.db

@@ -20,6 +20,7 @@ import {
   type HabitLike, type NodeView, type CurvePoint, type NodeState,
 } from "@/lib/habitLogic";
 import { setAppBadge } from "@/lib/notify";
+import { syncWidgetSnapshot } from "@/lib/widgetSync";
 import { useHydration, usePersist, type Snapshot } from "@/store/usePersist";
 import { usePro, type PayRestoreResult, type ProReason } from "@/store/usePro";
 import { useHabitActions } from "@/store/useHabitActions";
@@ -308,6 +309,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setLangState, setThemeState, setVisited, setInstallAt,
     setHabits, setHonors, setSettings, setPurchased, setTrialUntil, setHydrated,
   });
+
+  /* ===================== 主屏小组件 =====================
+   * habits / 语言任一变化 → 同步今日快照到 App Group（WidgetKit 扩展读取）。
+   * 仅在首载完成后同步，避免 hydration 中途的空数组把小组件清成空态。
+   * 非 iOS / 原生模块缺失时 widgetSync 内部静默降级，不触碰任何原生调用。 */
+  useEffect(() => {
+    if (hydrated) syncWidgetSnapshot(habits, lang);
+  }, [hydrated, habits, lang]);
 
   /* ===================== Pro ===================== */
   const router = useRouter();

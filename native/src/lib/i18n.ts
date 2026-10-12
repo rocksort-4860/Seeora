@@ -61,7 +61,6 @@ export interface Dict {
   setNotif: string; setBadge: string;
   setDevice: string; setHaptics: string; setWeekStart: string;
   weekMon: string; weekSun: string;
-  setExt: string; extHealth: string; extHealthSub: string; extSiri: string; extSiriSub: string; extWidget: string; extWidgetSub: string;
   setData: string; dataBuyout: string; dataExport: string; dataWipe: string;
   about: string; version: string; privacy: string; privacyText: string; localPromise: string;
   themeSystem: string; themeLight: string; themeDark: string;
@@ -152,7 +151,6 @@ export const I18N: Record<Lang, Dict> = {
     setNotif: "通知", setBadge: "应用角标",
     setDevice: "设备偏好", setHaptics: "触感反馈", setWeekStart: "一周起始日",
     weekMon: "周一", weekSun: "周日",
-    setExt: "扩展集成", extHealth: "Apple Health", extHealthSub: "只读摘要（即将支持）", extSiri: "Siri 与快捷指令", extSiriSub: "用语音打卡（即将支持）", extWidget: "主屏组件", extWidgetSub: "在桌面查看今日进度",
     setData: "数据安全", dataBuyout: "买断说明", dataExport: "导出备份", dataWipe: "抹掉数据",
     about: "关于", version: "版本 {v}", privacy: "隐私政策", privacyText: "Seeora 是一款本地优先的习惯打卡应用：你的习惯、打卡与连续天数保存在你自己的设备上，我们不会上传这些内容。本应用无需注册账号，我们不收集你的姓名、邮箱或电话等可直接识别身份的信息。为验证购买并支持「恢复购买」，我们使用第三方内购服务 RevenueCat，它会接收有限的购买记录与基础技术信息（如平台、系统版本、应用版本），并与一个随机匿名标识符关联，不含你的姓名或邮箱。详见《隐私政策》。", localPromise: "数据仅存于本机，由你掌控。",
     themeSystem: "跟随系统", themeLight: "浅色", themeDark: "深色",
@@ -213,7 +211,6 @@ export const I18N: Record<Lang, Dict> = {
     setNotif: "Notifications", setBadge: "App badge",
     setDevice: "Device", setHaptics: "Haptics", setWeekStart: "Week starts on",
     weekMon: "Monday", weekSun: "Sunday",
-    setExt: "Integrations", extHealth: "Apple Health", extHealthSub: "Read-only summary (soon)", extSiri: "Siri & Shortcuts", extSiriSub: "Check in by voice (soon)", extWidget: "Home widget", extWidgetSub: "See today's progress on your Home Screen",
     setData: "Data & safety", dataBuyout: "Buyout info", dataExport: "Export backup", dataWipe: "Erase data",
     about: "About", version: "Version {v}", privacy: "Privacy Policy", privacyText: "Seeora is a local-first habit tracker: your habits, check-ins and streaks are stored on your own device and are not uploaded by us. No account is required, and we do not collect directly identifying information such as your name, email address or phone number. To validate purchases and support restore purchases we use a third-party purchase service, RevenueCat, which receives limited purchase records and basic technical information (such as platform, OS and app version) tied to a random anonymous identifier - never your name or email. See the Privacy Policy for details.", localPromise: "Data stays on your device, under your control.",
     themeSystem: "System", themeLight: "Light", themeDark: "Dark",

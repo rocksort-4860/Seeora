@@ -89,3 +89,6 @@ export function Onboarding() {
     </View>
   );
 }
+
+// expo-router 要求路由文件必须有 default export（组件本体由 index.tsx 按 visited 状态叠加渲染）
+export default Onboarding;

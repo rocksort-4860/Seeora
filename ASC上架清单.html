@@ -83,8 +83,9 @@
   <div class="card">
     <h2>第 1 步 · App 信息（App Information）</h2>
     <p class="note">ASC 左侧「App 信息」页</p>
-    <div class="kv"><b>名称（30 字符内）：</b>Seeora</div>
-    <div class="kv"><b>副标题（30 字符内）：</b>建议 "Build habits that stick"（中文可留空，仅影响展示）</div>
+    <div class="kv"><b>名称（30 字符内）：</b>Seeora: ADHD Habit Tracker（26 字符，已定稿 2026-10-11）</div>
+    <div class="kv"><b>副标题（30 字符内）：</b>Gentle routines, no guilt（25 字符，已定稿）</div>
+    <div class="kv"><b>关键词（100 字符内）：</b><code>streak,checkin,goal,productivity,planner,widget,offline,backfill,discipline,daily,rest,calm,focus</code>（97 字符，已定稿）</div>
     <div class="kv"><b>主类别：</b>健康健美（Health &amp; Fitness）</div>
     <div class="kv"><b>副类别：</b>效率（Productivity）</div>
     <div class="kv"><b>内容版权：</b>© 2026 张新华</div>
@@ -159,8 +160,8 @@
   <div class="card">
     <h2>第 6 步 · 商店页面素材</h2>
     <p class="note">ASC 左侧「App Store」→ 版本信息</p>
-    <label class="item"><input type="checkbox" data-k="s1"><span>截图 6.7 英寸（iPhone 15 Pro Max 等）至少 3 张，且无模板占位图</span></label>
-    <label class="item"><input type="checkbox" data-k="s2"><span>若保留 iPad 支持：需另备 iPad 13 英寸截图（工程里 <code>supportsTablet: true</code>）；若不打算做 iPad，需在工程里关掉并重新构建</span></label>
+    <label class="item"><input type="checkbox" data-k="s1"><span>截图 6.3 英寸（1206×2622，iPhone 16 Pro）至少 3 张，必须来自真实 App 重截（旧 Web 原型截图已于 2026-10-11 归档弃用）</span></label>
+    <label class="item"><input type="checkbox" data-k="s2"><span><s>iPad 截图</s> —— 已决定不做 iPad：工程 <code>supportsTablet</code> 已改为 <code>false</code>（2026-10-11），下次构建生效后无需 iPad 截图</span></label>
     <label class="item"><input type="checkbox" data-k="s3"><span>宣传文本（170 字符内）已填</span></label>
     <label class="item"><input type="checkbox" data-k="s4"><span>描述（4000 字符内）已填</span></label>
     <label class="item"><input type="checkbox" data-k="s5"><span>关键词（100 字符内，逗号分隔）已填</span></label>
@@ -204,7 +205,7 @@
   <div class="card">
     <h2>需要你拍板的两个问题</h2>
     <label class="item"><input type="checkbox" data-k="q1"><span><b>域名</b>：你有现成域名吗？没有的话，用什么域名（这决定隐私政策 URL）</span></label>
-    <label class="item"><input type="checkbox" data-k="q2"><span><b>iPad</b>：要不要支持 iPad？支持则必须补 iPad 截图；不支持则需改工程配置并重新构建</span></label>
+    <label class="item"><input type="checkbox" data-k="q2"><span><b>iPad</b>：✅ 已拍板（2026-10-11）——不支持，工程已关 <code>supportsTablet</code>；<b>主屏小组件</b>：✅ 已拍板开发（WidgetKit 扩展）</span></label>
   </div>
 
   <p class="footnote">

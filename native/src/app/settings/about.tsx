@@ -50,13 +50,15 @@ export default function AboutScreen() {
 
         <GroupTitle colors={c}>{d.privacy}</GroupTitle>
         <Group colors={c}>
-          {/* ★ 隐私政策入口暂不外链：**正式域名尚未确定**（本地只有 landing/privacy/terms/support
-             四个 .html 文件，仓库里没有任何已上线域名）。
-             iOS 审核要求 Privacy Policy 必须有**可公网访问的 URL**，ASC 后台也要填同一个地址。
-             域名定下来后，把下面这行换成：
-               onPress={() => Linking.openURL("<正式域名>/privacy.html")}
-             现在只展示说明文字，避免 App 里出现打不开的假链接。 */}
-          <Row label={d.privacy} colors={c} first last />
+          {/* 隐私政策入口：ASC 必填 URL 同地址（2026-10-11 实测 200 可达） */}
+          <Row
+            label={d.privacy}
+            colors={c}
+            first
+            last
+            chevron
+            onPress={() => Linking.openURL("https://rocksort-4860.github.io/Seeora/privacy.html")}
+          />
         </Group>
         <Text
           style={{ color: c.ink3, fontSize: 13, lineHeight: 18, marginHorizontal: 22, marginTop: -6 }}

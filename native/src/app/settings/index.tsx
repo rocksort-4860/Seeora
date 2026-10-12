@@ -229,14 +229,6 @@ export default function SettingsScreen() {
           <T className="text-xs" style={{ color: c.ink4 }}>{d.localPromise}</T>
         </View>
 
-        {/* ── 扩展集成（占位） ── */}
-        <GroupTitle colors={c}>{d.setExt}</GroupTitle>
-        <Group colors={c}>
-          <PlaceholderRow label={d.extHealth} sub={d.extHealthSub} colors={c} />
-          <PlaceholderRow label={d.extSiri} sub={d.extSiriSub} colors={c} />
-          <PlaceholderRow label={d.extWidget} sub={d.extWidgetSub} colors={c} />
-        </Group>
-
         {/* ── 关于 ── */}
         <GroupTitle colors={c}>{d.about}</GroupTitle>
         <Group colors={c}>
@@ -323,17 +315,6 @@ function ExportRow({ label, icon, onPress, colors: c, last }: {
         <Text style={{ color: c.ink, fontSize: 16 }}>{label}</Text>
       </View>
     </Pressable>
-  );
-}
-
-function PlaceholderRow({ label, sub, colors: c }: { label: string; sub: string; colors: ReturnType<typeof useApp>["colors"] }) {
-  /* ★ 占位项用 View 而不是 Pressable：功能未实现，Pressable 会承诺「可点」
-     却什么都不做（用户点了没反应）。想强调未开放就用 opacity，不要伪装成按钮。 */
-  return (
-    <View style={{ paddingHorizontal: 16, paddingVertical: 11, opacity: 0.55 }}>
-      <Text style={{ color: c.ink, fontSize: 16 }}>{label}</Text>
-      <Text style={{ color: c.ink4, fontSize: 12, marginTop: 2 }}>{sub}</Text>
-    </View>
   );
 }
 

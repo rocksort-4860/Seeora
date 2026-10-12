@@ -1,38 +1,51 @@
 # Seeora · v8
 
-习惯打卡 Web 应用（单文件 HTML，由 DeepSeek 生成的 v8 完整项目包）。
+> **⚠️ 2026-10-12 更新：本文件描述的是 Web 原型。上架主体已是 `native/` 下的 Expo + RN 工程（SDK 55，build 10）。**
+> 当前进度与待办看 `上架准备清单.md`（唯一定稿追踪），细项审计看
+> `Seeora-上架审核专家全量检查报告.md`。本 README 下文「付费模式 / 恢复购买」里的
+> localStorage 模拟**只适用于 Web 原型预览，不是上架版本的真实行为**——
+> 上架版走 RevenueCat + StoreKit，商品 `seeora_pro_lifetime`，凭证在苹果服务器、重装不丢。
+>
+> 根目录的 `index.html` / `landing.html` / `privacy.html` / `terms.html` / `support.html`
+> **已移入 `静态网页/`**（10-11 目录整理）。下文「结构」与「运行」章节按此理解。
 
 ## 结构
 
 ```
 习惯927/
-├── index.html        ← 【Web 定稿】主应用（所有 JS/CSS 内联，单文件分发）
-├── landing.html      ← 营销落地页（中英双语）
-├── privacy.html      ← 隐私政策（中英双语）
-├── terms.html        ← 使用条款（中英双语）
-├── support.html      ← 支持与联系（中英双语）
-├── assets/
-│   ├── brand-mark-fill.svg  ← 品牌标·应用图标版（奶油圆角底，favicon / 页头）
-│   ├── brand-mark-line.svg  ← 品牌标·透明底版（启动画面）
-│   ├── mark-transparent.png ← 品牌标透明底 PNG 母版（897×265，供复用）
-│   ├── icon-1024.png        ← App 图标母版（1024×1024 奶油底满幅）
-│   ├── apple-touch-icon.png ← iOS 添加到主屏图标（180×180）
-│   ├── favicon.png / icon.png
-│   ├── style.css            ← 四个静态页共享样式
-│   └── lang.js              ← 静态页语言切换（en 默认 / zh）
-├── native/           ← 【iOS 工程落地处】从 原工程 迁入的 Expo + RN 骨架
-│   └── README-迁移说明.md   ← 转 Seeora 必改配置清单（bundle id / 品牌色 / 权限…）
-├── 参考/             ← 迁移文档库 + 防崩溃三件套 + 原工程完整 git 历史包
-├── README.md
-├── 上架准备清单.md    ← 上架前你要准备的账号 / 后台 / 素材清单
+├── native/           ← 【上架主体】Expo SDK 55 + RN 0.83 工程，当前 build 10
+│   ├── app.json               bundle id com.seeora.app / 权限文案 / 插件 / 隐私声明
+│   ├── eas.json               production profile：sdk-55 镜像 + RC key env 注入 + submit 配置
+│   ├── src/                   expo-router 页面、store、i18n、widgetSync、付费墙
+│   ├── modules/widget-sync    App Group 数据桥（小组件取数）
+│   ├── targets/widget         WidgetKit 扩展（小/中尺寸）
+│   ├── plugins/               iOS26 启动崩溃专项修复 4 件套（提审包勿摘）
+│   └── README-迁移说明.md     转 Seeora 必改配置清单（bundle id / 品牌色 / 权限…）
+├── 静态网页/         定稿四页 + 主应用（index / landing / privacy / terms / support）
+│                    线上：https://rocksort-4860.github.io/Seeora/
+├── assets/           品牌标 SVG、icon-1024 母版、apple-touch-icon、共享 css/js
+├── 商店截图_1206x2622\  【唯一送审用图】6.3"，5 张真实 UI + _raw 母版
+├── 参考/             迁移文档库 + 防崩溃三件套 + 原工程完整 git 历史包
+├── _过程文件\        历轮审计/反馈/修复说明报告、白屏核验包、DeepSeek 复核包、迁移清单
+├── README.md              本文件
+├── 上架准备清单.md         【唯一定稿进度追踪】
+├── ASC上架清单.html        ASC 后台逐项照抄版
+├── Seeora-上架审核专家全量检查报告.md   权威审计报告（2026-10-11，85 文件 + 81 单测）
 └── 从原工程迁移与删除清单.md
 ```
 
-## 运行
+**常驻工具脚本不是临时件**：`_verify_fix.js` / `_verify_swipe.js` / `_check_pages.cjs`
+在 `.gitignore` 里被明文标注为「常驻守卫，必须保留」；`_shot_real.js`（依赖
+`_serve_dist.js`）是全量检查报告点名的**商店截图流水线**，固定走 `expo export` 静态导出。
+
+## 运行（Web 原型预览）
+
+> 上架版请用 `native/` + EAS 构建，见 `上架准备清单.md`。以下仅为 Web 原型预览方式。
 
 不能用 file:// 打开（通知 API / localStorage 会被浏览器拒绝），必须走本地服务：
 
 ```bash
+cd 静态网页
 python -m http.server 5173
 # 或：npx serve -p 5173
 ```
@@ -90,15 +103,15 @@ localStorage.setItem("seeora_lang", "zh");
 
 ## 线上地址（已部署）
 
-站点：**https://rocksort-4860.github.io/Streakora/**
+站点：**https://rocksort-4860.github.io/Seeora/**
 
 | 页面 | 线上 URL | App Store Connect 用途 |
 |---|---|---|
-| 应用页 / 首页 | `https://rocksort-4860.github.io/Streakora/` | — |
-| 隐私政策 | `https://rocksort-4860.github.io/Streakora/privacy.html` | **Privacy Policy URL（必填）** |
-| 使用条款 | `https://rocksort-4860.github.io/Streakora/terms.html` | 自定义 EULA（如用） |
-| 支持与联系 | `https://rocksort-4860.github.io/Streakora/support.html` | **Support URL（必填）** |
-| 营销落地页 | `https://rocksort-4860.github.io/Streakora` | Marketing URL（可选） |
+| 应用页 / 首页 | `https://rocksort-4860.github.io/Seeora/` | — |
+| 隐私政策 | `https://rocksort-4860.github.io/Seeora/privacy.html` | **Privacy Policy URL（必填）** |
+| 使用条款 | `https://rocksort-4860.github.io/Seeora/terms.html` | 自定义 EULA（如用） |
+| 支持与联系 | `https://rocksort-4860.github.io/Seeora/support.html` | **Support URL（必填）** |
+| 营销落地页 | `https://rocksort-4860.github.io/Seeora` | Marketing URL（可选） |
 
 **对外身份口径（已确认）**
 - 开发者：个人开发者 **张新华 / Zhang Xinhua**（非公司主体）

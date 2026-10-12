@@ -9,6 +9,7 @@ import { View, Text } from "react-native";
 import { Linking } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
+import { Slot } from "expo-router";
 import { PortalHost } from "@rn-primitives/portal";
 import { AppProvider, useApp } from "@/store/app";
 import { ToastHost } from "@/components/Toast";
@@ -52,13 +53,13 @@ function DiagBadge({ stage }: { stage: number }) {
   );
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout() {
   if (!DIAG) {
     const tree = (
       <GestureHandlerRootView style={{ flex: 1 }}>
         <AppProvider>
           <ThemedStatusBar />
-          {children}
+          <Slot />
           <ToastHost />
           <ConfettiHost />
           <ModalHost />
@@ -92,7 +93,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const inner = (
     <>
       {withStatusBar && <ThemedStatusBar />}
-      {children}
+      <Slot />
       {withOverlay && (<><ToastHost /><ConfettiHost /><ModalHost /><PortalHost /></>)}
     </>
   );
