@@ -51,7 +51,7 @@ export default function SettingsScreen() {
     dict: d, colors: c, lang, theme, settings,
     setLang, setTheme,
     setWeekStartOn, setHaptics, setBadge,
-    openOnboarding, openPro,
+    openPro,
     openExport, openWipe, closeExport, closeWipe, exportVisible, wipeVisible, doWipe,
     habits, exportJson, importJson, showToast,
   } = useApp();
@@ -148,9 +148,6 @@ export default function SettingsScreen() {
         <SegmentCard title={d.setTheme} value={themeValue} colors={c}>
           <Segmented options={themeOptions} selected={theme} onSelect={(v) => setTheme(v as "system" | "light" | "dark")} colors={c} />
         </SegmentCard>
-        <Group colors={c}>
-          <Row label={d.setOnboarding} chevron colors={c} last onPress={openOnboarding} />
-        </Group>
 
         {/* ── 通知 ── */}
         <GroupTitle colors={c}>{d.setNotif}</GroupTitle>

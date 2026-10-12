@@ -1,6 +1,5 @@
 /**
  * Tabs 容器：History（左）/ Today（中，默认）/ Settings（右）
- * 首次启动（!visited）叠加 Onboarding 全屏引导
  */
 import "react-native-gesture-handler";
 import { Tabs } from "expo-router";
@@ -8,10 +7,9 @@ import { View } from "react-native";
 import { Icon } from "@/components/ui/icon";
 import { CalendarDays, History, Settings } from "lucide-react-native";
 import { useApp } from "@/store/app";
-import { Onboarding } from "@/app/onboarding";
 
 export default function TabsLayout() {
-  const { colors, t, visited, hydrated } = useApp();
+  const { colors, t } = useApp();
   return (
     <View style={{ flex: 1 }}>
       <Tabs
@@ -37,7 +35,6 @@ export default function TabsLayout() {
           options={{ title: t("tabSettings"), tabBarIcon: ({ color, size }) => <Icon as={Settings} color={color} size={size} /> }}
         />
       </Tabs>
-      {hydrated && !visited && <Onboarding />}
     </View>
   );
 }

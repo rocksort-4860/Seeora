@@ -17,6 +17,7 @@ import { ConfettiHost } from "@/components/Confetti";
 import { ModalHost } from "@/components/ModalHost";
 import { TurboModuleErrorSurface } from "@/components/TurboModuleErrorSurface";
 import { DiagnosticErrorBoundary } from "@/components/DiagnosticErrorBoundary";
+import { DiagProbe } from "@/components/DiagProbe";
 
 // ── 崩溃红线 #4：Linking 兜底 ──
 // 裸 scheme URL（seeora://... 无后续路径）在 expo-router 启动期会触发崩溃；中性化为 null
@@ -65,6 +66,7 @@ export default function RootLayout() {
           <ModalHost />
           <PortalHost />
           {SURFACE && <TurboModuleErrorSurface />}
+          {SURFACE && <DiagProbe />}
         </AppProvider>
       </GestureHandlerRootView>
     );
