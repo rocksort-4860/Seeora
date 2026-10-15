@@ -411,7 +411,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   /* === v0.2：周期节点 / 连续 / 可视化 === */
   const streakOf = useCallback((h: HabitLike) => currentStreak(h), []);
   const pausedOf = useCallback((h: HabitLike) => streakPausedDays(h), []);
-  const bestOf = useCallback((h: HabitLike) => bestStreakOf(h), []);
+  const bestOf = useCallback((h: HabitLike) => Math.max(bestStreakOf(h), currentStreak(h)), []);
   const nodesOf = useCallback((h: HabitLike, count = 21) => recentNodes(h, count), []);
   const curveOf = useCallback((h: HabitLike, days = 60) => curveSeries(h, days), []);
   const miniOf = useCallback((h: HabitLike) => miniWeek(h), []);
