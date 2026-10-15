@@ -21,6 +21,7 @@ import {
   nodeRange,
   nodeStateAt,
   currentStreak,
+  streakPausedDays,
   bestStreakOf,
   windowProgress,
   recentNodes,
@@ -184,47 +185,82 @@ describe("v0.2 频率 N 与周期节点", () => {
   });
 });
 
-describe("v0.2 当前连续（漏1不断 / 连续漏2暂停 / 不归零）", () => {
-  // createdAt 2026-09-01，freq=1 → 每个日期一个节点；now = 2026-09-22
-  const now = new Date(2026, 8, 22);
+describe("v0.2 当前连续 · 方案A（永不归零 / 漏签暂停 / 打卡接续）", () => {
+  // createdAt 2026-09-01，freq=1 → 每个日期一个节点
   const at = (ci: Record<string, true>, rests?: Record<string, true>) =>
     makeHabit({ createdAt: "2026-09-01", frequency: 1, checkIns: ci, rests });
 
-  it("正常累积：连续 3 天打卡", () => {
+  it("1. 连续打卡：currentStreak 正常递增", () => {
+    const now = new Date(2026, 8, 22);
     expect(currentStreak(at({ "2026-09-20": true, "2026-09-21": true, "2026-09-22": true }), now)).toBe(3);
   });
 
-  it("今日未打卡且昨天漏签 1 天：连续不断", () => {
-    // 09-22 未打卡(今日节点未结束)，09-21 漏 → 计数不变
-    // 09-21 miss(第1个) → 09-20 done → +1；09-19 done → +1；再往前连续漏2 → 暂停
-    const ci: Record<string, true> = { "2026-09-20": true, "2026-09-19": true };
-    expect(currentStreak(at(ci), now)).toBe(2);
+  it("2. 漏签 1 天：streak 不变，pausedDays=1（卡片展示暂停小字）", () => {
+    const now = new Date(2026, 8, 22); // 今天未打卡，上次完成 09-21
+    const h = at({ "2026-09-20": true, "2026-09-21": true });
+    expect(currentStreak(h, now)).toBe(2);
+    expect(streakPausedDays(h, now)).toBe(1);
   });
 
-  it("连续漏签 2 天：连续暂停（不归零），恢复打卡从暂停点继续", () => {
-    // 今天打卡，但 09-21、09-20 连续漏 → 只有今天算 1
-    expect(currentStreak(at({ "2026-09-22": true }), now)).toBe(1);
-    // 中断很久之后重新打卡，不会跨回更早的连续
-    expect(currentStreak(at({ "2026-09-22": true, "2026-09-13": true }), now)).toBe(1);
+  it("3. 连续漏签 2 天：streak 不变，pausedDays 封顶=2", () => {
+    const now = new Date(2026, 8, 22); // 上次完成 09-20
+    const h = at({ "2026-09-19": true, "2026-09-20": true });
+    expect(currentStreak(h, now)).toBe(2);
+    expect(streakPausedDays(h, now)).toBe(2);
   });
 
-  it("中间隔一个漏签日：继续往前累计", () => {
-    // 09-22 未打卡；09-21 done →1，09-20 miss(1)，09-19 done →2，09-18 miss(1)，09-17 done →3
-    const ci: Record<string, true> = { "2026-09-21": true, "2026-09-19": true, "2026-09-17": true };
-    expect(currentStreak(at(ci), now)).toBe(3);
+  it("4. 持续漏签 5 天（及更久）：currentStreak 保持不变、永不归零，pausedDays 维持 2", () => {
+    const ci: Record<string, true> = {
+      "2026-09-01": true, "2026-09-02": true, "2026-09-03": true, "2026-09-04": true, "2026-09-05": true,
+    };
+    const h = at(ci);
+    expect(currentStreak(h, new Date(2026, 8, 10))).toBe(5);
+    expect(streakPausedDays(h, new Date(2026, 8, 10))).toBe(2);
+    expect(currentStreak(h, new Date(2026, 8, 15))).toBe(5);
+    expect(streakPausedDays(h, new Date(2026, 8, 15))).toBe(2);
   });
 
-  it("计划休息日不打断连续", () => {
-    // 09-22 未打卡；09-21 标为休息日 → 计 1；09-20 done → 2
-    const ci: Record<string, true> = { "2026-09-20": true };
-    expect(currentStreak(at(ci, { "2026-09-21": true }), now)).toBe(2);
+  it("5. 长时间暂停后打卡：在原有数值上 +1，pausedDays 归 0（规格示例 10→11）", () => {
+    // 连打 10 天 → 漏 2 天（暂停，仍是 10）→ 打卡（变 11）
+    const ci: Record<string, true> = {};
+    for (let d = 1; d <= 10; d++) ci[`2026-09-${String(d).padStart(2, "0")}`] = true;
+    expect(currentStreak(at(ci), new Date(2026, 8, 12))).toBe(10);
+    expect(streakPausedDays(at(ci), new Date(2026, 8, 12))).toBe(2);
+    const resumed = at({ ...ci, "2026-09-12": true });
+    expect(currentStreak(resumed, new Date(2026, 8, 12))).toBe(11);
+    expect(streakPausedDays(resumed, new Date(2026, 8, 12))).toBe(0);
   });
 
-  it("bestStreak 永久保存，不受后续中断影响", () => {
+  it("6. maxStreak 只增不减，永久保存", () => {
     const h = at({ "2026-09-20": true, "2026-09-21": true, "2026-09-22": true });
     const withBest = { ...h, bestStreak: 3 };
     expect(bestStreakOf(withBest)).toBe(3);
     expect(bestStreakOf(at({}))).toBe(0);
+    // 打卡把 bestStreak 写高后，后续中断不会回退
+    expect(bestStreakOf({ ...h, bestStreak: 30 })).toBe(30);
+  });
+
+  it("中间隔漏签日：全部完成节点照常累计", () => {
+    const now = new Date(2026, 8, 22);
+    const ci: Record<string, true> = { "2026-09-21": true, "2026-09-19": true, "2026-09-17": true };
+    expect(currentStreak(at(ci), now)).toBe(3);
+  });
+
+  it("计划休息日等同完成：计入连续，且休息日不算漏签", () => {
+    const now = new Date(2026, 8, 22);
+    const h = at({ "2026-09-20": true }, { "2026-09-21": true });
+    expect(currentStreak(h, now)).toBe(2);
+    expect(streakPausedDays(h, now)).toBe(1); // 距上次完成（09-21 休息）1 天
+  });
+
+  it("今日已休息：pausedDays=0，不展示暂停提示", () => {
+    const now = new Date(2026, 8, 22);
+    expect(streakPausedDays(at({ "2026-09-20": true }, { "2026-09-22": true }), now)).toBe(0);
+  });
+
+  it("创建当天未打卡：pausedDays=0；创建 3 天未打卡：pausedDays=2（封顶）", () => {
+    expect(streakPausedDays(at({}), new Date(2026, 8, 1))).toBe(0);
+    expect(streakPausedDays(at({}), new Date(2026, 8, 4))).toBe(2);
   });
 });
 

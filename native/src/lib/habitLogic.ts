@@ -202,30 +202,44 @@ export function nodeStateAt(h: HabitLike, idx: number): NodeState {
 }
 
 /**
- * 当前连续（周期数）。规则：
- *  - 今日节点已完成（打卡或休息）→ 先计 1
- *  - 向前遍历：完成 → +1；漏签第 1 天 → 计数不变（连续不断）；连续漏签第 2 天 → 暂停，直接停止
- *  - 恢复打卡后从暂停点继续计数（不归零）
+ * 当前连续（周期数）· 方案 A（2026-10-15 定稿）：**永不归零**。
+ *  - 每完成一个周期节点（打卡或休息）→ +1；漏签只让计数「暂停」，不扣减、不清零
+ *  - 中断任意时长后恢复打卡 → 在原有数值上继续 +1（从暂停点接续）
+ *  - 实现上等价于「自创建日起已完成节点总数」，单调不减
+ * 产品承诺：no streak guilt / nothing ever resets to zero
  */
 export function currentStreak(h: HabitLike, now: Date = new Date()): number {
   const today = fmtDate(now);
   const cur = nodeIndexAt(h, today);
   if (cur < 0) return 0;
   let streak = 0;
-  const todayState = nodeStateAt(h, cur);
-  if (todayState === "done" || todayState === "rest") streak = 1;
-  let miss = 0;
-  for (let i = cur - 1; i >= 0; i--) {
-    const st = nodeStateAt(h, i);
-    if (st === "done" || st === "rest") {
-      miss = 0;
-      streak += 1;
-    } else {
-      miss += 1;
-      if (miss >= 2) break; // 连续漏签 2 → 暂停
-    }
+  for (let i = 0; i <= cur; i++) {
+    if (nodeStateAt(h, i) !== "miss") streak += 1;
   }
   return streak;
+}
+
+/**
+ * 连续漏签天数（暂停程度）：0 / 1 / 2（封顶，不再上涨）。
+ *  - 0 = 今天已完成（打卡或休息），或尚未到创建日
+ *  - 1 = 距上次完成 1 天；2 = 距上次完成 ≥2 天
+ * 基于本地时区日历日（不用 UTC），>= 1 时习惯卡片展示「已暂停」辅助小字。
+ */
+export function streakPausedDays(h: HabitLike, now: Date = new Date()): number {
+  const today = fmtDate(now);
+  const start = habitStartDate(h);
+  if (diffDays(start, today) < 0) return 0;
+  let last: string | null = null;
+  for (const d of Object.keys(h.checkIns)) {
+    if (h.checkIns[d] && d <= today && (last === null || d > last)) last = d;
+  }
+  const rests = h.rests || {};
+  for (const d of Object.keys(rests)) {
+    if (rests[d] && d <= today && (last === null || d > last)) last = d;
+  }
+  // 从未完成过：以创建日为起点计暂停
+  const gap = diffDays(last ?? start, today);
+  return Math.min(2, Math.max(0, gap));
 }
 
 /** 历史最长连续（永久保存，永不消失） */

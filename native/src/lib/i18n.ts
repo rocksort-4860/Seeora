@@ -43,7 +43,7 @@ export interface Dict {
   restTitle: string; restAdd: string; restLocked: string; restToday: string;
   makeupTitle: string; makeupHint: string;
   ringHint: string; trendTitle: string;
-  curStreak: string; bestStreak: string; cycles: string;
+  curStreak: string; bestStreak: string; cycles: string; streakPausedHint: string;
   nodeDays: string; newBest: string; achieve: string;
 
   // History
@@ -135,7 +135,7 @@ export const I18N: Record<Lang, Dict> = {
     restTitle: "计划休息日", restAdd: "标记休息", restLocked: "过去的日期不能标记为休息日", restToday: "今天休息中",
     makeupTitle: "补签", makeupHint: "过去 7 天内可自由补签或取消，更早的日期已锁定。",
     ringHint: "每圈 7 个点，从你开始的那天算", trendTitle: "累计打卡曲线",
-    curStreak: "当前连续", bestStreak: "最长连续", cycles: "累计打卡周期",
+    curStreak: "当前连续", bestStreak: "最长连续", cycles: "累计打卡周期", streakPausedHint: "已暂停 · 打卡即可继续累加",
     nodeDays: "每个节点 {n} 天", newBest: "新的最长连续：{n}", achieve: "生成成就卡片",
 
     totalCard: "累计坚持天数", totalReal: "Seeora 内真实天数", totalImported: "导入天数",
@@ -195,7 +195,7 @@ export const I18N: Record<Lang, Dict> = {
     restTitle: "Rest day", restAdd: "Mark rest", restLocked: "Past dates can't be marked as rest", restToday: "Resting today",
     makeupTitle: "Backfill", makeupHint: "Free to backfill or undo within the last 7 days. Earlier dates are locked.",
     ringHint: "7 nodes per loop, counted from your first day", trendTitle: "Cumulative check-ins",
-    curStreak: "Current streak", bestStreak: "Best streak", cycles: "Cycles completed",
+    curStreak: "Current streak", bestStreak: "Best streak", cycles: "Cycles completed", streakPausedHint: "Paused · check in to keep it going",
     nodeDays: "1 node = {n} days", newBest: "New best streak: {n}", achieve: "Create achievement card",
 
     totalCard: "Total days", totalReal: "Real days in Seeora", totalImported: "Imported days",

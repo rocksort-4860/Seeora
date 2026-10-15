@@ -28,7 +28,7 @@ import { Icon } from "@/components/ui/icon";
 import type { Habit } from "@/store/app";
 
 export function HabitRow({ habit }: { habit: Habit }) {
-  const { colors: c, dict: d, lang, streakOf, bestOf, miniOf, toggleToday, frozenIds } = useApp();
+  const { colors: c, dict: d, lang, streakOf, bestOf, pausedOf, miniOf, toggleToday, frozenIds } = useApp();
   const router = useRouter();
   const layout = useRef({ x: 0, y: 0, w: 0, h: 0 });
   const [pressed, setPressed] = useState(false);
@@ -37,6 +37,7 @@ export function HabitRow({ habit }: { habit: Habit }) {
   const done = !!habit.checkIns[today];
   const streak = streakOf(habit);
   const best = bestOf(habit);
+  const paused = pausedOf(habit);
   const week = miniOf(habit);
   const frozen = frozenIds.has(habit.id);
 
@@ -91,6 +92,10 @@ export function HabitRow({ habit }: { habit: Habit }) {
               {d.bestStreak} · {best}
             </Text>
           </View>
+          {/* 方案 A：仅暂停状态展示浅灰辅助小字；无警示色、无催促词 */}
+          {paused >= 1 ? (
+            <Text className="mt-1 text-[11px]" style={{ color: c.ink4 }}>{d.streakPausedHint}</Text>
+          ) : null}
         </View>
 
         {/* 最近 7 天迷你点条 */}

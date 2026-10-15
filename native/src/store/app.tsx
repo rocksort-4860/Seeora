@@ -15,7 +15,7 @@ import { fmt as fmtTpl, getDict, I18N, type Dict, type Lang } from "@/lib/i18n";
 import { lightColors, darkColors, habitColors, type Colors } from "@/lib/tokens";
 import { todayStr } from "@/lib/dates";
 import {
-  currentStreak, bestStreakOf, recentNodes, curveSeries, miniWeek,
+  currentStreak, bestStreakOf, streakPausedDays, recentNodes, curveSeries, miniWeek,
   canRestOn, canMakeupOn, nodeStateAt, nodeIndexAt, freqOf,
   type HabitLike, type NodeView, type CurvePoint, type NodeState,
 } from "@/lib/habitLogic";
@@ -164,6 +164,7 @@ interface AppCtx {
   /* 派生 */
   /* === v0.2：周期节点 / 连续 / 可视化 === */
   streakOf: (h: HabitLike) => number;
+  pausedOf: (h: HabitLike) => number;
   bestOf: (h: HabitLike) => number;
   nodesOf: (h: HabitLike, count?: number) => NodeView[];
   curveOf: (h: HabitLike, days?: number) => CurvePoint[];
@@ -409,6 +410,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   /* ===================== 派生算法 ===================== */
   /* === v0.2：周期节点 / 连续 / 可视化 === */
   const streakOf = useCallback((h: HabitLike) => currentStreak(h), []);
+  const pausedOf = useCallback((h: HabitLike) => streakPausedDays(h), []);
   const bestOf = useCallback((h: HabitLike) => bestStreakOf(h), []);
   const nodesOf = useCallback((h: HabitLike, count = 21) => recentNodes(h, count), []);
   const curveOf = useCallback((h: HabitLike, days = 60) => curveSeries(h, days), []);
@@ -455,7 +457,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     openShare, closeShare, openExport, closeExport,
     deleteHabitNow, archiveHabit, openWipe, closeWipe, doWipe,
     showToast, confettiNonce, toastMsg, burst,
-    streakOf, bestOf, nodesOf, curveOf, miniOf, nodeStateOf, nodeIdxOf, freqOf: freqOfH, canRestOf, canMakeupOf,
+    streakOf, bestOf, pausedOf, nodesOf, curveOf, miniOf, nodeStateOf, nodeIdxOf, freqOf: freqOfH, canRestOf, canMakeupOf,
     importedTotalAll,
     exportJson, importJson,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -472,7 +474,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     openShare, closeShare, openExport, closeExport,
     deleteHabitNow, archiveHabit, openWipe, closeWipe, doWipe,
     showToast, confettiNonce, toastMsg, burst,
-    streakOf, bestOf, nodesOf, curveOf, miniOf, nodeStateOf, nodeIdxOf, freqOfH, canRestOf, canMakeupOf,
+    streakOf, bestOf, pausedOf, nodesOf, curveOf, miniOf, nodeStateOf, nodeIdxOf, freqOfH, canRestOf, canMakeupOf,
     importedTotalAll, exportJson, importJson,
   ]);
 
