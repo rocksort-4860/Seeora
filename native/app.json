@@ -10,7 +10,7 @@
     "ios": {
       "appleTeamId": "ZFVWH8644U",
       "supportsTablet": false,
-      "buildNumber": "12",
+      "buildNumber": "13",
       "bundleIdentifier": "com.seeora.app",
       "entitlements": {
         "com.apple.security.application-groups": [
