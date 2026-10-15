@@ -26,7 +26,7 @@
       "extends": "diagnose",
       "env": {
         "EXPO_PUBLIC_DIAG": "1",
-        "EXPO_PUBLIC_DIAG_STAGE": "2.5"
+        "EXPO_PUBLIC_DIAG_STAGE": "0.5"
       }
     }
   },

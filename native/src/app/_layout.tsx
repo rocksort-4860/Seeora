@@ -99,6 +99,24 @@ export default function RootLayout() {
    *   · 裸渲染有内容 → 问题在 Tabs / react-native-screens（iOS 26 + Fabric 已知失灵族）
    *   · 裸渲染仍黑   → 问题在 Today 页自身或配色层（看 DiagProbe 的 THEME / VIEW 行）
    * 仅在 EXPO_PUBLIC_DIAG=1 且 DIAG_STAGE=2.5 时命中，生产构建永不进入。 */
+  /* ★ 二分第二刀（STAGE === 0.5）：在 2.5 的基础上只加 GestureHandlerRootView 一层。
+   * 2.5 已证实：裸 Today 正常。0.5 只多手势根视图这一个原生包装层：
+   *   · 0.5 黑屏 → 元凶是 GestureHandlerRootView（App 内无任何手势组件依赖它，删掉即修）
+   *   · 0.5 正常 → 手势层排除，元凶是 Slot/RNSScreen 导航层
+   * 仅在 EXPO_PUBLIC_DIAG=1 且 DIAG_STAGE=0.5 时命中，生产构建永不进入。 */
+  if (STAGE === 0.5) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <AppProvider>
+          <ThemedStatusBar />
+          <TodayScreen />
+          <DiagBadge stage={STAGE} />
+          {SURFACE && <DiagProbe />}
+        </AppProvider>
+      </GestureHandlerRootView>
+    );
+  }
+
   if (STAGE === 2.5) {
     return (
       <AppProvider>
