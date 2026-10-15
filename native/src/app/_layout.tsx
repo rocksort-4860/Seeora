@@ -20,6 +20,16 @@ import { DiagnosticErrorBoundary } from "@/components/DiagnosticErrorBoundary";
 import { DiagProbe } from "@/components/DiagProbe";
 import TodayScreen from "@/app/today";
 
+// ── iOS 26 + Fabric 黑屏修复（build 12-14 二分定案）──
+// 元凶：expo-router Slot 底层的 RNSScreen 原生组件在 iOS 26 新架构下不绘制
+// （JS 存活、触摸有效、画面全黑；裸渲染 Today 与手势根视图均正常）。
+// 处置：enableScreens(false) 令导航退化为普通 View 渲染，绕开失效原生组件。
+// 验证期用 env 门控（仅诊断构建携带）；确证有效后生产构建同样开启。
+if (process.env.EXPO_PUBLIC_DISABLE_SCREENS === "1") {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require("react-native-screens").enableScreens(false);
+}
+
 // ── 崩溃红线 #4：Linking 兜底 ──
 // 裸 scheme URL（seeora://... 无后续路径）在 expo-router 启动期会触发崩溃；中性化为 null
 const _orig = Linking.getInitialURL;
