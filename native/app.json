@@ -10,7 +10,7 @@
     "ios": {
       "appleTeamId": "ZFVWH8644U",
       "supportsTablet": false,
-      "buildNumber": "11",
+      "buildNumber": "12",
       "bundleIdentifier": "com.seeora.app",
       "entitlements": {
         "com.apple.security.application-groups": [
@@ -19,7 +19,6 @@
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "UIFileSharingEnabled": true,
         "LSApplicationQueriesSchemes": [
           "mailto"
         ]
