@@ -1,7 +1,7 @@
 {
   "name": "seeora",
   "version": "1.0.0",
-  "main": "expo-router/entry",
+  "main": "index.js",
   "packageManager": "pnpm@9.15.9",
   "scripts": {
     "start": "expo start",
