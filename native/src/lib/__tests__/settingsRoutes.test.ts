@@ -19,7 +19,8 @@ import path from "node:path";
    jest 的工作目录就是项目根（native/），所以从 cwd 反解最稳。 */
 const APP_DIR = path.resolve(process.cwd(), "src/app");
 
-/** 收集 src/app 下所有可路由文件 → 路由路径集合（如 "/settings/language"） */
+/** 收集 src/app 下所有可路由文件 → 路由路径集合（如 "/settings/about"）
+ *  expo-router 的分组目录（如 "(tabs)"）不进入 URL：递归时对 prefix 透明。 */
 function collectRoutes(dir: string, prefix = ""): Set<string> {
   const out = new Set<string>();
   let entries: fs.Dirent[];
@@ -32,7 +33,12 @@ function collectRoutes(dir: string, prefix = ""): Set<string> {
     if (e.name.startsWith("_") || e.name.startsWith(".")) continue; // _layout.tsx 不是路由
     const full = path.join(dir, e.name);
     if (e.isDirectory()) {
-      // 目录自身若含 index.tsx，它就映射为 prefix（这��必须登记，
+      // ★ 分组目录（(tabs) 等）：括号段不进 URL，原样向下递归（prefix 不变）
+      if (/^\(.*\)$/.test(e.name)) {
+        for (const r of collectRoutes(full, prefix)) out.add(r);
+        continue;
+      }
+      // 目录自身若含 index.tsx，它就映射为 prefix（这里必须登记，
       // 否则 `/settings` 及 `/settings/xxx` 会整段丢失 —— 实测栽过）。
       if (fs.existsSync(path.join(full, "index.tsx"))) out.add(prefix || "/");
       for (const r of collectRoutes(full, `${prefix}/${e.name}`)) out.add(r);

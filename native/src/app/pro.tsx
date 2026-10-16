@@ -15,7 +15,7 @@
  *      是两个独立入口，必须分别拦——它们都不受 backdropClosable 管辖。
  */
 import React, { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
 import { Check, Gem, X } from "lucide-react-native";
@@ -129,97 +129,94 @@ export default function ProScreen() {
   };
 
   return (
-    <View className="flex-1" style={{ backgroundColor: c.bg }}>
-      <View className="flex-row items-center justify-between px-5 pb-2" style={{ paddingTop: insets.top + 16 }}>
-        <Text className="text-[26px] font-extrabold tracking-tight" style={{ color: c.ink }}>{d.proTitle}</Text>
+    <View style={[styles.flex1, { backgroundColor: c.bg }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <Text style={[styles.title, { color: c.ink }]}>{d.proTitle}</Text>
         <Pressable
           onPress={closePro}
           hitSlop={8}
-          className="h-9 w-9 items-center justify-center rounded-full"
-          style={{ backgroundColor: c.surface2 }}
+          style={[styles.closeBtn, { backgroundColor: c.surface2 }]}
           accessibilityLabel={d.close}
         >
           <Icon as={X} color={c.ink2} size={18} />
         </Pressable>
       </View>
 
-      <ScrollView className="flex-1 px-5" contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.flex1, styles.scrollH]} contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {/* 来源说明：从「免费版已满 5 个习惯」引导进来的，先讲清原因再讲权益 */}
         {fromHabitLimit ? (
           <View
             accessibilityLiveRegion="polite"
-            className="mt-4 flex-row items-start gap-3 rounded-xl px-4 py-3"
-            style={{ backgroundColor: c.surface, borderWidth: 1, borderColor: c.accentInk }}
+            style={[styles.banner, { backgroundColor: c.surface, borderWidth: 1, borderColor: c.accentInk }]}
           >
             <Icon as={Gem} color={c.accent} size={18} />
-            <View className="flex-1">
-              <T className="text-[15px] font-semibold" style={{ color: c.ink }}>
+            <View style={styles.flex1}>
+              <T style={[styles.bannerTitle, { color: c.ink }]}>
                 {d.habitLimitTitle.replace("{n}", String(FREE_HABIT_LIMIT))}
               </T>
-              <T className="mt-1 text-sm leading-5" style={{ color: c.ink2 }}>{d.habitLimitBody}</T>
+              <T style={[styles.bannerBody, { color: c.ink2 }]}>{d.habitLimitBody}</T>
             </View>
           </View>
         ) : null}
 
-        <View className="mt-2 items-center py-4">
-          <View className="h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: c.accentInk }}>
+        <View style={styles.hero}>
+          <View style={[styles.heroIcon, { backgroundColor: c.accentInk }]}>
             <Icon as={Gem} color="#fff" size={30} />
           </View>
-          <Text className="mt-3 text-[24px] font-extrabold" style={{ color: c.ink }}>{d.proLifetime}</Text>
-          <T className="mt-1 text-sm" style={{ color: c.ink3 }}>{d.slogan}</T>
+          <Text style={[styles.heroTitle, { color: c.ink }]}>{d.proLifetime}</Text>
+          <T style={[styles.heroSub, { color: c.ink3 }]}>{d.slogan}</T>
         </View>
 
-        <View className="mt-3 gap-2.5">
+        <View style={styles.benefits}>
           {benefits.map((b, i) => (
-            <View key={i} className="flex-row items-center gap-3 rounded-xl px-4 py-3" style={{ backgroundColor: c.surface }}>
-              <View className="h-6 w-6 items-center justify-center rounded-full" style={{ backgroundColor: c.surface2 }}>
+            <View key={i} style={[styles.benefit, { backgroundColor: c.surface }]}>
+              <View style={styles.benefitIcon}>
                 <Icon as={Check} color={c.accent} size={15} />
               </View>
-              <T className="flex-1 text-[15px]" style={{ color: c.ink }}>{b}</T>
+              <T style={[styles.benefitText, { color: c.ink }]}>{b}</T>
             </View>
           ))}
         </View>
 
-        <T className="mt-4 text-sm leading-6" style={{ color: c.ink3 }}>{d.buyoutBody}</T>
+        <T style={[styles.body, { color: c.ink3 }]}>{d.buyoutBody}</T>
 
         {purchased ? (
-          <View className="mt-5 flex-row items-center justify-center gap-2 rounded-xl py-4" style={{ backgroundColor: c.surface }}>
+          <View style={[styles.ownedRow, { backgroundColor: c.surface }]}>
             <Icon as={Check} color={c.success} size={18} />
-            <T className="text-base font-semibold" style={{ color: c.success }}>{d.proOwned}</T>
+            <T style={[styles.ownedText, { color: c.success }]}>{d.proOwned}</T>
           </View>
         ) : (
           <>
             {trialActive && (
-              <View className="mt-5 flex-row items-center justify-center gap-2 rounded-xl py-3" style={{ backgroundColor: c.surface }}>
+              <View style={[styles.trialRow, { backgroundColor: c.surface }]}>
                 <Icon as={Gem} color={c.accent} size={16} />
-                <T className="text-sm font-medium" style={{ color: c.ink }}>{d.proTrialLeft.replace("{n}", String(trialDaysLeft))}</T>
+                <T style={[styles.trialText, { color: c.ink }]}>{d.proTrialLeft.replace("{n}", String(trialDaysLeft))}</T>
               </View>
             )}
             {/* 试用已结束（≠ 从未领取）：如实说明，紧接买断引导 */}
             {trialEnded && (
-              <View className="mt-5 flex-row items-center justify-center gap-2 rounded-xl py-3" style={{ backgroundColor: c.surface }}>
+              <View style={[styles.trialRow, { backgroundColor: c.surface }]}>
                 <Icon as={Gem} color={c.ink3} size={16} />
-                <T className="text-sm font-medium" style={{ color: c.ink2 }}>{d.proTrialOver}</T>
+                <T style={[styles.trialText, { color: c.ink2 }]}>{d.proTrialOver}</T>
               </View>
             )}
             <Button
-              className={trialActive || trialEnded ? "mt-3 h-14" : "mt-5 h-14"}
-              style={{ backgroundColor: c.accentInk }}
+              style={[styles.buyBtn, { marginTop: trialActive || trialEnded ? 12 : 20, backgroundColor: c.accentInk }]}
               onPress={openPay}
             >
-              <Text className="text-base font-bold" style={{ color: "#fff" }}>{d.proBuy}</Text>
+              <Text style={styles.buyBtnText}>{d.proBuy}</Text>
             </Button>
             {/* ★ 试用改为手动领取：只有「从未领取」才出现这个入口。
                 用 outline 次要样式 —— 主 CTA 仍是买断（本页是买断页），
                 同时给暂时不想付费的用户一条完整功能的低门槛路径。 */}
             {trialFresh && (
               <>
-                <Button variant="outline" className="mt-2 h-14" onPress={startTrial}>
-                  <Text className="text-base font-medium" style={{ color: c.ink }}>{d.proTrialStart}</Text>
+                <Button variant="outline" style={[styles.buyBtn, { marginTop: 8 }]} onPress={startTrial}>
+                  <Text style={[styles.trialStartText, { color: c.ink }]}>{d.proTrialStart}</Text>
                 </Button>
                 {/* ★ 2026-10-07 合规澄清：说明「体验 ≠ 订阅」——到期不会自动扣费，
                     想继续用才一次性买断（价格由后台商品提供，文案不硬编码）。 */}
-                <T className="mt-2 text-center text-xs leading-5" style={{ color: c.ink3 }}>{d.proTrialNote}</T>
+                <T style={[styles.trialNote, { color: c.ink3 }]}>{d.proTrialNote}</T>
               </>
             )}
           </>
@@ -247,14 +244,13 @@ export default function ProScreen() {
             没有滚动容器时超出的部分会被推出屏幕外 —— 用户连买断按钮都看不到。
             SheetHeader 留在滚动区外，✕ 常驻可见（仅在支付/恢复进行中置灰，见 closable）。 */}
         <ScrollView showsVerticalScrollIndicator={false} style={{ flexShrink: 1 }}>
-          <View className="items-center py-3" style={{ backgroundColor: c.accentWash, borderRadius: 16, marginBottom: 12 }}>
+          <View style={[styles.priceBox, { backgroundColor: c.accentWash, borderRadius: 16, marginBottom: 12 }]}>
             {/* 价格是「文字」不是「块底色」：深色模式必须用 accentText（亮绿），
                 用 accentInk（深绿）压在近黑背景上会掉到 3.2:1 不达 AA。
                 三件套必须齐全（台账 D2）：numberOfLines + adjustsFontSizeToFit + minimumFontScale ——
                 少了 minimumFontScale，后台改价后长文本只会被裁掉（用户看不到完整价格）。 */}
             <Text
-              className="text-[40px] font-extrabold tabular-nums"
-              style={{ color: c.accentText }}
+              style={[styles.price, { color: c.accentText }]}
               numberOfLines={1}
               adjustsFontSizeToFit
               minimumFontScale={0.5}
@@ -265,7 +261,7 @@ export default function ProScreen() {
               刻意**不显示价格、也不允许提交**，但必须让用户知道发生了什么、能做什么。
               文案用的是 i18n 里本就预留、此前从未被引用的 payUnavailable / proRetry。 */}
           {priceUnavailable ? (
-            <View className="flex-row items-center justify-center gap-2" style={{ marginBottom: 10 }}>
+            <View style={styles.unavailRow}>
               <Text
                 accessibilityLiveRegion="polite"
                 style={{ color: c.danger, fontSize: 13, lineHeight: 20, flexShrink: 1 }}
@@ -284,13 +280,13 @@ export default function ProScreen() {
           ) : null}
 
           {/* 支付方式：仅 App Store */}
-          <View className="flex-row items-center gap-2 rounded-xl px-3 py-3" style={{ borderWidth: 1, borderColor: c.accentInk, marginBottom: 8 }}>
+          <View style={[styles.payMethod, { borderWidth: 1, borderColor: c.accentInk, marginBottom: 8 }]}>
             <Text style={{ fontSize: 18 }}>🍎</Text>
-            <T className="flex-1 text-sm font-medium" style={{ color: c.ink }}>{d.payStore}</T>
+            <T style={[styles.payStore, { color: c.ink }]}>{d.payStore}</T>
             <Text style={{ color: c.accentText, fontWeight: "700" }}>✓</Text>
           </View>
 
-          <T className="text-xs leading-5" style={{ color: c.ink4 }}>{d.buyoutBody}</T>
+          <T style={[styles.sheetBody, { color: c.ink4 }]}>{d.buyoutBody}</T>
 
           {/* 支付失败原因（内联可见，不依赖被弹层盖住的全局 toast） */}
           {payErr ? (
@@ -303,8 +299,7 @@ export default function ProScreen() {
           ) : null}
 
           <Button
-            className="mt-4 h-14 w-full"
-            style={{ backgroundColor: c.accentInk, opacity: payBlocked ? 0.7 : 1 }}
+            style={[styles.sheetBuyBtn, { backgroundColor: c.accentInk, opacity: payBlocked ? 0.7 : 1 }]}
             /* ★ 第二层保护：价格还没取到时不可提交订单（用户不该在没看到价格时下单）。
              *   这不是竞态修复的替代 —— 竞态已在 iap.ts 用 Promise 缓存根治（见该文件）。
              *   ★ 关键前提：`ready` 必须**保证会归位**（iap.ts 已改为无条件置 true，
@@ -317,7 +312,7 @@ export default function ProScreen() {
           >
             {/* ★ 买断中必须换文案：点下到 StoreKit 面板弹出之间有一段空档，
                 只把按钮变淡不换字，用户看到的就是「点了没反应」 */}
-            <Text className="text-base font-bold" style={{ color: "#fff" }}>
+            <Text style={styles.buyBtnText}>
               {paying ? d.payProcessing : d.proBuy}
             </Text>
           </Button>
@@ -337,12 +332,11 @@ export default function ProScreen() {
 
           <Button
             variant="outline"
-            className="mt-2 h-11 w-full"
-            style={{ opacity: busy ? 0.45 : 1 }}
+            style={[styles.sheetRestoreBtn, { opacity: busy ? 0.45 : 1 }]}
             disabled={busy}
             onPress={() => { void onRestore(); }}
           >
-            <Text className="text-base font-medium" style={{ color: c.ink }}>
+            <Text style={[styles.restoreText, { color: c.ink }]}>
               {restoring ? d.payRestoring : d.proRestore}
             </Text>
           </Button>
@@ -351,3 +345,68 @@ export default function ProScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  flex1: { flex: 1 },
+  scrollH: { paddingHorizontal: 20 },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+  },
+  title: { fontSize: 26, fontWeight: "800", letterSpacing: -0.5 },
+  closeBtn: { height: 36, width: 36, alignItems: "center", justifyContent: "center", borderRadius: 9999 },
+  banner: {
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  bannerTitle: { fontSize: 15, fontWeight: "600" },
+  bannerBody: { marginTop: 4, fontSize: 14, lineHeight: 20 },
+  hero: { marginTop: 8, alignItems: "center", paddingVertical: 16 },
+  heroIcon: { height: 64, width: 64, alignItems: "center", justifyContent: "center", borderRadius: 16 },
+  heroTitle: { marginTop: 12, fontSize: 24, fontWeight: "800" },
+  heroSub: { marginTop: 4, fontSize: 14 },
+  benefits: { marginTop: 12, gap: 10 },
+  benefit: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  benefitIcon: { height: 24, width: 24, alignItems: "center", justifyContent: "center", borderRadius: 9999 },
+  benefitText: { flex: 1, fontSize: 15 },
+  body: { marginTop: 16, fontSize: 14, lineHeight: 24 },
+  ownedRow: { marginTop: 20, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 12, paddingVertical: 16 },
+  ownedText: { fontSize: 16, fontWeight: "600" },
+  trialRow: { marginTop: 20, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 12, paddingVertical: 12 },
+  trialText: { fontSize: 14, fontWeight: "500" },
+  buyBtn: { minHeight: 56 },
+  buyBtnText: { fontSize: 16, fontWeight: "700", color: "#FFFFFF" },
+  trialStartText: { fontSize: 16, fontWeight: "500" },
+  trialNote: { marginTop: 8, textAlign: "center", fontSize: 12, lineHeight: 20 },
+  priceBox: { alignItems: "center", paddingVertical: 12 },
+  price: { fontSize: 40, fontWeight: "800", fontVariant: ["tabular-nums"] },
+  unavailRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  payMethod: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  payStore: { flex: 1, fontSize: 14, fontWeight: "500" },
+  sheetBody: { fontSize: 12, lineHeight: 20 },
+  sheetBuyBtn: { marginTop: 16, minHeight: 56, width: "100%" },
+  sheetRestoreBtn: { marginTop: 8, minHeight: 44, width: "100%" },
+  restoreText: { fontSize: 16, fontWeight: "500" },
+});

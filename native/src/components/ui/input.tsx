@@ -1,29 +1,41 @@
-import { cn } from '@/lib/utils';
-import { Platform, TextInput } from 'react-native';
+/**
+ * ui/input（重写版）：StyleSheet 输入框。
+ * 原 shadcn 口径：h-10、rounded-md、border-input、text-base；占位符 muted-foreground/50。
+ */
+import * as React from "react";
+import { StyleSheet, TextInput } from "react-native";
+import { useApp } from "@/store/app";
 
-function Input({ className, ...props }: React.ComponentProps<typeof TextInput>) {
+type InputProps = React.ComponentProps<typeof TextInput>;
+
+function Input({ style, editable, placeholderTextColor, ...props }: InputProps) {
+  const { colors: c } = useApp();
   return (
     <TextInput
-      className={cn(
-        'dark:bg-input/30 border-input bg-background text-foreground flex h-10 w-full min-w-0 flex-row items-center rounded-md border px-3 py-1 text-base leading-5 shadow-sm shadow-black/5 sm:h-9',
-        props.editable === false &&
-          cn(
-            'opacity-50',
-            Platform.select({ web: 'disabled:pointer-events-none disabled:cursor-not-allowed' })
-          ),
-        Platform.select({
-          web: cn(
-            'placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground outline-none transition-[color,box-shadow] md:text-sm',
-            'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-            'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive'
-          ),
-          native: 'placeholder:text-muted-foreground/50',
-        }),
-        className
-      )}
+      editable={editable}
+      placeholderTextColor={placeholderTextColor ?? "rgba(122,122,122,0.5)"}
+      style={[
+        styles.base,
+        { color: c.ink, backgroundColor: c.bg, borderColor: c.line },
+        editable === false ? styles.disabled : null,
+        style,
+      ]}
       {...props}
     />
   );
 }
 
 export { Input };
+
+const styles = StyleSheet.create({
+  base: {
+    borderWidth: 1,
+    borderRadius: 6,
+    minHeight: 40,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    fontSize: 16,
+    lineHeight: 20,
+  },
+  disabled: { opacity: 0.5 },
+});

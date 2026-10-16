@@ -1,66 +1,43 @@
-import { TextClassContext } from '@/components/ui/text';
-import { cn } from '@/lib/utils';
-import * as Slot from '@rn-primitives/slot';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { Platform, View } from 'react-native';
+/**
+ * ui/badge（重写版）：StyleSheet 胶囊小标。
+ * 原 shadcn 令牌映射：default→c.accent、secondary→c.surface2、destructive→c.rest、
+ * outline→透明底 + c.line 描边；调用处 style 覆盖优先生效（如 HonorRoom 的 accentWash）。
+ */
+import * as React from "react";
+import { StyleSheet, View } from "react-native";
+import { useApp } from "@/store/app";
 
-const badgeVariants = cva(
-  cn(
-    'border-border group shrink-0 flex-row items-center justify-center gap-1 overflow-hidden rounded-full border px-2 py-0.5',
-    Platform.select({
-      web: 'focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-fit whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] [&>svg]:pointer-events-none [&>svg]:size-3',
-    })
-  ),
-  {
-    variants: {
-      variant: {
-        default: cn(
-          'bg-primary border-transparent',
-          Platform.select({ web: '[a&]:hover:bg-primary/90' })
-        ),
-        secondary: cn(
-          'bg-secondary border-transparent',
-          Platform.select({ web: '[a&]:hover:bg-secondary/90' })
-        ),
-        destructive: cn(
-          'bg-destructive border-transparent',
-          Platform.select({ web: '[a&]:hover:bg-destructive/90' })
-        ),
-        outline: Platform.select({ web: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground' }),
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
-  }
-);
-
-const badgeTextVariants = cva('text-xs font-medium', {
-  variants: {
-    variant: {
-      default: 'text-primary-foreground',
-      secondary: 'text-secondary-foreground',
-      destructive: 'text-white',
-      outline: 'text-foreground',
-    },
-  },
-  defaultVariants: {
-    variant: 'default',
-  },
-});
+type Variant = "default" | "secondary" | "destructive" | "outline";
 
 type BadgeProps = React.ComponentProps<typeof View> & {
-    asChild?: boolean;
-  } & VariantProps<typeof badgeVariants>;
+  variant?: Variant;
+};
 
-function Badge({ className, variant, asChild, ...props }: BadgeProps) {
-  const Component = asChild ? Slot.View : View;
-  return (
-    <TextClassContext.Provider value={badgeTextVariants({ variant })}>
-      <Component className={cn(badgeVariants({ variant }), className)} {...props} />
-    </TextClassContext.Provider>
-  );
+function Badge({ style, variant = "default", ...props }: BadgeProps) {
+  const { colors: c } = useApp();
+  const variantStyle =
+    variant === "secondary"
+      ? { backgroundColor: c.surface2 }
+      : variant === "destructive"
+        ? { backgroundColor: c.rest }
+        : variant === "outline"
+          ? { backgroundColor: "transparent", borderWidth: 1, borderColor: c.line }
+          : { backgroundColor: c.accent };
+  return <View style={[styles.base, variantStyle, style]} {...props} />;
 }
 
-export { Badge, badgeTextVariants, badgeVariants };
-export type { BadgeProps };
+export { Badge };
+
+const styles = StyleSheet.create({
+  base: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    borderRadius: 9999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    overflow: "hidden",
+    flexShrink: 0,
+  },
+});

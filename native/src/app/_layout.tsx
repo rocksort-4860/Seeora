@@ -2,8 +2,8 @@
  * 根布局（Seeora）：纯本地 App，无登录
  * 全局挂载：GestureHandler > AppProvider > ThemedStatusBar > 路由(Slot) > Toast/Confetti/Modal/Portal
  * 崩溃红线：Linking 兜底 + iap 懒加载 + 启动时绝不初始化原生模块
+ * （2026-10-16 重写：移除 global.css/NativeWind 引入；Tabs 移入 (tabs) 分组，样式全部 StyleSheet。）
  */
-import "../global.css";
 import React from "react";
 import { View, Text } from "react-native";
 import { Linking } from "react-native";
@@ -18,7 +18,7 @@ import { ModalHost } from "@/components/ModalHost";
 import { TurboModuleErrorSurface } from "@/components/TurboModuleErrorSurface";
 import { DiagnosticErrorBoundary } from "@/components/DiagnosticErrorBoundary";
 import { DiagProbe } from "@/components/DiagProbe";
-import TodayScreen from "@/app/today";
+import TodayScreen from "@/app/(tabs)/today";
 
 // ── iOS 26 + Fabric 黑屏修复（build 12-14 二分定案）──
 // 元凶：expo-router Slot 底层的 RNSScreen 原生组件在 iOS 26 新架构下不绘制

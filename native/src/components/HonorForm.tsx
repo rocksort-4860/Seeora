@@ -13,7 +13,7 @@
  *   表单内容来自 store 的 honorForm（关闭时不清空），退场期间不会闪空。
  */
 import React from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useApp } from "@/store/app";
 import { Sheet, SheetHeader } from "@/components/Sheet";
 import { Input } from "@/components/ui/input";
@@ -40,7 +40,7 @@ export function HonorForm() {
       />
 
       {/* flexShrink:1 —— 内容超过弹层 88% 上限时由本容器滚动，而不是把按钮顶出屏幕 */}
-      <View className="gap-3" style={{ flexShrink: 1 }}>
+      <View style={[styles.fields, { flexShrink: 1 }]}>
         <Labeled label={d.fHonorTitle} colors={c}>
           <Input value={honorForm.title} onChangeText={(t) => setHonorForm({ title: t })} placeholder={d.fNamePh} maxLength={40} />
         </Labeled>
@@ -61,12 +61,12 @@ export function HonorForm() {
       {/* 横排：取消在左、保存在右（Apple HIG 双按钮确认框的标准排布）。
           原 DialogFooter 在原生端是 column-reverse（从 DOM 反着堆），
           属于工具类在移动端没生效的产物；此处按它 flex-1 的原始意图改为横排。 */}
-      <View className="mt-4 flex-row gap-2">
-        <Button variant="outline" className="flex-1" onPress={closeHonorForm}>
-          <Text className="text-base font-medium" style={{ color: c.ink }}>{d.cancel}</Text>
+      <View style={styles.footerRow}>
+        <Button variant="outline" style={styles.flex1} onPress={closeHonorForm}>
+          <Text style={[styles.btnMd, { color: c.ink }]}>{d.cancel}</Text>
         </Button>
-        <Button className="flex-1" style={{ backgroundColor: c.accentInk }} onPress={saveHonor}>
-          <Text className="text-base font-bold" style={{ color: "#fff" }}>{d.save}</Text>
+        <Button style={[styles.flex1, { backgroundColor: c.accentInk }]} onPress={saveHonor}>
+          <Text style={styles.btnBoldWhite}>{d.save}</Text>
         </Button>
       </View>
     </Sheet>
@@ -77,8 +77,17 @@ function Labeled({ label, children, colors: c }: { label: string; children: Reac
   return (
     <View>
       {/* 标签字色走 c.ink2：原先硬编码 #5B5E68，深色模式下不可读 */}
-      <T className="mb-1.5 text-sm font-medium" style={{ color: c.ink2 }}>{label}</T>
+      <T style={[styles.fieldLabel, { color: c.ink2 }]}>{label}</T>
       {children}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  fields: { gap: 12 },
+  fieldLabel: { marginBottom: 6, fontSize: 14, fontWeight: "500" },
+  footerRow: { marginTop: 16, flexDirection: "row", gap: 8 },
+  flex1: { flex: 1 },
+  btnMd: { fontSize: 16, fontWeight: "500" },
+  btnBoldWhite: { fontSize: 16, fontWeight: "700", color: "#FFFFFF" },
+});

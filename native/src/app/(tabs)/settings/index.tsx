@@ -13,7 +13,7 @@
  */
 import React, { useState } from "react";
 /* ★ 这里**不能**从 react-native 导入 Switch —— RN 自带的那个没有 checked/onCheckedChange，
-   会覆盖掉项目的 rn-primitives 版并导致 tsc 报错。项目的开关在 @/components/ui/switch。 */
+   会覆盖掉项目的开关实现并导致 tsc 报错。项目的开关在 @/components/ui/switch。 */
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -223,7 +223,7 @@ export default function SettingsScreen() {
         </Group>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 22, marginTop: -14 }}>
           <Icon as={Shield} color={c.success} size={14} />
-          <T className="text-xs" style={{ color: c.ink4 }}>{d.localPromise}</T>
+          <T style={{ fontSize: 12, color: c.ink4 }}>{d.localPromise}</T>
         </View>
 
         {/* ── 关于 ── */}
@@ -235,8 +235,7 @@ export default function SettingsScreen() {
         </Group>
         {privacyOpen ? (
           <T
-            className="text-sm leading-6"
-            style={{ color: c.ink3, paddingHorizontal: 22, marginTop: -12, marginBottom: 22 }}
+            style={{ fontSize: 14, lineHeight: 24, color: c.ink3, paddingHorizontal: 22, marginTop: -12, marginBottom: 22 }}
             maxFontSizeMultiplier={1.5}
           >
             {d.privacyText}
@@ -317,8 +316,8 @@ function ExportRow({ label, icon, onPress, colors: c, last }: {
 
 /**
  * 「确认抹掉」按钮 —— 单独抽出只为用 useState 跟踪按压态。
- * ★ 不要写 `style={({pressed}) => …}`：NativeWind v4 在 Android 上会静默丢弃
- *   函数式 style（iOS 正常）→ 按钮在 Android 上完全不可见。
+ * ★ 不要写 `style={({pressed}) => …}`：函数式 style 在部分平台上不可靠，
+ *   用 onPressIn/Out 自行记录按压态（iOS/Android 表现一致）。
  */
 function WipeConfirmButton({ label, onPress, colors: c }: {
   label: string;

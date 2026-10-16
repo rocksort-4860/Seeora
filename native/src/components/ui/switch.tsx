@@ -1,35 +1,29 @@
-import { cn } from '@/lib/utils';
-import * as SwitchPrimitives from '@rn-primitives/switch';
-import { Platform } from 'react-native';
+/**
+ * ui/switch（重写版）：RN 原生 Switch 包装（替换 @rn-primitives/switch）。
+ * 对外接口保持 checked / onCheckedChange 不变，调用点零改动。
+ * 颜色语义：开=品牌强调色，关=c.line（原 bg-input 令牌）。
+ */
+import * as React from "react";
+import { Switch as RNSwitch } from "react-native";
+import { useApp } from "@/store/app";
 
-function Switch({
-  className,
-  ...props
-}: React.ComponentProps<typeof SwitchPrimitives.Root>) {
+type SwitchProps = Omit<React.ComponentProps<typeof RNSwitch>, "value" | "onValueChange"> & {
+  checked?: boolean;
+  onCheckedChange?: (v: boolean) => void;
+};
+
+function Switch({ checked = false, onCheckedChange, disabled, ...props }: SwitchProps) {
+  const { colors: c } = useApp();
   return (
-    <SwitchPrimitives.Root
-      className={cn(
-        'flex h-[1.15rem] w-8 shrink-0 flex-row items-center rounded-full border border-transparent shadow-sm shadow-black/5',
-        Platform.select({
-          web: 'focus-visible:border-ring focus-visible:ring-ring/50 peer inline-flex outline-none transition-all focus-visible:ring-[3px] disabled:cursor-not-allowed',
-        }),
-        props.checked ? 'bg-primary' : 'bg-input dark:bg-input/80',
-        props.disabled && 'opacity-50',
-        className
-      )}
-      {...props}>
-      <SwitchPrimitives.Thumb
-        className={cn(
-          'bg-background size-4 rounded-full transition-transform',
-          Platform.select({
-            web: 'pointer-events-none block ring-0',
-          }),
-          props.checked
-            ? 'dark:bg-primary-foreground translate-x-3.5'
-            : 'dark:bg-foreground translate-x-0'
-        )}
-      />
-    </SwitchPrimitives.Root>
+    <RNSwitch
+      value={checked}
+      onValueChange={onCheckedChange}
+      disabled={disabled}
+      trackColor={{ false: c.line, true: c.accent }}
+      thumbColor="#FFFFFF"
+      ios_backgroundColor={c.line}
+      {...props}
+    />
   );
 }
 

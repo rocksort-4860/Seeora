@@ -13,11 +13,11 @@
  *   这里给出三重可见信号：整行降透明度 + 名称旁「已冻结」小标 + 打卡钮换成锁图标。
  *
  * ★ Pressable 的 style **必须传静态对象**，不能用 `style={({pressed}) => …}` 函数式：
- *   NativeWind v4 在 Android 上会**静默丢弃**函数式 style → 组件直接不可见。
- *   按压反馈改用 onPressIn/onPressOut + useState 记录（iOS 上等价）。
+ *   按压反馈统一用 onPressIn/onPressOut + useState 记录（iOS/Android 表现一致）。
+ *   （2026-10-16 重写：className 已全部替换为 StyleSheet，交互与文案保持逐字不变。）
  */
 import React, { useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Lock } from "lucide-react-native";
 import { useApp } from "@/store/app";
@@ -54,65 +54,67 @@ export function HabitRow({ habit }: { habit: Habit }) {
       onPressOut={() => setPressed(false)}
       accessibilityRole="button"
       accessibilityLabel={`${lang === "zh" ? habit.nameZh : habit.name}${frozen ? ` · ${d.habitFrozen}` : ""}`}
-      className="mt-3 rounded-lg border px-4 py-3.5"
-      style={{
-        backgroundColor: c.surface,
-        borderColor: frozen ? c.line2 : c.line,
-        opacity: frozen ? 0.66 : 1,
-        transform: [{ scale: pressed ? pressScale : 1 }],
-      }}
+      style={[
+        styles.row,
+        {
+          backgroundColor: c.surface,
+          borderColor: frozen ? c.line2 : c.line,
+          opacity: frozen ? 0.66 : 1,
+          transform: [{ scale: pressed ? pressScale : 1 }],
+        },
+      ]}
     >
-      <View className="flex-row items-center gap-3">
+      <View style={styles.inner}>
         {/* 图标底：规范面 pearl，不用强调色铺底，避免蓝色泛滥 */}
-        <View className="h-9 w-9 items-center justify-center rounded-full" style={{ backgroundColor: c.surface2 }}>
+        <View style={[styles.emojiWrap, { backgroundColor: c.surface2 }]}>
           <Text style={{ fontSize: 17 }}>{habit.emoji}</Text>
         </View>
 
         {/* 名称与连续 */}
-        <View className="flex-1">
-          <View className="flex-row items-baseline gap-2">
-            <Text className="text-[17px] font-semibold" style={{ color: c.ink }}>
+        <View style={styles.flex1}>
+          <View style={styles.nameRow}>
+            <Text style={[styles.nameText, { color: c.ink }]}>
               {lang === "zh" ? habit.nameZh : habit.name}
             </Text>
             {frozen ? (
-              <View className="rounded-pill px-1.5 py-0.5" style={{ backgroundColor: c.surface2 }}>
-                <Text className="text-[10px] font-medium" style={{ color: c.inkGroup }}>{d.habitFrozen}</Text>
+              <View style={[styles.frozenPill, { backgroundColor: c.surface2 }]}>
+                <Text style={[styles.frozenText, { color: c.inkGroup }]}>{d.habitFrozen}</Text>
               </View>
             ) : done ? (
-              <Text className="text-xs" style={{ color: c.done }}>{lang === "zh" ? "今日已完成" : "Done today"}</Text>
+              <Text style={[styles.doneTag, { color: c.done }]}>{lang === "zh" ? "今日已完成" : "Done today"}</Text>
             ) : habit.rests?.[today] ? (
-              <Text className="text-xs" style={{ color: c.rest }}>{d.restToday}</Text>
+              <Text style={[styles.doneTag, { color: c.rest }]}>{d.restToday}</Text>
             ) : null}
           </View>
-          <View className="mt-0.5 flex-row gap-3">
-            <Text className="text-[14px]" style={{ color: c.ink4 }}>
+          <View style={styles.streakRow}>
+            <Text style={[styles.streakText, { color: c.ink4 }]}>
               {d.curStreak} · {streak}
             </Text>
-            <Text className="text-[14px]" style={{ color: c.ink4 }}>
+            <Text style={[styles.streakText, { color: c.ink4 }]}>
               {d.bestStreak} · {best}
             </Text>
           </View>
           {/* 方案 A：仅暂停状态展示浅灰辅助小字；无警示色、无催促词 */}
           {paused >= 1 ? (
-            <Text className="mt-1 text-[11px]" style={{ color: c.ink4 }}>{d.streakPausedHint}</Text>
+            <Text style={[styles.pausedHint, { color: c.ink4 }]}>{d.streakPausedHint}</Text>
           ) : null}
         </View>
 
         {/* 最近 7 天迷你点条 */}
-        <View className="items-center">
-          <View className="h-4 w-[62px] justify-center">
+        <View style={styles.center}>
+          <View style={styles.weekBar}>
             <View style={{ position: "absolute", left: 4, right: 4, height: 1, backgroundColor: c.blank }} />
-            <View className="flex-row items-center justify-between">
+            <View style={styles.weekDots}>
               {week.map((day) => {
                 const filled = day.done || day.rest;
                 const color = day.done ? c.done : day.rest ? c.rest : c.blank;
                 return (
                   <View
                     key={day.date}
-                    className="rounded-full"
                     style={{
                       width: day.isToday ? 9 : 7,
                       height: day.isToday ? 9 : 7,
+                      borderRadius: 9999,
                       backgroundColor: filled ? color : "transparent",
                       borderWidth: filled ? 0 : 1,
                       borderColor: c.blank,
@@ -123,7 +125,7 @@ export function HabitRow({ habit }: { habit: Habit }) {
               })}
             </View>
           </View>
-          <Text className="mt-1 text-[10px]" style={{ color: c.ink4 }}>{fmt(d.nodeDays, { n: 1 })}</Text>
+          <Text style={[styles.weekLabel, { color: c.ink4 }]}>{fmt(d.nodeDays, { n: 1 })}</Text>
         </View>
 
         {/* 当日打卡圆钮（冻结 → 换成锁，点它照样走 blockIfFrozen 的升级引导） */}
@@ -136,22 +138,46 @@ export function HabitRow({ habit }: { habit: Habit }) {
             const a = e.nativeEvent.layout;
             layout.current = { x: a.x, y: a.y, w: a.width, h: a.height };
           }}
-          className="h-11 w-11 items-center justify-center rounded-full"
-          style={{
-            backgroundColor: frozen ? c.surface2 : done ? c.done : "transparent",
-            borderWidth: 2,
-            borderColor: frozen ? "transparent" : done ? c.done : c.blank,
-          }}
+          style={[
+            styles.checkBtn,
+            {
+              backgroundColor: frozen ? c.surface2 : done ? c.done : "transparent",
+              borderWidth: 2,
+              borderColor: frozen ? "transparent" : done ? c.done : c.blank,
+            },
+          ]}
         >
           {frozen ? (
             <Icon as={Lock} color={c.inkGroup} size={16} />
           ) : done ? (
-            <Text className="text-lg font-bold" style={{ color: c.surface }}>✓</Text>
+            <Text style={styles.checkMark}>✓</Text>
           ) : (
-            <View className="h-3 w-3 rounded-full" style={{ backgroundColor: c.blank }} />
+            <View style={[styles.checkDot, { backgroundColor: c.blank }]} />
           )}
         </Pressable>
       </View>
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  row: { marginTop: 12, borderRadius: 8, borderWidth: 1, paddingHorizontal: 16, paddingVertical: 14 },
+  inner: { flexDirection: "row", alignItems: "center", gap: 12 },
+  emojiWrap: { height: 36, width: 36, alignItems: "center", justifyContent: "center", borderRadius: 9999 },
+  flex1: { flex: 1 },
+  nameRow: { flexDirection: "row", alignItems: "baseline", gap: 8 },
+  nameText: { fontSize: 17, fontWeight: "600" },
+  frozenPill: { borderRadius: 9999, paddingHorizontal: 6, paddingVertical: 2 },
+  frozenText: { fontSize: 10, fontWeight: "500" },
+  doneTag: { fontSize: 12 },
+  streakRow: { marginTop: 2, flexDirection: "row", gap: 12 },
+  streakText: { fontSize: 14 },
+  pausedHint: { marginTop: 4, fontSize: 11 },
+  center: { alignItems: "center" },
+  weekBar: { height: 16, width: 62, justifyContent: "center" },
+  weekDots: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  weekLabel: { marginTop: 4, fontSize: 10 },
+  checkBtn: { height: 44, width: 44, alignItems: "center", justifyContent: "center", borderRadius: 9999 },
+  checkMark: { fontSize: 18, fontWeight: "700", color: "#FFFFFF" },
+  checkDot: { height: 12, width: 12, borderRadius: 9999 },
+});

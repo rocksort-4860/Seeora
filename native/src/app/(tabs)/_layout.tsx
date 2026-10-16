@@ -1,9 +1,9 @@
 /**
- * Tabs 容器：History（左）/ Today（中，默认）/ Settings（右）
+ * Tabs 容器（(tabs) 分组，标准 expo-router 结构）：History（左）/ Today（中，默认）/ Settings（右）
  */
 import "react-native-gesture-handler";
 import { Tabs } from "expo-router";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Icon } from "@/components/ui/icon";
 import { CalendarDays, History, Settings } from "lucide-react-native";
 import { useApp } from "@/store/app";
@@ -11,7 +11,7 @@ import { useApp } from "@/store/app";
 export default function TabsLayout() {
   const { colors, t } = useApp();
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.flex1}>
       <Tabs
         initialRouteName="today"
         screenOptions={{
@@ -38,3 +38,7 @@ export default function TabsLayout() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  flex1: { flex: 1 },
+});

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Share 分享成就卡页（Seeora）：modal 路由 /share
  *  - 单个习惯成就卡 /share?habit=<id>：螺旋圆环 + 横向累计曲线 + 三宫格数据 + 备选文案 + 底部签名
  *  - 全站成就总卡 /share（无 habit 参数）：累计天数
@@ -22,7 +22,7 @@
  *      `writeAsStringAsync` 是**运行期直接 throw 的弃用壳**（会静默变成「保存失败」）。
  */
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Platform, Pressable, ScrollView, Share, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
 import Svg from "react-native-svg";
 import { useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -210,27 +210,26 @@ export default function ShareScreen() {
   const shareLabel = busy === "share" ? d.sharePreparing : d.shareShare;
 
   return (
-    <View className="flex-1" style={{ backgroundColor: c.bg }}>
-      <View className="flex-row items-center justify-between px-5 pb-2" style={{ paddingTop: insets.top + 16 }}>
-        <Text className="text-[24px] font-semibold" style={{ color: c.ink }}>
+    <View style={[styles.flex1, { backgroundColor: c.bg }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <Text style={[styles.title, { color: c.ink }]}>
           {d.shareTitle}
         </Text>
         <Pressable
           onPress={closeShare}
           hitSlop={8}
-          className="h-9 w-9 items-center justify-center rounded-full"
-          style={{ backgroundColor: c.surface2 }}
+          style={[styles.closeBtn, { backgroundColor: c.surface2 }]}
           accessibilityLabel={d.close}
         >
           <Icon as={X} color={c.ink2} size={18} />
         </Pressable>
       </View>
 
-      <ScrollView className="flex-1 px-5" contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.flex1, styles.scrollH]} contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {/* 成就卡：白面 + 全系统唯一投影（规范里“落在台面上的产品”）。
             外层负责投影、内层负责裁圆角 —— 同一个 View 同时设 overflow:hidden 会把投影一起裁掉。
             ★ 卡片是 SVG，导出与预览共用同一棵树，所见即所得。 */}
-        <View className="mt-2" style={{ ...productShadow, borderRadius: 24, backgroundColor: c.surface }}>
+        <View style={[styles.cardOuter, { ...productShadow, borderRadius: 24, backgroundColor: c.surface }]}>
           <View style={{ borderRadius: 24, overflow: "hidden", alignItems: "center" }}>
             <AchievementCard
               lang={lang}
@@ -251,9 +250,9 @@ export default function ShareScreen() {
         </View>
 
         {/* 编辑 */}
-        <View className="mt-4 gap-3">
-          <View className="rounded-xl px-4 py-3" style={{ backgroundColor: c.surface }}>
-            <T className="mb-1 text-[12px] uppercase" style={{ color: c.ink4 }}>
+        <View style={styles.editor}>
+          <View style={[styles.editorCard, { backgroundColor: c.surface }]}>
+            <T style={[styles.editorLabel, { marginBottom: 4, color: c.ink4 }]}>
               {d.shareMainTitle}
             </T>
             <TextInput
@@ -261,15 +260,14 @@ export default function ShareScreen() {
               onChangeText={setTitle}
               placeholder={d.shareMainTitle}
               placeholderTextColor={c.ink4}
-              className="text-[17px]"
-              style={{ color: c.ink }}
+              style={[styles.editorInput, { color: c.ink }]}
             />
           </View>
 
           {habit ? (
             <>
-              <View className="rounded-xl px-4 py-3" style={{ backgroundColor: c.surface }}>
-                <T className="mb-2 text-[12px] uppercase" style={{ color: c.ink4 }}>
+              <View style={[styles.editorCard, { backgroundColor: c.surface }]}>
+                <T style={[styles.editorLabel, { marginBottom: 8, color: c.ink4 }]}>
                   {d.quoteLabel}
                 </T>
                 {QUOTES.map((q, i) => (
@@ -278,20 +276,19 @@ export default function ShareScreen() {
                     onPress={() => setQuoteIdx(i)}
                     accessibilityRole="radio"
                     accessibilityState={{ selected: quoteIdx === i }}
-                    className="flex-row items-center gap-2 py-1.5"
+                    style={styles.quoteRow}
                   >
                     <View
-                      className="h-4 w-4 rounded-full border"
-                      style={{ borderColor: c.line2, backgroundColor: quoteIdx === i ? c.accent : "transparent" }}
+                      style={[styles.radioDot, { borderColor: c.line2, backgroundColor: quoteIdx === i ? c.accent : "transparent" }]}
                     />
-                    <T className="text-[14px]" style={{ color: quoteIdx === i ? c.ink : c.ink4 }}>
+                    <T style={[styles.quoteText, { color: quoteIdx === i ? c.ink : c.ink4 }]}>
                       {d[q]}
                     </T>
                   </Pressable>
                 ))}
               </View>
-              <View className="rounded-xl px-4 py-3" style={{ backgroundColor: c.surface }}>
-                <T className="mb-1 text-[12px] uppercase" style={{ color: c.ink4 }}>
+              <View style={[styles.editorCard, { backgroundColor: c.surface }]}>
+                <T style={[styles.editorLabel, { marginBottom: 4, color: c.ink4 }]}>
                   {d.signLabel}
                 </T>
                 <TextInput
@@ -299,15 +296,14 @@ export default function ShareScreen() {
                   onChangeText={setSign}
                   placeholder={d.signLabel}
                   placeholderTextColor={c.ink4}
-                  className="text-[17px]"
-                  style={{ color: c.ink }}
+                  style={[styles.editorInput, { color: c.ink }]}
                 />
               </View>
             </>
           ) : null}
 
-          <View className="rounded-xl px-4 py-3" style={{ backgroundColor: c.surface }}>
-            <T className="mb-1 text-[12px] uppercase" style={{ color: c.ink4 }}>
+          <View style={[styles.editorCard, { backgroundColor: c.surface }]}>
+            <T style={[styles.editorLabel, { marginBottom: 4, color: c.ink4 }]}>
               {d.shareNote}
             </T>
             <TextInput
@@ -315,29 +311,27 @@ export default function ShareScreen() {
               onChangeText={setNote}
               placeholder={d.shareNote}
               placeholderTextColor={c.ink4}
-              className="text-[17px]"
-              style={{ color: c.ink }}
+              style={[styles.editorInput, { color: c.ink }]}
               multiline
             />
           </View>
         </View>
 
         {/* 动作：规范按钮语法 —— 主 CTA = 行动色胶囊；次级 = 幽灵胶囊（透明底 + 1px 强调色描边） */}
-        <View className="mt-5 gap-2">
+        <View style={styles.actions}>
           <Pressable
             onPress={() => { void onSave(); }}
             disabled={!!busy}
             accessibilityRole="button"
             accessibilityState={{ disabled: !!busy }}
-            className="w-full flex-row items-center justify-center gap-2 rounded-pill"
-            style={{
+            style={[styles.pillBtn, {
               backgroundColor: c.accent,
               minHeight: 48,
               opacity: busy ? 0.7 : 1,
-            }}
+            }]}
           >
             {busy === "save" ? <ActivityIndicator color={c.inkInverse} size="small" /> : null}
-            <Text className="text-[17px] font-semibold" style={{ color: c.inkInverse }}>
+            <Text style={[styles.pillTextPrimary, { color: c.inkInverse }]}>
               {saveLabel}
             </Text>
           </Pressable>
@@ -346,21 +340,20 @@ export default function ShareScreen() {
             disabled={!!busy}
             accessibilityRole="button"
             accessibilityState={{ disabled: !!busy }}
-            className="w-full flex-row items-center justify-center gap-2 rounded-pill border"
-            style={{
+            style={[styles.pillBtn, styles.pillBtnGhost, {
               backgroundColor: "transparent",
               borderColor: c.accent,
               minHeight: 48,
               opacity: busy ? 0.7 : 1,
-            }}
+            }]}
           >
             {busy === "share" ? <ActivityIndicator color={c.accentText} size="small" /> : null}
-            <Text className="text-[17px]" style={{ color: c.accentText }}>
+            <Text style={[styles.pillText, { color: c.accentText }]}>
               {shareLabel}
             </Text>
           </Pressable>
           {/* 卡片是图片不是文字：说明一句，避免用户以为「分享」还是复制文案 */}
-          <T className="mt-1 text-center text-[12px]" style={{ color: c.ink4 }}>
+          <T style={[styles.note, { color: c.ink4 }]}>
             {lang === "zh" ? "卡片将保存为图片，可直接发到微信、微博等社交平台" : "Saved as an image — ready to post to any social app."}
           </T>
         </View>
@@ -368,3 +361,38 @@ export default function ShareScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  flex1: { flex: 1 },
+  scrollH: { paddingHorizontal: 20 },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+  },
+  title: { fontSize: 24, fontWeight: "600" },
+  closeBtn: { height: 36, width: 36, alignItems: "center", justifyContent: "center", borderRadius: 9999 },
+  cardOuter: { marginTop: 8 },
+  editor: { marginTop: 16, gap: 12 },
+  editorCard: { borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12 },
+  editorLabel: { fontSize: 12, textTransform: "uppercase" },
+  editorInput: { fontSize: 17 },
+  quoteRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 6 },
+  radioDot: { height: 16, width: 16, borderRadius: 9999, borderWidth: 1 },
+  quoteText: { fontSize: 14 },
+  actions: { marginTop: 20, gap: 8 },
+  pillBtn: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 9999,
+  },
+  pillBtnGhost: { borderWidth: 1 },
+  pillTextPrimary: { fontSize: 17, fontWeight: "600" },
+  pillText: { fontSize: 17 },
+  note: { marginTop: 4, textAlign: "center", fontSize: 12 },
+});

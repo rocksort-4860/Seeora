@@ -23,7 +23,7 @@
  *     直接读状态会让弹层内容**闪空**。所以依赖数据的弹层要缓存「最后一次有效值」。
  */
 import React, { useRef } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useApp } from "@/store/app";
 import type { Habit } from "@/store/app";
 import { Sheet, SheetHeader } from "@/components/Sheet";
@@ -77,11 +77,11 @@ function Backfill() {
       <SheetHeader title={d.backfillTitle} onClose={closeBackfill} closeLabel={d.close} />
       {habit ? (
         <>
-          <T className="mb-3 text-sm" style={{ color: c.ink3 }}>{d.backfillSub}</T>
+          <T style={[styles.backfillSub, { color: c.ink3 }]}>{d.backfillSub}</T>
 
           {/* flexShrink:1 —— 8 行在小屏上会顶到弹层 88% 上限，超出部分滚动 */}
           <ScrollView style={{ flexShrink: 1 }} showsVerticalScrollIndicator={false}>
-            <View className="gap-2">
+            <View style={styles.gap2}>
               {days.map((date) => {
                 const dt = new Date(date + "T00:00:00");
                 const checked = !!habit.checkIns[date];
@@ -92,14 +92,13 @@ function Backfill() {
                     key={date}
                     disabled={locked}
                     onPress={() => toggleBackfillDate(habit.id, date)}
-                    className="flex-row items-center justify-between rounded-xl px-4 py-3"
-                    style={{ backgroundColor: c.surface2, opacity: locked ? 0.5 : 1 }}
+                    style={[styles.dayRow, { backgroundColor: c.surface2, opacity: locked ? 0.5 : 1 }]}
                   >
-                    <View className="flex-row items-center gap-2">
-                      <T className="text-base font-medium" style={{ color: c.ink }}>{lang === "zh" ? "周" + WK[dt.getDay()] : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dt.getDay()]}</T>
-                      <T className="text-sm" style={{ color: c.ink3 }}>{date.slice(5)}</T>
+                    <View style={styles.dayNameRow}>
+                      <T style={[styles.dayName, { color: c.ink }]}>{lang === "zh" ? "周" + WK[dt.getDay()] : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dt.getDay()]}</T>
+                      <T style={[styles.dayDate, { color: c.ink3 }]}>{date.slice(5)}</T>
                     </View>
-                    <View className="h-7 w-7 items-center justify-center rounded-full" style={{ backgroundColor: checked ? c.accentInk : c.surface3 }}>
+                    <View style={[styles.dayCheck, { backgroundColor: checked ? c.accentInk : c.surface3 }]}>
                       {checked ? <Icon as={Check} color="#fff" size={16} /> : locked ? <Icon as={Lock} color={c.ink4} size={14} /> : null}
                     </View>
                   </Pressable>
@@ -108,8 +107,8 @@ function Backfill() {
             </View>
           </ScrollView>
 
-          <Button className="mt-4 h-12" style={{ backgroundColor: c.accentInk }} onPress={closeBackfill}>
-            <Text className="text-base font-bold" style={{ color: "#fff" }}>{d.close}</Text>
+          <Button style={[styles.closeBtn, { backgroundColor: c.accentInk }]} onPress={closeBackfill}>
+            <Text style={styles.closeBtnText}>{d.close}</Text>
           </Button>
         </>
       ) : null}
@@ -123,3 +122,22 @@ function Backfill() {
  *   而抹除只有一步确认，就地展开后「确认 / 取消」都在手指下方。
  *   ⚠️ 若将来要恢复成弹层，记住它与 InlineExpand 共用 store 的 wipeVisible，
  *      两者不能同时挂载（会一起响应）。 */
+
+const styles = StyleSheet.create({
+  backfillSub: { marginBottom: 12, fontSize: 14 },
+  gap2: { gap: 8 },
+  dayRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  dayNameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  dayName: { fontSize: 16, fontWeight: "500" },
+  dayDate: { fontSize: 14 },
+  dayCheck: { height: 28, width: 28, alignItems: "center", justifyContent: "center", borderRadius: 9999 },
+  closeBtn: { marginTop: 16, minHeight: 48 },
+  closeBtnText: { fontSize: 16, fontWeight: "700", color: "#FFFFFF" },
+});

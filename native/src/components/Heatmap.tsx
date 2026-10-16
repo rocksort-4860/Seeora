@@ -3,12 +3,11 @@
  * 最近 119 天（17 周 × 7 天）的网格；同日多习惯打卡则更亮
  */
 import React, { useMemo } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useApp } from "@/store/app";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Text as T } from "@/components/ui/text";
 import { lastNDates } from "@/lib/habitLogic";
-import { cn } from "@/lib/utils";
 
 const DAYS = 119; // 17 周
 const COLS = 17;
@@ -29,9 +28,9 @@ export function Heatmap() {
 
   if (habits.length === 0 || cells.every((x) => x === 0)) {
     return (
-      <Card className="mt-4">
-        <CardHeader><CardTitle className="text-[21px] font-extrabold">{d.heatmap}</CardTitle></CardHeader>
-        <T className="mt-2 text-sm" style={{ color: c.ink3 }}>{d.heatmapEmpty}</T>
+      <Card style={styles.card}>
+        <CardHeader><CardTitle style={styles.title}>{d.heatmap}</CardTitle></CardHeader>
+        <T style={[styles.emptyText, { color: c.ink3 }]}>{d.heatmapEmpty}</T>
       </Card>
     );
   }
@@ -40,17 +39,18 @@ export function Heatmap() {
   const gap = 4;
 
   return (
-    <Card className="mt-4">
-      <CardHeader><CardTitle className="text-[21px] font-extrabold">{d.heatmap}</CardTitle></CardHeader>
-      <View className="mt-2 flex-row flex-wrap" style={{ gap }}>
+    <Card style={styles.card}>
+      <CardHeader><CardTitle style={styles.title}>{d.heatmap}</CardTitle></CardHeader>
+      <View style={[styles.grid, { gap }]}>
         {cells.map((n, i) => {
           const ratio = n > 0 ? 0.35 + 0.65 * (n / max) : 0;
           return (
             <View
               key={i}
-              className={cn("rounded-[3px]")}
               style={{
-                width: cell, height: cell,
+                width: cell,
+                height: cell,
+                borderRadius: 3,
                 backgroundColor: n > 0 ? c.accent : c.surface3,
                 opacity: n > 0 ? ratio : 1,
               }}
@@ -58,7 +58,15 @@ export function Heatmap() {
           );
         })}
       </View>
-      <T className="mt-2 text-xs" style={{ color: c.ink4 }}>{d.last8weeks}</T>
+      <T style={[styles.footerText, { color: c.ink4 }]}>{d.last8weeks}</T>
     </Card>
   );
 }
+
+const styles = StyleSheet.create({
+  card: { marginTop: 16 },
+  title: { fontSize: 21, fontWeight: "800" },
+  emptyText: { marginTop: 8, fontSize: 14 },
+  grid: { marginTop: 8, flexDirection: "row", flexWrap: "wrap" },
+  footerText: { marginTop: 8, fontSize: 12 },
+});

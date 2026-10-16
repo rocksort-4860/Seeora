@@ -1,52 +1,48 @@
-import { Text, TextClassContext } from '@/components/ui/text';
-import { cn } from '@/lib/utils';
-import { View } from 'react-native';
+/**
+ * ui/card（重写版）：StyleSheet 卡片。
+ * 原 shadcn 令牌口径映射到设计令牌：bg-card→c.surface、border-border→c.line；
+ * 结构保持 Card / CardHeader / CardTitle / CardDescription / CardContent / CardFooter。
+ */
+import * as React from "react";
+import { StyleSheet, Text as RNText, View } from "react-native";
+import { useApp } from "@/store/app";
+import { Text } from "@/components/ui/text";
 
-function Card({ className, ...props }: React.ComponentProps<typeof View>) {
-  return (
-    <TextClassContext.Provider value="text-card-foreground">
-      <View
-        className={cn(
-          'bg-card border-border flex flex-col gap-6 rounded-xl border py-6 shadow-sm shadow-black/5',
-          className
-        )}
-        {...props}
-      />
-    </TextClassContext.Provider>
-  );
+type ViewProps = React.ComponentProps<typeof View>;
+type TextProps = React.ComponentProps<typeof RNText>;
+
+function Card({ style, ...props }: ViewProps) {
+  const { colors: c } = useApp();
+  return <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.line }, style]} {...props} />;
 }
 
-function CardHeader({ className, ...props }: React.ComponentProps<typeof View>) {
-  return <View className={cn('flex flex-col gap-1.5 px-6', className)} {...props} />;
+function CardHeader({ style, ...props }: ViewProps) {
+  return <View style={[styles.header, style]} {...props} />;
 }
 
-function CardTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof Text>) {
-  return (
-    <Text
-      role="heading"
-      aria-level={3}
-      className={cn('font-semibold leading-none', className)}
-      {...props}
-    />
-  );
+function CardTitle({ style, ...props }: TextProps) {
+  return <Text role="heading" aria-level={3} style={[styles.title, style]} {...props} />;
 }
 
-function CardDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof Text>) {
-  return <Text className={cn('text-muted-foreground text-sm', className)} {...props} />;
+function CardDescription({ style, ...props }: TextProps) {
+  return <Text style={[styles.description, style]} {...props} />;
 }
 
-function CardContent({ className, ...props }: React.ComponentProps<typeof View>) {
-  return <View className={cn('px-6', className)} {...props} />;
+function CardContent({ style, ...props }: ViewProps) {
+  return <View style={[styles.content, style]} {...props} />;
 }
 
-function CardFooter({ className, ...props }: React.ComponentProps<typeof View>) {
-  return <View className={cn('flex flex-row items-center px-6', className)} {...props} />;
+function CardFooter({ style, ...props }: ViewProps) {
+  return <View style={[styles.footer, style]} {...props} />;
 }
 
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle };
+
+const styles = StyleSheet.create({
+  card: { borderRadius: 12, borderWidth: 1, flexDirection: "column", paddingVertical: 24, gap: 24 },
+  header: { flexDirection: "column", paddingHorizontal: 24, gap: 6 },
+  title: { fontSize: 16, fontWeight: "600", lineHeight: 18 },
+  description: { fontSize: 14 },
+  content: { paddingHorizontal: 24 },
+  footer: { flexDirection: "row", alignItems: "center", paddingHorizontal: 24 },
+});

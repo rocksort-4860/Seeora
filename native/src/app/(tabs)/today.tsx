@@ -7,7 +7,7 @@
  *   白做一遍且体验像"点了没反应"），而是直接进买断页 /pro，并在该页说明原因。
  */
 import React, { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "@/components/ui/icon";
 import { ChevronDown, Gem, Plus } from "lucide-react-native";
@@ -41,38 +41,33 @@ export default function TodayScreen() {
   };
 
   return (
-    <View className="flex-1" style={{ backgroundColor: c.bg }}>
+    <View style={[styles.flex1, { backgroundColor: c.bg }]}>
       {/* 顶部标题栏 */}
-      <View
-        className="flex-row items-end justify-between px-5 pb-3"
-        style={{ paddingTop: insets.top + 16 }}
-      >
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <View>
-          <Text className="text-[28px] font-extrabold tracking-tight" style={{ color: c.ink }}>{d.brand}</Text>
-          <T className="text-sm" style={{ color: c.ink3 }}>{d.slogan}</T>
+          <Text style={[styles.brand, { color: c.ink }]}>{d.brand}</Text>
+          <T style={[styles.slogan, { color: c.ink3 }]}>{d.slogan}</T>
         </View>
         <Pressable
           onPress={open}
           hitSlop={12}
           accessibilityRole="button"
           accessibilityLabel={atLimit ? limitTitle : d.addHabit}
-          className="h-10 w-10 items-center justify-center rounded-full"
-          style={{ backgroundColor: c.accent }}
+          style={[styles.addBtn, { backgroundColor: c.accent }]}
         >
           <Icon as={atLimit ? Gem : Plus} color="#FFFFFF" size={22} />
         </Pressable>
       </View>
 
-      <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.flex1, styles.scrollH]} contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         {hydrated && habits.length === 0 && (
           <Pressable
             onPress={open}
-            className="mt-6 items-center justify-center rounded-2xl border-2 border-dashed px-6 py-14"
-            style={{ borderColor: c.line2 }}
+            style={[styles.emptyCard, { borderColor: c.line2 }]}
           >
             <Text style={{ fontSize: 46 }}>🌱</Text>
-            <T className="mt-3 text-center text-[19px] font-extrabold" style={{ color: c.ink2 }}>{d.emptyTitle}</T>
-            <T className="mt-2 text-center text-base" style={{ color: c.ink3 }}>{d.emptySub}</T>
+            <T style={[styles.emptyTitle, { color: c.ink2 }]}>{d.emptyTitle}</T>
+            <T style={[styles.emptySub, { color: c.ink3 }]}>{d.emptySub}</T>
           </Pressable>
         )}
 
@@ -85,20 +80,16 @@ export default function TodayScreen() {
           onPress={open}
           accessibilityRole="button"
           accessibilityLabel={atLimit ? `${limitTitle} · ${d.habitLimitBody}` : d.addHabit}
-          className="mt-3 flex-row items-center gap-3 rounded-2xl border-2 border-dashed px-4 py-4"
-          style={{ borderColor: atLimit ? c.accent : c.line2, opacity: 0.9 }}
+          style={[styles.guideRow, { borderColor: atLimit ? c.accent : c.line2, opacity: 0.9 }]}
         >
-          <View
-            className="h-9 w-9 items-center justify-center rounded-full border-2 border-dashed"
-            style={{ borderColor: atLimit ? c.accent : c.line2 }}
-          >
+          <View style={[styles.guideIcon, { borderColor: atLimit ? c.accent : c.line2 }]}>
             <Icon as={atLimit ? Gem : Plus} color={atLimit ? c.accent : c.ink4} size={18} />
           </View>
-          <View className="flex-1">
-            <T className="text-base font-medium" style={{ color: atLimit ? c.ink : c.ink4 }}>
+          <View style={styles.flex1}>
+            <T style={[styles.guideTitle, { color: atLimit ? c.ink : c.ink4 }]}>
               {atLimit ? limitTitle : d.addHabit}
             </T>
-            <T className="text-xs" style={{ color: atLimit ? c.accentText : c.ink4 }}>
+            <T style={[styles.guideHint, { color: atLimit ? c.accentText : c.ink4 }]}>
               {atLimit ? d.habitLimitBody : d.addHabitHint}
             </T>
           </View>
@@ -106,49 +97,45 @@ export default function TodayScreen() {
 
         {/* 已归档区：折叠展示，展开后可取消归档 / 删除。归档仍计入免费版 5 条上限。 */}
         {archived.length > 0 ? (
-          <View className="mt-4">
+          <View style={styles.archSection}>
             <Pressable
               onPress={() => setArchOpen((v) => !v)}
               accessibilityRole="button"
               accessibilityLabel={`${d.archived} (${archived.length})`}
-              className="flex-row items-center gap-2 rounded-lg px-4 py-3"
-              style={{ borderWidth: 1, borderColor: c.line2, borderStyle: "dashed" }}
+              style={[styles.archToggle, { borderWidth: 1, borderColor: c.line2, borderStyle: "dashed" }]}
             >
               <View style={{ transform: archOpen ? [{ rotate: "180deg" }] : [] }}>
                 <Icon as={ChevronDown} color={c.ink3} size={18} />
               </View>
-              <Text className="flex-1 text-[15px] font-semibold" style={{ color: c.ink2 }}>
+              <Text style={[styles.archLabel, { color: c.ink2 }]}>
                 {d.archived} ({archived.length})
               </Text>
             </Pressable>
             {archOpen ? (
-              <View className="mt-2">
+              <View style={styles.archList}>
                 {archived.map((h) => (
                   <View
                     key={h.id}
-                    className="mb-2 flex-row items-center gap-2 rounded-lg px-4 py-3"
-                    style={{ backgroundColor: c.surface, borderWidth: 1, borderColor: c.line }}
+                    style={[styles.archItem, { backgroundColor: c.surface, borderWidth: 1, borderColor: c.line }]}
                   >
-                    <Text className="flex-1 text-[16px]" style={{ color: c.ink }} numberOfLines={1}>
+                    <Text style={[styles.archName, { color: c.ink }]} numberOfLines={1}>
                       {h.emoji} {lang === "zh" ? h.nameZh : h.name}
                     </Text>
                     <Pressable
                       onPress={() => archiveHabit(h.id, false)}
                       accessibilityRole="button"
                       accessibilityLabel={d.unarchive}
-                      className="rounded-lg px-3 py-1.5"
-                      style={{ borderWidth: 1, borderColor: c.line2 }}
+                      style={[styles.archBtn, { borderWidth: 1, borderColor: c.line2 }]}
                     >
-                      <Text className="text-[14px] font-semibold" style={{ color: c.accent }}>{d.unarchive}</Text>
+                      <Text style={[styles.archBtnText, { color: c.accent }]}>{d.unarchive}</Text>
                     </Pressable>
                     <Pressable
                       onPress={() => deleteHabitNow(h.id)}
                       accessibilityRole="button"
                       accessibilityLabel={d.delete}
-                      className="rounded-lg px-3 py-1.5"
-                      style={{ borderWidth: 1, borderColor: c.danger }}
+                      style={[styles.archBtn, { borderWidth: 1, borderColor: c.danger }]}
                     >
-                      <Text className="text-[14px] font-semibold" style={{ color: c.danger }}>{d.delete}</Text>
+                      <Text style={[styles.archBtnText, { color: c.danger }]}>{d.delete}</Text>
                     </Pressable>
                   </View>
                 ))}
@@ -160,3 +147,75 @@ export default function TodayScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  flex1: { flex: 1 },
+  scrollH: { paddingHorizontal: 16 },
+  header: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  brand: { fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
+  slogan: { fontSize: 14 },
+  addBtn: { height: 40, width: 40, alignItems: "center", justifyContent: "center", borderRadius: 9999 },
+  emptyCard: {
+    marginTop: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 16,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    paddingHorizontal: 24,
+    paddingVertical: 56,
+  },
+  emptyTitle: { marginTop: 12, textAlign: "center", fontSize: 19, fontWeight: "800" },
+  emptySub: { marginTop: 8, textAlign: "center", fontSize: 16 },
+  guideRow: {
+    marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  guideIcon: {
+    height: 36,
+    width: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 9999,
+    borderWidth: 2,
+    borderStyle: "dashed",
+  },
+  guideTitle: { fontSize: 16, fontWeight: "500" },
+  guideHint: { fontSize: 12 },
+  archSection: { marginTop: 16 },
+  archToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  archLabel: { flex: 1, fontSize: 15, fontWeight: "600" },
+  archList: { marginTop: 8 },
+  archItem: {
+    marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  archName: { flex: 1, fontSize: 16 },
+  archBtn: { borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
+  archBtnText: { fontSize: 14, fontWeight: "600" },
+});
