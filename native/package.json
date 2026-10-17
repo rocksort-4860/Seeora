@@ -9,7 +9,11 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "node scripts/lint.mjs",
-    "test": "jest"
+    "test": "jest",
+    "check-local": "node scripts/check-local.mjs",
+    "check-local:quick": "node scripts/check-local.mjs --quick",
+    "build:ios": "node scripts/prebuild-check.mjs -- eas build -p ios --profile production",
+    "build:android": "node scripts/prebuild-check.mjs -- eas build -p android --profile production"
   },
   "dependencies": {
     "@bacons/apple-targets": "^5.0.0",
@@ -51,12 +55,15 @@
     "@biomejs/biome": "2.5.12",
     "@expo/metro-runtime": "55.0.11",
     "@jest/globals": "^30.5.1",
+    "@testing-library/react-native": "14.1.0",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.2.14",
     "babel-preset-expo": "55.0.6",
     "eslint-plugin-expo": "^1.0.0",
     "jest": "^30.5.1",
+    "jest-expo": "55.0.22",
     "oxlint": "^1.60.0",
+    "react-test-renderer": "19.2.0",
     "ts-jest": "^29.4.12",
     "typescript": "~5.9.2"
   },
